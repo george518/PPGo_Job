@@ -1,0 +1,33 @@
+@charset "utf-8";
+
+/*============后台模板==============*/
+.navbar-mystyle{background-color:#093; color:#FFF;}
+.mystyle-brand{ background-color:#03742a; display:block;}
+
+/*导航栏样式变更*/
+.navbar-mystyle .navbar-nav li .mystyle-color:hover{ background-color:#03742a; color:#FFF;}
+.navbar-default .navbar-nav>li>a,.navbar-default .navbar-nav>li>a:focus{color:#FFF;}
+.navbar-default .navbar-brand{color:#FFF;}
+.navbar-default .navbar-nav>.open>a, .navbar-default .navbar-nav>.open>a:focus, .navbar-default .navbar-nav>.open>a:hover{ background-color:#FFF; color:#000;}
+.navbar-default .navbar-brand:hover{color:#FFF;}
+.navbar-default .dropdown-menu{ width:100%; min-width:1px; border:0px; border-top:1px solid #e5e5e5;}
+/*隐藏按钮*/
+.navbar-default .navbar-toggle{ border-color:#FFF;}
+.navbar-default .navbar-toggle .icon-bar{ background-color:#FFF;}
+.topbar-num{font-size: 12px;color: #fff;background: #f90;border-radius: 5px;padding: 2px 5px;
+display: inline-block;line-height: 16px;vertical-align: top;text-align: center;}
+.li-border{border-right: 1px solid #03742a;}
+/*左侧导航选中样式*/
+.sBox ul .active{ background-color:#093;}
+
+/*搜索*/
+.dropdown .search-dropdown{left:auto; right:0px; padding:0px; width:280px;border: 2px solid #03742a;}
+.dropdown .search-dropdown .form-control{ border:0px;}
+.dropdown .search-dropdown .btn{ padding:7px 12px; border-radius:0px; border:0px; color:#FFF; background-color:#03742a;}
+
+/*时间*/
+.time-title .year-month{ padding:10px; background-color:#093; height:100%; color:#FFF;}
+.time-title .hour-minute{color:#093; line-height:70px; background-color:#FFF; padding-left:10px; padding-right:10px;}
+
+/*按钮*/
+.btn-mystyle{color: #FFF;background-color: #093;}

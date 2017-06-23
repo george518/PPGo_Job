@@ -1,0 +1,139 @@
+<div class="container-fluid">
+    <div class="info-center">
+        <!--title-->
+        <div class="info-center">
+            <div class="page-header">
+                <div class="pull-left">
+                    <h4>{{.pageTitle}}</h4>      
+                </div>
+                <div class="pull-right">
+                   <!--  <button type="button" class="btn btn-mystyle btn-sm refresh">刷新</button>
+                    <button type="button" class="btn btn-mystyle btn-sm reback">返回</button> -->
+                </div>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <!--content-list--> 
+    <div class="content-list">
+        <!-- <div class="row" style="height: 120px">
+            <div class="col-md-3">
+                <div class="content" style="height: 110px;">
+                    <div class="w30 left-icon pull-left">
+                        <span class="glyphicon glyphicon-ok green"></span>
+                    </div>
+                    <div class="w70 right-title pull-right">
+                        <div class="title-content">
+                            <p>今日执行任务成功的次数</p>
+                            <h3 class="number">11</h3>
+                            
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="content" style="height: 110px;">
+                    <div class="w30 left-icon pull-left">
+                        <span class="glyphicon glyphicon-remove" style="background:#d9534f"></span>
+                    </div>
+                    <div class="w70 right-title pull-right">
+                        <div class="title-content">
+                            <p>今日执行任务失败的次数</p>
+                            <h3 class="number">0</h3>
+                            
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="content" style="height: 110px;">
+                    <div class="w30 left-icon pull-left">
+                        <span class="glyphicon glyphicon-hourglass orange"></span>
+                    </div>
+                    <div class="w70 right-title pull-right">
+                        <div class="title-content">
+                            <p>即将执行的任务</p>
+                            <h3 class="number">1</h3>
+                            
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="content" style="height: 110px;">
+                    <div class="w30 left-icon pull-left">
+                        <span class="glyphicon glyphicon-stats violet"></span>
+                    </div>
+                    <div class="w70 right-title pull-right">
+                        <div class="title-content">
+                            <p>定时任务总数量</p>
+                            <h3 class="number">10</h3>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+        </div> -->
+        <!--信息列表-->
+        <div class="row newslist" style="margin-top:20px;">
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        最近执行的任务
+                        <a href="/" class="pull-right">
+                            <span class="glyphicon glyphicon-refresh"></span>
+                        </a>
+                    </div> 
+                    {{range $k, $v := .recentLogs}}
+                        <div class="panel-body">
+                            <div class="w45 pull-left">
+                                <a href="{{urlfor "TaskController.ViewLog" "id" $v.id}}" class="news-item-title">{{$v.task_name}} # {{$v.id}}</a>
+                            </div>
+                            <div class="w45 pull-left">{{$v.start_time}} </div>
+                            <div class="w10 pull-left">
+                                {{if eq $v.status 0}}
+                                正常
+                                {{else if eq $v.status -1}}
+                                <span style="color:red">异常</span>
+                                {{else}}
+                                <span style="color:red">超时</span>
+                                {{end}}
+                            </div>
+                        </div>
+                    {{else}}
+                        <div class="panel-body">
+                            <div style="width: 100%">暂无信息</div>
+                        </div>
+                    {{end}}
+                    
+                </div>
+            </div>
+     
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        即将执行的任务
+                        <a href="/" class="pull-right"><span class="glyphicon glyphicon-refresh"></span></a>
+                    </div> 
+                    
+                    {{range $k, $v := .jobs}}
+                        <div class="panel-body">
+                            <div class="w50 pull-left">
+                                <a href="{{urlfor "TaskController.Logs" "id" $v.task_id}}" class="news-item-title">{{$v.task_name}} # {{$v.task_id}}</a>
+                            </div>
+                            <div class="w50 pull-left">{{$v.next_time}}</div>
+                        </div>
+                    {{else}}
+                        <div class="panel-body">
+                            <div style="width: 100%">暂无信息</div>
+                        </div>
+                    {{end}}
+                    
+                </div>
+            </div>
+        </div>
+    </div> 
+</div> 

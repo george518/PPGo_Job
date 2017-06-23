@@ -1,0 +1,195 @@
+/*
+ * Date: 2016-12-07
+ */
+@charset "UTF-8";
+/*
+ * 重置默认样式
+ */
+*{margin: 0px; padding: 0px; font-size: 12px; color: #000; line-height: 100%; font-family: 'Microsoft YaHei','SimHei',"Arial","Helvetica","sans-serif";}
+h1,h2,h3,h4,h5,h6{font-weight: normal;}
+ul,ol,li{list-style: none;}
+img{display: block; border: none; width: 100%; height: auto;}
+a{text-decoration: none; border: none;}
+input,button,select,textarea{outline: none; border: none;}
+textarea{resize: none;}
+/*
+ * 浮动
+ */
+.float_left{float: left !important;}
+.float_right{float: right !important;}
+.clearfix:after{display: block; content: ""; height: 0px; clear: both; visibility: hidden;}
+.clearfix{zoom: 1;}
+/*
+ * 公共样式
+ */
+.box_sizing{
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+.scroll_warp{
+	width: 100%;
+	overflow: auto;
+	position: relative;
+}
+.htmlBody{
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+/*
+ * 自定义tips
+ */
+.tips_panel{
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0,0,0,0.36);
+	position: fixed;
+	left: 0px;
+	top: 0px;
+	z-index: 9999;
+}
+.tips_panel > div{
+	width: 300px;
+	background-color: #fff;
+	border-radius: 3px;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	margin: -200px 0px 0px -150px;
+}
+.tips_panel .tips_txt{
+	padding: 20px 0px;
+}
+.tips_panel h3{
+	font-size: 14px;
+	text-align: center;
+	line-height: 18px;
+	padding: 0px 15px;
+}
+.tips_panel .tips_button{
+	border-top: 1px solid #666;
+	padding: 10px 0px;
+}
+.tips_panel .tips_close,
+.tips_panel .tips_sure{
+	width: 30%;
+	margin: 0px auto;
+}
+.tips_panel button{
+	display: block;
+	width: 100%;
+	height: 30px;
+	border: 1px solid #999;
+	border-radius: 2px;
+	background-color: rgb(221,221,221);
+	cursor: pointer;
+}
+.tips_panel .tips_button2 .tips_close{
+	float: left;
+	margin: 0px 0px 0px 20px;
+}
+.tips_panel .tips_button2 .tips_sure{
+	float: right;
+	margin: 0px 20px 0px 0px;
+}
+/*
+ * 登录
+ */
+.login_page_html,
+.login_page,
+.login_page_bg{
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	font-size: 20px;
+	color: #fff;
+}
+.login_page_bg{
+	background: url("background.jpg") no-repeat 50% 50%;
+	/*background: #e4e4e4;*/
+	background-size: 100% 100%;
+}
+.login_page_panel{
+	width: 360px;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	margin-left: -180px;
+	margin-top: -160px;
+}
+.login_page_panel .remember{
+	color: #fff;
+	
+}
+.login_page h1{
+	/*height: 84px;*/
+	height: 40px;
+	/*background: url("logo.png") no-repeat 50% 50%;
+	background-size: 100% auto;*/
+	
+}
+.login_page .username,
+.login_page .login_button{
+	padding-top: 20px;
+}
+.login_page .password,
+.login_page .verifycode{
+	padding-top: 15px;
+}
+.login_page .verifycode .code_input{
+	float: left;
+	width: 160px;
+}
+.login_page .verifycode .code_button{
+	float: right;
+	width: 200px;
+}
+.login_page .username input,
+.login_page .password input,
+.login_page .verifycode input{
+	display: block;
+	width: 100%;
+	height: 40px;
+	line-height: 38px;
+	font-size: 14px;
+	padding: 0px 20px;
+	border: 1px solid #666;
+	background-color: rgba(255,255,255, 0.9);
+}
+.login_page .verifycode button,
+.login_page .login_button button{
+	height: 40px;
+	color: #fff;
+	font-size: 14px;
+	cursor: pointer;
+}
+.login_page .verifycode button{
+	float: right;
+	min-width: 150px;
+	background-color: #333;
+	padding: 0px 15px;
+}
+.login_page .verifycode button.disabled{
+	color: #666;
+	background-color: #999;
+}
+.login_page .login_button button{
+	display: block;
+	width: 100%;
+	height: 38px;
+	border-width: 1px;
+	border-style: solid;
+	border-color: #245d8f #225988 #215682;
+	text-shadow: 0px -1px 0px #166399;
+	background: -webkit-linear-gradient(top, #3078BB, #336E9D);
+	background: -moz-linear-gradient(top, #3078BB, #336E9D);
+	background: -o-linear-gradient(top, #3078BB, #336E9D);
+	background: linear-gradient(top, #3078BB, #336E9D);
+}
+.login_page .login_button button:hover{
+	background: -webkit-linear-gradient(top, #4b8cc8, #3682be);
+	background: -moz-linear-gradient(top, #4b8cc8, #3682be);
+	background: -o-linear-gradient(top, #4b8cc8, #3682be);
+	background: linear-gradient(top, #4b8cc8, #3682be);
+}

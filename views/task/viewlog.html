@@ -1,0 +1,47 @@
+<!-- 新增任务 -->
+<div class="container-fluid">
+    <div class="info-center">
+        <!--title-->
+        <div class="info-center">
+            <div class="page-header">
+                <div class="pull-left">
+                    <h4>{{.pageTitle}}</h4>      
+                </div>
+                <div class="pull-right">
+                   <!--  <button type="button" class="btn btn-mystyle btn-sm refresh">刷新</button>
+                    <button type="button" class="btn btn-mystyle btn-sm reback">返回</button> -->
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+
+    <!--content-list--> 
+    <div class="content-list">
+        <div class="search-box row">
+            <h4>{{.task.TaskName}}</h4>
+            日志ID：#{{.data.id}} <br />
+            执行时间：{{.data.start_time}} <br />
+            执行耗时：{{.data.process_time}}秒 <br />
+            输出大小：{{.data.ouput_size}}
+
+            <hr />
+            <h4>任务命令</h4>
+            <pre class="pre-scrollable">{{.task.Command}}</pre>
+            <hr />
+            
+            <h4>执行输出</h4>
+            <pre class="pre-scrollable">{{.data.output}}</pre>
+            
+            <h4>错误输出</h4>
+            <pre class="pre-scrollable">{{.data.error}}</pre>
+            <hr />
+            
+            <div class="btn-group">
+                <a href="{{urlfor "TaskController.Logs" "id" .task.Id}}" class="btn  btn-default"><span class="icon-chevron-left"></span> 返 回</a>
+            </div>
+        </div>
+        
+    </div>
+</div>

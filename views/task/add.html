@@ -1,0 +1,167 @@
+<!-- 新增任务 -->
+<div class="container-fluid">
+    <div class="info-center">
+        <!--title-->
+        <div class="info-center">
+            <div class="page-header">
+                <div class="pull-left">
+                    <h4>{{.pageTitle}}</h4>      
+                </div>
+                <div class="pull-right">
+                   <!--  <button type="button" class="btn btn-mystyle btn-sm refresh">刷新</button>
+                    <button type="button" class="btn btn-mystyle btn-sm reback">返回</button> -->
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+
+    <!--content-list--> 
+    <div class="content-list">
+        <form  action="{{urlfor "TaskController.Add"}}" method="post" class="form-horizontal">
+            <div class="form-group" style="margin-top: 15px">
+                <label class="col-sm-3 control-label" for="task_name">任务名称</label>
+                <div class="col-sm-3" >
+                    <input type="text"  class="form-control input-sm" placeholder="" name="task_name" value="" required />
+                </div>
+                <div class="col-sm-6" style="padding-top:5px;">
+                    
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 15px">
+                <label class="col-sm-3 control-label" for="description">任务说明</label>
+                <div class="col-sm-5" >
+                    <textarea name="description" class="form-control" id="description" rows="3"></textarea>
+                </div>
+                <div class="col-sm-4" style="padding-top:5px;">
+                    
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 15px">
+                <label class="col-sm-3 control-label" for="group_id">任务分组</label>
+                <div class="col-sm-3" >
+                    <select name="group_id" class="form-control">
+                        <option value="0">未分组</option>
+                        {{range $k, $v := .groups}}
+                        <option value="{{$v.Id}}">{{$v.GroupName}}</option>
+                        {{end}}
+                    </select>
+                </div>
+                <div class="col-sm-6" style="padding-top:5px;">
+                    
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 15px">
+                <label class="col-sm-3 control-label" for="concurrent">是否单例</label>
+                <div class="col-sm-3" >
+                    <label class="radio-inline">
+                        <input type="radio" name="concurrent"  value="0" checked> 是
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="concurrent" value="1"> 否
+                    </label>
+                </div>
+                <div class="col-sm-6" style="padding-top:5px;">
+                    <i>设为“是”的话，如果该任务在上一个时间点还没执行完，则略过不执行</i>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 15px">
+                <label class="col-sm-3 control-label" for="cron_spec">时间表达式</label>
+                <div class="col-sm-3" >
+                     <input type="text"  class="form-control input-sm" placeholder="" name="cron_spec" value="" />
+                </div>
+                <div class="col-sm-6" style="padding-top:5px;">
+                    <a href="{{urlfor "HelpController.Index"}}" target="_blank">参见使用帮助</a>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 15px">
+                <label class="col-sm-3 control-label" for="command">命令脚本</label>
+                <div class="col-sm-5" >
+                    <textarea name="command" class="form-control" id="command" rows="3"></textarea>
+                </div>
+                <div class="col-sm-4" style="padding-top:5px;">
+                    
+                </div>
+            </div>
+            
+
+            <div class="form-group" style="margin-top: 15px">
+                <label class="col-sm-3 control-label" for="timeout">超时设置</label>
+                <div class="col-sm-3" >
+                     <input type="text"  class="form-control input-sm" placeholder="秒" name="timeout" value="" />
+                </div>
+                <div class="col-sm-6" style="padding-top:5px;">
+                    单位秒，不设置的话，默认超时时间为1天
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 15px">
+                <label class="col-sm-3 control-label" for="notify">邮件通知</label>
+                <div class="col-sm-6" >
+                    <label class="radio-inline">
+                        <input type="radio" name="notify"  value="0" checked> 不通知
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="notify" value="1"> 执行失败通知
+                    </label>
+
+                    <label class="radio-inline">
+                        <input type="radio" name="notify" value="2"> 执行结束通知
+                    </label>
+                </div>
+                <div class="col-sm-3" style="padding-top:5px;">
+                   
+                </div>
+            </div>
+            
+            <div class="form-group notify_email hide" style="margin-top: 15px">
+                <label class="col-sm-3 control-label" for="notify_email">通知邮件抄送人</label>
+                <div class="col-sm-5" >
+                    <textarea name="notify_email" class="form-control" id="notify_email" rows="3"></textarea>
+                </div>
+                <div class="col-sm-4" style="padding-top:5px;">
+                    每行一个email地址，如果不需要抄送给其他人请留空
+                </div>
+            </div>
+            
+            <br />    
+            <div class="modal-footer" style="text-align:center">
+                <button type="submit" class="btn btn-primary submit_attr_button">保存</button>
+                <button type="button" class="btn btn-default reback">返回</button>
+            </div>
+        </form>
+    </div> 
+</div> 
+
+<script>
+$(function () {
+    $("form").submit(function () {
+        // $(".alert").hide();
+        $("button[type='submit']").attr('disabled', true);
+        $.post('{{urlfor "TaskController.Add"}}', $(this).serialize(), function (out) {
+            if (out.status == 0) {
+                window.location.href = '{{urlfor "TaskController.List"}}';
+            } else {
+                alert_message(out.msg,"alert-danger","alert-success");
+                // $(".alert").text(out.msg);
+                // $(".alert").show();
+                $("button[type='submit']").attr('disabled', false);
+            }
+        }, "json");
+        return false;
+    });
+    $("input[name='notify']").click(function () {
+        if ($(this).val() > 0) {
+            $('.notify_email').removeClass('hide');
+        } else {
+            $('.notify_email').addClass('hide');
+        }
+    });
+});
+</script>
