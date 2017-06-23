@@ -7,9 +7,9 @@
 package controllers
 
 import (
-	"PPGo_Job/jobs"
-	"PPGo_Job/libs"
-	"PPGo_Job/models"
+	"github.com/PPGo_Job/jobs"
+	"github.com/PPGo_Job/libs"
+	"github.com/PPGo_Job/models"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/utils"
 	"runtime"

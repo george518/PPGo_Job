@@ -8,8 +8,8 @@
 package jobs
 
 import (
-	"PPGo_Job/models"
 	"fmt"
+	"github.com/PPGo_Job/models"
 	"github.com/astaxie/beego"
 	"os/exec"
 	"time"

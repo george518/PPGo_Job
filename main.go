@@ -1,8 +1,8 @@
 package main
 
 import (
-	"PPGo_Job/models"
-	_ "PPGo_Job/routers"
+	"github.com/PPGo_Job/models"
+	_ "github.com/PPGo_Job/routers"
 	"github.com/astaxie/beego"
 )
 

@@ -1,7 +1,7 @@
 package routers
 
 import (
-	"PPGo_Job/controllers"
+	"github.com/PPGo_Job/controllers"
 	"github.com/astaxie/beego"
 )
 

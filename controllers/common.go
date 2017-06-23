@@ -7,8 +7,8 @@
 package controllers
 
 import (
-	"PPGo_Job/libs"
-	"PPGo_Job/models"
+	"github.com/PPGo_Job/libs"
+	"github.com/PPGo_Job/models"
 	"github.com/astaxie/beego"
 	"strconv"
 	"strings"

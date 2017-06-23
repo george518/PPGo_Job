@@ -8,10 +8,10 @@
 package controllers
 
 import (
-	crons "PPGo_Job/crons"
-	"PPGo_Job/jobs"
-	"PPGo_Job/libs"
-	"PPGo_Job/models"
+	crons "github.com/PPGo_Job/crons"
+	"github.com/PPGo_Job/jobs"
+	"github.com/PPGo_Job/libs"
+	"github.com/PPGo_Job/models"
 	"github.com/astaxie/beego"
 	"strconv"
 	"strings"
