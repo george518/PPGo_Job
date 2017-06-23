@@ -10,9 +10,9 @@ package jobs
 import (
 	"bytes"
 	"fmt"
-	"github.com/PPGo_Job/mail"
-	"github.com/PPGo_Job/models"
 	"github.com/astaxie/beego"
+	"github.com/george518/PPGo_Job/mail"
+	"github.com/george518/PPGo_Job/models"
 	"html/template"
 	"os/exec"
 	"runtime/debug"
