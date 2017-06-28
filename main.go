@@ -13,6 +13,7 @@ const (
 
 func init() {
 	//初始化数据模型
+	beego.LoadAppConfig("ini", "src/github.com/george518/PPGo_Job/conf/app.conf")
 	models.Init()
 }
 

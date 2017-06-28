@@ -13,12 +13,13 @@ type RemoveCheckFunc func(e *Entry) bool
 // Cron keeps track of any number of entries, invoking the associated func as
 // specified by the schedule. It may be started, stopped, and the entries may
 // be inspected while running.
+// Cron保持任意数量的条目的轨道，调用相关的func时间表指定。它可以被启动，停止和条目，可运行的同时进行检查。
 type Cron struct {
-	entries  []*Entry
-	stop     chan struct{}
-	add      chan *Entry
+	entries  []*Entry      //任务
+	stop     chan struct{} //停止的通道
+	add      chan *Entry   //添加新任务的方式
 	remove   chan RemoveCheckFunc
-	snapshot chan []*Entry
+	snapshot chan []*Entry //请求获取任务快照的方式
 	running  bool
 }
 
