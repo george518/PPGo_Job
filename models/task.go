@@ -25,6 +25,7 @@ type Task struct {
 	GroupId      int
 	TaskName     string
 	TaskType     int
+	TaskTag		 string
 	Description  string
 	CronSpec     string
 	Concurrent   int
@@ -52,6 +53,10 @@ func (t *Task) Update(fields ...string) error {
 func TaskAdd(task *Task) (int64, error) {
 	if task.TaskName == "" {
 		return 0, fmt.Errorf("TaskName字段不能为空")
+	}
+
+	if task.TaskTag == "" {
+		return 0, fmt.Errorf("TaskTag字段不能为空")
 	}
 	if task.CronSpec == "" {
 		return 0, fmt.Errorf("CronSpec字段不能为空")

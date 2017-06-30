@@ -74,7 +74,8 @@ func NewCommandJob(id int, name string, command string) *Job {
 	job.runFunc = func(timeout time.Duration) (string, string, error, bool) {
 		bufOut := new(bytes.Buffer)
 		bufErr := new(bytes.Buffer)
-		cmd := exec.Command("/bin/bash", "-c", command)
+		//cmd := exec.Command("/bin/bash", "-c", command)
+		cmd := exec.Command("sh", "-c", command)
 		cmd.Stdout = bufOut
 		cmd.Stderr = bufErr
 		cmd.Start()
@@ -134,6 +135,10 @@ func (j *Job) Run() {
 	}
 
 	cmdOut, cmdErr, err, isTimeout := j.runFunc(timeout)
+	if err.Error() == "signal: killed" {
+		cmdOut += err.Error()
+		err = nil
+	}
 
 	ut := time.Now().Sub(t) / time.Millisecond
 

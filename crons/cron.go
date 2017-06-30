@@ -134,6 +134,7 @@ func (c *Cron) Entries() []*Entry {
 // Start the cron scheduler in its own go-routine.
 func (c *Cron) Start() {
 	c.running = true
+
 	go c.run()
 }
 

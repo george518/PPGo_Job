@@ -23,17 +23,27 @@
             <div class="form-group" style="margin-top: 15px">
                 <label class="col-sm-3 control-label" for="task_name">任务名称</label>
                 <div class="col-sm-3" >
-                    <input type="text"  class="form-control input-sm" placeholder="" name="task_name" value="" required />
+                    <input type="text"  class="form-control input-sm" placeholder="不需要带分组名称" name="task_name" value="" required />
                 </div>
                 <div class="col-sm-6" style="padding-top:5px;">
-                    
+                    <i style="color:red">*</i>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 15px">
+                <label class="col-sm-3 control-label" for="task_tag">进程标志</label>
+                <div class="col-sm-3" >
+                    <input type="text"  class="form-control input-sm" placeholder="用于查找进程，一般为方法名称" name="task_tag" value="" required />
+                </div>
+                <div class="col-sm-6" style="padding-top:5px;">
+
                 </div>
             </div>
 
             <div class="form-group" style="margin-top: 15px">
                 <label class="col-sm-3 control-label" for="description">任务说明</label>
                 <div class="col-sm-5" >
-                    <textarea name="description" class="form-control" id="description" rows="3"></textarea>
+                    <textarea name="description" class="form-control" id="description" rows="3" placeholder="注明执行周期"></textarea>
                 </div>
                 <div class="col-sm-4" style="padding-top:5px;">
                     
@@ -66,7 +76,22 @@
                     </label>
                 </div>
                 <div class="col-sm-6" style="padding-top:5px;">
-                    <i>设为“是”的话，如果该任务在上一个时间点还没执行完，则略过不执行</i>
+                    <i style="font-size: 12px">设为“是”的话，如果该任务在上一个时间点还没执行完，则略过不执行</i>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 15px">
+                <label class="col-sm-3 control-label" for="task_type">任务类型</label>
+                <div class="col-sm-3" >
+                    <label class="radio-inline">
+                        <input type="radio" name="task_type"  value="0" checked> 定时任务
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="task_type" value="1"> 常驻任务
+                    </label>
+                </div>
+                <div class="col-sm-6" style="padding-top:5px;">
+                    <i></i>
                 </div>
             </div>
 
@@ -76,17 +101,16 @@
                      <input type="text"  class="form-control input-sm" placeholder="" name="cron_spec" value="" />
                 </div>
                 <div class="col-sm-6" style="padding-top:5px;">
-                    <a href="{{urlfor "HelpController.Index"}}" target="_blank">参见使用帮助</a>
+                    <a href="{{urlfor "HelpController.Index"}}" target="_blank"><i style="font-size: 12px">支持秒级定时，详见《参见使用帮助》</i></a>
                 </div>
             </div>
 
             <div class="form-group" style="margin-top: 15px">
                 <label class="col-sm-3 control-label" for="command">命令脚本</label>
                 <div class="col-sm-5" >
-                    <textarea name="command" class="form-control" id="command" rows="3"></textarea>
+                    <textarea name="command" class="form-control" id="command" rows="3" placeholder="支持bash命令和shell文件"></textarea>
                 </div>
                 <div class="col-sm-4" style="padding-top:5px;">
-                    
                 </div>
             </div>
             
@@ -94,10 +118,10 @@
             <div class="form-group" style="margin-top: 15px">
                 <label class="col-sm-3 control-label" for="timeout">超时设置</label>
                 <div class="col-sm-3" >
-                     <input type="text"  class="form-control input-sm" placeholder="秒" name="timeout" value="" />
+                     <input type="text"  class="form-control input-sm" placeholder="秒,默认一天" name="timeout" value="" />
                 </div>
                 <div class="col-sm-6" style="padding-top:5px;">
-                    单位秒，不设置的话，默认超时时间为1天
+
                 </div>
             </div>
 

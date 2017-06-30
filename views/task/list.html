@@ -61,6 +61,8 @@
                             <td>ID</td>
                             <td width="20%">任务名称</td>
                             <td>时间表达式</td>
+                            <td>任务说明</td>
+                            <td>任务类型</td>
                             <td>上次执行时间</td>
                             <td>下次执行时间</td>
                             <td width="25%">操作</td>
@@ -77,9 +79,19 @@
                                 {{else}}
                                 <span class="glyphicon glyphicon-ok-sign brand-success " aria-hidden="true"></span>
                                 {{end}}
+                                &nbsp;
                                 {{$v.name}}
                             </td>
                             <td> {{$v.cron_spec}} </td>
+                            <td> {{$v.description}} </td>
+                            <td>
+                                {{if eq $v.task_type 0}}
+                                定时任务
+                                {{else}}
+                                <i style="color:red">常驻任务</i>
+                                {{end}}
+
+                            </td>
                             <td> {{$v.prev_time}} </td>
                             <td> {{$v.next_time}} </td>
                             <td>
@@ -95,9 +107,14 @@
                                     <a class="btn btn-info  btn-xs" href="{{urlfor "TaskController.Edit"}}?id={{$v.id}}">
                                        <span class="glyphicon glyphicon-edit" aria-hidden="true"></span> 编辑
                                     </a>
-                                    <a class="btn btn-info btn-run  btn-xs" href="{{urlfor "TaskController.Run"}}?id={{$v.id}}">
+
+                                    {{if eq $v.task_type 0}}
+                                        <a class="btn btn-info btn-run  btn-xs" href="{{urlfor "TaskController.Run"}}?id={{$v.id}}">
                                         <span class="glyphicon glyphicon-flash" aria-hidden="true"></span> 执行
-                                    </a>
+                                        </a>
+                                    {{end}}
+
+
                                     <a class="btn btn-info  btn-xs" href="{{urlfor "TaskController.Logs"}}?id={{$v.id}}">
                                         <span class="glyphicon glyphicon-file" aria-hidden="true"></span> 日志
                                    </a>
@@ -108,7 +125,7 @@
                     </tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="7">
+                            <td colspan="9">
                                 <div class="pull-right">
                                     {{str2html .pageBar}}
                                 </div>
