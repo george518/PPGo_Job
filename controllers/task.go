@@ -16,9 +16,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"os/exec"
-	"log"
-	"os"
 )
 
 type TaskController struct {
@@ -46,9 +43,6 @@ func (this *TaskController) List() {
 		row["cron_spec"] = v.CronSpec
 		row["status"] = v.Status
 		row["description"] = v.Description
-
-		row["task_type"] = v.TaskType
-
 		e := jobs.GetEntryById(v.Id)
 		if e != nil {
 			row["next_time"] = beego.Date(e.Next, "Y-m-d H:i:s")
@@ -90,15 +84,12 @@ func (this *TaskController) Add() {
 		task.UserId = this.userId
 		task.GroupId, _ = this.GetInt("group_id")
 		task.TaskName = strings.TrimSpace(this.GetString("task_name"))
-		task.TaskTag = strings.TrimSpace(this.GetString("task_tag"))
-		task.TaskType, _ = this.GetInt("task_type")
 		task.Description = strings.TrimSpace(this.GetString("description"))
 		task.Concurrent, _ = this.GetInt("concurrent")
 		task.CronSpec = strings.TrimSpace(this.GetString("cron_spec"))
 		task.Command = strings.TrimSpace(this.GetString("command"))
 		task.Notify, _ = this.GetInt("notify")
 		task.Timeout, _ = this.GetInt("timeout")
-
 
 		notifyEmail := strings.TrimSpace(this.GetString("notify_email"))
 		if notifyEmail != "" {
@@ -146,8 +137,6 @@ func (this *TaskController) Edit() {
 
 	if this.isPost() {
 		task.TaskName = strings.TrimSpace(this.GetString("task_name"))
-		task.TaskTag = strings.TrimSpace(this.GetString("task_tag"))
-		task.TaskType, _ = this.GetInt("task_type")
 		task.Description = strings.TrimSpace(this.GetString("description"))
 		task.GroupId, _ = this.GetInt("group_id")
 		task.Concurrent, _ = this.GetInt("concurrent")
@@ -304,9 +293,6 @@ func (this *TaskController) Batch() {
 			if task, err := models.TaskGetById(id); err == nil {
 				task.Status = 0
 				task.Update()
-				if task.TaskType==1 {
-					stopProcess(task.TaskTag)//杀死进程
-				}
 			}
 
 		case "delete":
@@ -358,10 +344,6 @@ func (this *TaskController) Pause() {
 	task.Status = 0
 	task.Update()
 
-	//如果是常驻进程，kill
-	if task.TaskType==1 {
-		stopProcess(task.TaskTag)
-	}
 	refer := this.Ctx.Request.Referer()
 	if refer == "" {
 		refer = beego.URLFor("TaskController.List")
@@ -384,12 +366,4 @@ func (this *TaskController) Run() {
 	}
 	job.Run()
 	this.redirect(beego.URLFor("TaskController.ViewLog", "id", job.GetLogId()))
-}
-//杀死进程
-func stopProcess(taskTag string)  {
-	ppPath,_ := os.Getwd() //项目根目录
-	shellFile := ppPath+"/kill_process.sh "
-	cmd:= exec.Command("sh","-c", shellFile + taskTag)
-	out,err:=cmd.Output()
-	log.Printf("==========================out:%s err:%s",out,err)
 }

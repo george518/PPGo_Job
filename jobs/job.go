@@ -133,13 +133,7 @@ func (j *Job) Run() {
 	if j.task.Timeout > 0 {
 		timeout = time.Second * time.Duration(j.task.Timeout)
 	}
-
 	cmdOut, cmdErr, err, isTimeout := j.runFunc(timeout)
-	if err.Error() == "signal: killed" {
-		cmdOut += err.Error()
-		err = nil
-	}
-
 	ut := time.Now().Sub(t) / time.Millisecond
 
 	// 插入日志

@@ -30,15 +30,6 @@
                 </div>
             </div>
 
-            <div class="form-group" style="margin-top: 15px">
-                <label class="col-sm-3 control-label" for="task_tag">进程标志</label>
-                <div class="col-sm-3" >
-                    <input type="text"  class="form-control input-sm" placeholder="用于查找进程，一般为方法名称" name="task_tag" value="{{.task.TaskTag}}" required />
-                </div>
-                <div class="col-sm-6" style="padding-top:5px;">
-
-                </div>
-            </div>
 
             <div class="form-group" style="margin-top: 15px">
                 <label class="col-sm-3 control-label" for="task_name">任务说明</label>
@@ -77,21 +68,6 @@
                 </div>
                 <div class="col-sm-6" style="padding-top:5px;">
                     <i>设为“是”的话，如果该任务在上一个时间点还没执行完，则略过不执行</i>
-                </div>
-            </div>
-
-            <div class="form-group" style="margin-top: 15px">
-                <label class="col-sm-3 control-label" for="task_type">任务类型</label>
-                <div class="col-sm-3" >
-                    <label class="radio-inline">
-                        <input type="radio" name="task_type"  value="0" {{if eq .task.TaskType 0}}checked{{end}}> 定时任务
-                    </label>
-                    <label class="radio-inline">
-                        <input type="radio" name="task_type" value="1" {{if eq .task.TaskType 1}}checked{{end}}> 常驻任务
-                    </label>
-                </div>
-                <div class="col-sm-6" style="padding-top:5px;">
-                    <i></i>
                 </div>
             </div>
 
