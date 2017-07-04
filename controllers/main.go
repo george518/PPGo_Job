@@ -25,22 +25,35 @@ type MainController struct {
 // 首页
 func (this *MainController) Index() {
 	this.Data["pageTitle"] = "系统概况"
-
+	// 分组列表
+	groups, _ := models.TaskGroupGetList(1, 100)
+	groups_map := make(map[int]string)
+	for _,gname := range groups {
+		groups_map[gname.Id] = gname.GroupName
+	}
+	//计算总任务数量
+	_, count := models.TaskGetList(1, 200)
 	// 即将执行的任务
 	entries := jobs.GetEntries(30)
 	jobList := make([]map[string]interface{}, len(entries))
+	startJob := 0 //即将执行的任务
 	for k, v := range entries {
 		row := make(map[string]interface{})
 		job := v.Job.(*jobs.Job)
+		task, _ := models.TaskGetById(job.GetId())
 		row["task_id"] = job.GetId()
 		row["task_name"] = job.GetName()
+		row["task_group"] = groups_map[task.GroupId]
 		row["next_time"] = beego.Date(v.Next, "Y-m-d H:i:s")
 		jobList[k] = row
+		startJob++
 	}
 
 	// 最近执行的日志
 	logs, _ := models.TaskLogGetList(1, 20)
 	recentLogs := make([]map[string]interface{}, len(logs))
+	failJob := 0 //最近失败的数量
+	okJob:=0     //最近成功的数量
 	for k, v := range logs {
 		task, err := models.TaskGetById(v.TaskId)
 		taskName := ""
@@ -56,17 +69,24 @@ func (this *MainController) Index() {
 		row["output"] = beego.Substr(v.Output, 0, 100)
 		row["status"] = v.Status
 		recentLogs[k] = row
+		if v.Status!=0 {
+			failJob++
+		}else {
+			okJob++
+		}
 	}
 
 	// 最近执行失败的日志
 	logs, _ = models.TaskLogGetList(1, 20, "status__lt", 0)
 	errLogs := make([]map[string]interface{}, len(logs))
+
 	for k, v := range logs {
 		task, err := models.TaskGetById(v.TaskId)
 		taskName := ""
 		if err == nil {
 			taskName = task.TaskName
 		}
+
 		row := make(map[string]interface{})
 		row["task_name"] = taskName
 		row["id"] = v.Id
@@ -76,9 +96,14 @@ func (this *MainController) Index() {
 		row["error"] = beego.Substr(v.Error, 0, 100)
 		row["status"] = v.Status
 		errLogs[k] = row
+
 	}
 
-	this.Data["okTotal"] = 13
+	this.Data["startJob"] = startJob
+	this.Data["okJob"] = okJob
+	this.Data["failJob"] = failJob
+	this.Data["totalJob"] = count
+
 	this.Data["recentLogs"] = recentLogs
 	// this.Data["errLogs"] = errLogs
 	this.Data["jobs"] = jobList

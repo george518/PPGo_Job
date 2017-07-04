@@ -16,7 +16,7 @@
     </div>
     <!--content-list--> 
     <div class="content-list">
-        <!-- <div class="row" style="height: 120px">
+        <div class="row" style="height: 120px">
             <div class="col-md-3">
                 <div class="content" style="height: 110px;">
                     <div class="w30 left-icon pull-left">
@@ -24,9 +24,9 @@
                     </div>
                     <div class="w70 right-title pull-right">
                         <div class="title-content">
-                            <p>今日执行任务成功的次数</p>
-                            <h3 class="number">11</h3>
-                            
+                            <p>最近执行成功</p>
+                            <h3 class="number">{{.okJob}}</h3>
+
                         </div>
                     </div>
                     <div class="clearfix"></div>
@@ -39,9 +39,9 @@
                     </div>
                     <div class="w70 right-title pull-right">
                         <div class="title-content">
-                            <p>今日执行任务失败的次数</p>
-                            <h3 class="number">0</h3>
-                            
+                            <p>最近执行失败</p>
+                            <h3 class="number">{{.failJob}}</h3>
+
                         </div>
                     </div>
                     <div class="clearfix"></div>
@@ -55,8 +55,8 @@
                     <div class="w70 right-title pull-right">
                         <div class="title-content">
                             <p>即将执行的任务</p>
-                            <h3 class="number">1</h3>
-                            
+                            <h3 class="number">{{.startJob}}</h3>
+
                         </div>
                     </div>
                     <div class="clearfix"></div>
@@ -70,13 +70,13 @@
                     <div class="w70 right-title pull-right">
                         <div class="title-content">
                             <p>定时任务总数量</p>
-                            <h3 class="number">10</h3>
+                            <h3 class="number">{{.totalJob}}</h3>
                         </div>
                     </div>
                     <div class="clearfix"></div>
                 </div>
             </div>
-        </div> -->
+        </div>
         <!--信息列表-->
         <div class="row newslist" style="margin-top:20px;">
             <div class="col-md-6">
@@ -122,7 +122,7 @@
                     {{range $k, $v := .jobs}}
                         <div class="panel-body">
                             <div class="w50 pull-left">
-                                <a href="{{urlfor "TaskController.Logs" "id" $v.task_id}}" class="news-item-title">{{$v.task_name}} # {{$v.task_id}}</a>
+                                <a href="{{urlfor "TaskController.Logs" "id" $v.task_id}}" class="news-item-title">{{$v.task_name}}-{{$v.task_group}} # {{$v.task_id}}</a>
                             </div>
                             <div class="w50 pull-left">{{$v.next_time}}</div>
                         </div>

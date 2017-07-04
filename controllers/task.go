@@ -36,6 +36,12 @@ func (this *TaskController) List() {
 	result, count := models.TaskGetList(page, this.pageSize, filters...)
 
 	list := make([]map[string]interface{}, len(result))
+	// 分组列表
+	groups, _ := models.TaskGroupGetList(1, 100)
+	groups_map := make(map[int]string)
+	for _,gname := range groups {
+		groups_map[gname.Id] = gname.GroupName
+	}
 	for k, v := range result {
 		row := make(map[string]interface{})
 		row["id"] = v.Id
@@ -43,6 +49,9 @@ func (this *TaskController) List() {
 		row["cron_spec"] = v.CronSpec
 		row["status"] = v.Status
 		row["description"] = v.Description
+		row["group_id"] = v.GroupId
+		row["group_name"] = groups_map[v.GroupId]
+
 		e := jobs.GetEntryById(v.Id)
 		if e != nil {
 			row["next_time"] = beego.Date(e.Next, "Y-m-d H:i:s")
@@ -64,10 +73,6 @@ func (this *TaskController) List() {
 		}
 		list[k] = row
 	}
-
-	// 分组列表
-	groups, _ := models.TaskGroupGetList(1, 100)
-
 	this.Data["pageTitle"] = "任务列表"
 	this.Data["list"] = list
 	this.Data["groups"] = groups
