@@ -6,6 +6,7 @@ import (
 	"github.com/george518/PPGo_Job/models"
 	_ "github.com/george518/PPGo_Job/routers"
 	"os"
+	"github.com/george518/PPGo_Job/jobs"
 )
 
 const (
@@ -18,6 +19,7 @@ func init() {
 	CONFIG := PP_PATH + "/config/app.conf"
 	beego.LoadAppConfig("ini", CONFIG)
 	models.Init()
+	jobs.InitJobs()
 }
 
 func main() {
