@@ -16,6 +16,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"fmt"
 )
 
 type MainController struct {
@@ -117,29 +118,21 @@ func (this *MainController) Profile() {
 	user, _ := models.UserGetById(this.userId)
 
 	if this.isPost() {
-		flash := beego.NewFlash()
 		user.Email = this.GetString("email")
 		user.Update()
 		password1 := this.GetString("password1")
 		password2 := this.GetString("password2")
 		if password1 != "" {
 			if len(password1) < 6 {
-				flash.Error("密码长度必须大于6位")
-				flash.Store(&this.Controller)
-				this.redirect(beego.URLFor(".Profile"))
+				this.ajaxMsg("密码长度必须大于6位", MSG_ERR)
 			} else if password2 != password1 {
-				flash.Error("两次输入的密码不一致")
-				flash.Store(&this.Controller)
-				this.redirect(beego.URLFor(".Profile"))
+				this.ajaxMsg("两次输入的密码不一致", MSG_ERR)
 			} else {
 				user.Salt = string(utils.RandomCreateBytes(10))
 				user.Password = libs.Md5([]byte(password1 + user.Salt))
 				user.Update()
 			}
 		}
-		// flash.Success("修改成功！")
-		// flash.Store(&this.Controller)
-		// this.redirect(beego.URLFor(".Profile"))
 		this.ajaxMsg("", MSG_OK)
 	}
 

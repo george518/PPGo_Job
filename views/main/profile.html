@@ -40,9 +40,9 @@
             </div>
 
             <div class="form-group" style="margin-top: 15px">
-                <label class="col-sm-3 control-label" for="password">新密码</label>
+                <label class="col-sm-3 control-label" for="password1">新密码</label>
                 <div class="col-sm-3" >
-                    <input type="text"  class="form-control input-sm" placeholder="" name="password" value="" />
+                    <input type="text"  class="form-control input-sm" placeholder="" name="password1" value="" />
                 </div>
                 <div class="col-sm-6" style="padding-top:5px;">
                     <i>不修改密码请留空</i>
@@ -50,7 +50,7 @@
             </div>
 
             <div class="form-group" style="margin-top: 15px">
-                <label class="col-sm-3 control-label" for="concurrent">确认密码</label>
+                <label class="col-sm-3 control-label" for="password2">确认密码</label>
                 <div class="col-sm-3" >
                    <input type="text"  class="form-control input-sm" placeholder="" name="password2" value="" />
                 </div>
@@ -73,8 +73,8 @@
 <script>
 $(function () {
     $("form").submit(function () {
-
-        $("button[type='submit']").attr('disabled', true);
+//        console.log($(this).serialize());
+        //$("button[type='submit']").attr('disabled', true);
         $.post('{{urlfor "MainController.Profile"}}', $(this).serialize(), function (out) {
             if (out.status == 0) {
                 alert("保存成功");

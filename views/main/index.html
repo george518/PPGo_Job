@@ -90,7 +90,9 @@
                     {{range $k, $v := .recentLogs}}
                         <div class="panel-body">
                             <div class="w45 pull-left">
-                                <a href="{{urlfor "TaskController.ViewLog" "id" $v.id}}" class="news-item-title">{{$v.task_name}} # {{$v.id}}</a>
+                                <a href="{{urlfor "TaskController.ViewLog" "id" $v.id}}" class="news-item-title">
+                                {{$v.task_name}} # {{$v.id}}
+                                </a>
                             </div>
                             <div class="w45 pull-left">{{$v.start_time}} </div>
                             <div class="w10 pull-left">
