@@ -5,7 +5,6 @@ import (
 	_ "github.com/george518/PPGo_Job/mail"
 	"github.com/george518/PPGo_Job/models"
 	_ "github.com/george518/PPGo_Job/routers"
-	"os"
 	"github.com/george518/PPGo_Job/jobs"
 )
 
@@ -15,15 +14,11 @@ const (
 
 func init() {
 	//初始化数据模型
-	PP_PATH,_ := os.Getwd()
-	CONFIG := PP_PATH + "/config/app.conf"
-	beego.LoadAppConfig("ini", CONFIG)
 	models.Init()
 	jobs.InitJobs()
 }
 
 func main() {
+	beego.BConfig.WebConfig.Session.SessionOn = true
 	beego.Run()
 }
-
-
