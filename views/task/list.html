@@ -39,7 +39,7 @@
                 <div class=" btn-large pull-right" >
                     <form method="post" name="s" action="{{urlfor "TaskController.List"}}">
                         <select name="groupid" class="btn-large form-control">
-                            <option value="0">全部分组</option>
+                            <option value="99">全部分组</option>
                             {{range $k, $v := .groups}}
                         <option value="{{$v.Id}}" {{if eq $v.Id $.groupid}}selected{{end}} >{{$v.GroupName}}</option>
                         {{end}}

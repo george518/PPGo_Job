@@ -29,15 +29,15 @@ func (this *TaskController) List() {
 		page = 1
 	}
 	groupId, _ := this.GetInt("groupid")
-	if groupId>0 {
+	if groupId > 0 {
 		this.Ctx.SetCookie("groupid", strconv.Itoa(groupId)+"|job")
-	}else {
+	} else {
 		arr := strings.Split(this.Ctx.GetCookie("groupid"), "|")
-		groupId,_= strconv.Atoi(arr[0])
+		groupId, _ = strconv.Atoi(arr[0])
 	}
 
 	filters := make([]interface{}, 0)
-	if groupId > 0 {
+	if groupId > 0 && groupId!=99 {
 		filters = append(filters, "group_id", groupId)
 	}
 	result, count := models.TaskGetList(page, this.pageSize, filters...)
@@ -46,7 +46,7 @@ func (this *TaskController) List() {
 	// 分组列表
 	groups, _ := models.TaskGroupGetList(1, 100)
 	groups_map := make(map[int]string)
-	for _,gname := range groups {
+	for _, gname := range groups {
 		groups_map[gname.Id] = gname.GroupName
 	}
 	for k, v := range result {
@@ -58,7 +58,7 @@ func (this *TaskController) List() {
 		row["description"] = v.Description
 		row["group_id"] = v.GroupId
 		row["group_name"] = groups_map[v.GroupId]
-		row["is_odd"] = k%2
+		row["is_odd"] = k % 2
 
 		e := jobs.GetEntryById(v.Id)
 		if e != nil {
