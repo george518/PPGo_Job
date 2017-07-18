@@ -169,7 +169,7 @@ func (this *MainController) Login() {
 				if remember == "yes" {
 					this.Ctx.SetCookie("auth", strconv.Itoa(user.Id)+"|"+authkey, 7*86400)
 				} else {
-					this.Ctx.SetCookie("auth", strconv.Itoa(user.Id)+"|"+authkey)
+					this.Ctx.SetCookie("auth", strconv.Itoa(user.Id)+"|"+authkey,86400)
 				}
 				this.redirect(beego.URLFor("TaskController.List"))
 			}

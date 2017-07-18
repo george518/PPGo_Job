@@ -29,6 +29,13 @@ func (this *TaskController) List() {
 		page = 1
 	}
 	groupId, _ := this.GetInt("groupid")
+	if groupId>0 {
+		this.Ctx.SetCookie("groupid", strconv.Itoa(groupId)+"|job")
+	}else {
+		arr := strings.Split(this.Ctx.GetCookie("groupid"), "|")
+		groupId,_= strconv.Atoi(arr[0])
+	}
+
 	filters := make([]interface{}, 0)
 	if groupId > 0 {
 		filters = append(filters, "group_id", groupId)
@@ -51,6 +58,7 @@ func (this *TaskController) List() {
 		row["description"] = v.Description
 		row["group_id"] = v.GroupId
 		row["group_name"] = groups_map[v.GroupId]
+		row["is_odd"] = k%2
 
 		e := jobs.GetEntryById(v.Id)
 		if e != nil {

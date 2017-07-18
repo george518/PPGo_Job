@@ -69,7 +69,7 @@
                     </thead>
                     <tbody>
                         {{range $k,$v := .list}}
-                        <tr>
+                        <tr  {{if eq $v.is_odd 0 }} style="background: #FFFFFF " {{else}} style="background: #f8f8f8" {{end}}>
                             <td class="chk"><input type="checkbox" name="ids"  value="{{$v.id}}" /></td>
                             <td> {{$v.id}} </td>
                             <td> 
@@ -80,8 +80,6 @@
                                 {{end}}
                                 &nbsp;
                                 {{$v.name}}-{{$v.group_name}}
-
-
                             </td>
                             <td> {{$v.cron_spec}} </td>
                             <td> {{$v.description}} </td>
@@ -158,4 +156,8 @@ function batch(action) {
     }
     return false;
 }
+//点击行换色
+$('tbody tr').click(function(){
+    $(this).addClass("warning").siblings().removeClass("warning");
+});
 </script>

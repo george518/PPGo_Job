@@ -104,18 +104,18 @@
                 <label class="col-sm-3 control-label" for="notify">邮件通知</label>
                 <div class="col-sm-6" >
                     <label class="radio-inline">
-                        <input type="radio" name="notify"  value="0" checked> 不通知
+                        <input type="radio" name="notify"  value="0" checked readonly> 不通知
                     </label>
                     <label class="radio-inline">
-                        <input type="radio" name="notify" value="1"> 执行失败通知
+                        <input type="radio" name="notify"  value="1" > 执行失败通知
                     </label>
 
                     <label class="radio-inline">
-                        <input type="radio" name="notify" value="2"> 执行结束通知
+                        <input type="radio" name="notify" value="2" > 执行结束通知
                     </label>
                 </div>
                 <div class="col-sm-3" style="padding-top:5px;">
-                   
+                    <i style="font-size: 12px;color: red">暂不支持</i>
                 </div>
             </div>
             
@@ -156,6 +156,8 @@ $(function () {
         return false;
     });
     $("input[name='notify']").click(function () {
+//        alert("暂不启用");
+//        return;
         if ($(this).val() > 0) {
             $('.notify_email').removeClass('hide');
         } else {

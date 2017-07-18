@@ -105,4 +105,9 @@ function batch(action) {
     }
     return false;
 }
+
+//点击行换色
+$('tbody tr').click(function(){
+    $(this).addClass("warning").siblings().removeClass("warning");
+});
 </script>
