@@ -3,6 +3,15 @@ PPGo_Job
 定时任务管理  
 代码参考自https://github.com/lisijie/webcron.git
 
+效果展示
+----
+任务界面<br/>
+![github](https://github.com/george518/PPGo_Job/static/images/task.png?raw=true "github")
+<br/><br/>
+添加服务器界面<br/>
+![github](https://github.com/george518/PPGo_Job/static/images/server.png?raw=true "github")
+<br/><br/>
+
 安装方法    
 ----
 1、go get github.com/george518/PPGo_Job    
