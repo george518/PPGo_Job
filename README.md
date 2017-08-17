@@ -11,14 +11,23 @@ PPGo_Job
 4、运行 go build    
 5、运行 ./run.sh start|stop
 
+
 前台访问：http://your_host:8080
 用户名：admin 密码：123456
+
+排错
+----
+go build 时遇到以下错误：
+jobs/job.go:19:2: cannot find package "golang.org/x/crypto/ssh" in any of:
+
+需要 git clone https://github.com/golang/crypto.git
+并拷贝到 $GOPATH/src/golang.org/x/ 下就OK
 
 升级日志
 ----
 v1.0
 1、初始版本 本地任务的调取和执行
-2、定时任务执行日志
+2、定时任务执行日志    
 3、定时任务执行时间
 ----
 v1.1
