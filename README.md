@@ -6,10 +6,10 @@ PPGo_Job
 效果展示
 ----
 任务界面<br/>
-![github](https://github.com/george518/PPGo_Job/static/images/task.png?raw=true "github")
+![github](https://github.com/george518/PPGo_Job/blob/master/static/images/server.png?raw=true "github")
 <br/><br/>
 添加服务器界面<br/>
-![github](https://github.com/george518/PPGo_Job/static/images/server.png?raw=true "github")
+![github](https://github.com/george518/PPGo_Job/blob/master/static/images/server.png?raw=true "github")
 <br/><br/>
 
 安装方法    
