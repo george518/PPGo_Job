@@ -53,6 +53,7 @@ func (this *ServerController) Add() {
 	if this.isPost() {
 		server := new(models.TaskServer)
 		server.ServerName = strings.TrimSpace(this.GetString("server_name"))
+		server.ServerAccount = strings.TrimSpace(this.GetString("server_account"))
 		server.ServerIp = strings.TrimSpace(this.GetString("server_ip"))
 		server.Port,_= strconv.Atoi(this.GetString("port"))
 		server.Type,_ = strconv.Atoi(this.GetString("type"))
@@ -82,6 +83,7 @@ func (this *ServerController) Edit() {
 
 	if this.isPost() {
 		server.ServerName = strings.TrimSpace(this.GetString("server_name"))
+		server.ServerAccount = strings.TrimSpace(this.GetString("server_account"))
 		server.ServerIp = strings.TrimSpace(this.GetString("server_ip"))
 		server.Port,_ = strconv.Atoi(this.GetString("port"))
 		server.Type,_ = strconv.Atoi(this.GetString("type"))

@@ -9,7 +9,7 @@
  Target Server Version : 50712
  File Encoding         : utf-8
 
- Date: 08/17/2017 11:29:01 AM
+ Date: 08/17/2017 13:03:22 PM
 */
 
 SET NAMES utf8;
@@ -62,13 +62,13 @@ CREATE TABLE `pp_task` (
   PRIMARY KEY (`id`),
   KEY `idx_user_id` (`user_id`),
   KEY `idx_group_id` (`group_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 --  Records of `pp_task`
 -- ----------------------------
 BEGIN;
-INSERT INTO `pp_task` VALUES ('1', '1', '0', '2', '测试任务名称', '0', '测试任务说明', '0 0/1 11 * *', '0', 'echo \"hello\\n\" >> /tmp/test_cron1.log', '0', '0', '46', '1498187640', '1497855526'), ('2', '1', '1', '2', '外部服务器', '0', '一分钟一次', '0 */1 * * * *', '0', '/webroot/server/php/bin/php /webroot/www/default/test.php', '0', '0', '83', '1502940180', '1502876155'), ('3', '1', '1', '1', '重要测试任务222', '0', '1分钟执行一次', '0 */1 * * *', '0', '/webroot/server/php/bin/php /webroot/www/default/test2.php', '0', '0', '22', '1502940060', '1502936077');
+INSERT INTO `pp_task` VALUES ('1', '1', '0', '2', '测试任务名称', '0', '测试任务说明', '0 0/1 11 * *', '0', 'echo \"hello\\n\" >> /tmp/test_cron1.log', '0', '0', '47', '1502941758', '1497855526'), ('2', '1', '1', '2', '外部服务器', '0', '一分钟一次', '0 */1 * * * *', '0', '/webroot/server/php/bin/php /webroot/www/default/test.php', '0', '0', '83', '1502940180', '1502876155'), ('3', '1', '1', '1', '重要测试任务222', '0', '2s执行一次', '*/2 *  *  *  *', '0', '/webroot/server/php/bin/php /webroot/www/default/test2.php', '0', '0', '24', '1502941383', '1502936077'), ('9', '1', '4', '2', '密码验证任务', '0', '5秒执行一次', '*/5 * * * *', '0', '/webroot/server/php/bin/php /webroot/www/default/test2.php', '0', '0', '1', '1502946004', '1502945973');
 COMMIT;
 
 -- ----------------------------
@@ -106,13 +106,13 @@ CREATE TABLE `pp_task_log` (
   `create_time` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',
   PRIMARY KEY (`id`),
   KEY `idx_task_id` (`task_id`,`create_time`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 --  Records of `pp_task_log`
 -- ----------------------------
 BEGIN;
-INSERT INTO `pp_task_log` VALUES ('1', '7', '等待10秒\nphp执行完毕', '', '0', '20484', '1502940420'), ('2', '7', '等待10秒\nphp执行完毕', '', '0', '20367', '1502940480');
+INSERT INTO `pp_task_log` VALUES ('1', '7', '等待10秒\nphp执行完毕', '', '0', '20484', '1502940420'), ('2', '7', '等待10秒\nphp执行完毕', '', '0', '20367', '1502940480'), ('3', '8', '等待11秒\nphp执行完毕', '', '0', '121487', '1502940420'), ('4', '7', '等待10秒\nphp执行完毕', '', '0', '20317', '1502940540'), ('5', '7', '等待10秒\nphp执行完毕', '', '0', '20629', '1502940600'), ('6', '7', '等待10秒\nphp执行完毕', '', '0', '20387', '1502940660'), ('7', '8', '等待11秒\nphp执行完毕', '', '0', '121626', '1502940600'), ('8', '7', '等待10秒\nphp执行完毕', '', '0', '20486', '1502940720'), ('9', '7', '等待10秒\nphp执行完毕', '', '0', '20416', '1502940780'), ('10', '7', '等待10秒\nphp执行完毕', '', '0', '20378', '1502940840'), ('11', '8', '等待11秒\nphp执行完毕', '', '0', '121432', '1502940780'), ('12', '7', '等待10秒\nphp执行完毕', '', '0', '21313', '1502940900'), ('13', '7', '等待10秒\nphp执行完毕', '', '0', '20420', '1502940960'), ('14', '7', '等待10秒\nphp执行完毕', '', '0', '21271', '1502941020'), ('15', '8', '等待11秒\nphp执行完毕', '', '0', '121418', '1502940960'), ('16', '7', '等待10秒\nphp执行完毕', '', '0', '20355', '1502941080'), ('17', '3', '等待11秒\nphp执行完毕', '', '0', '121437', '1502941260'), ('18', '3', '等待11秒\nphp执行完毕', '', '0', '121343', '1502941383'), ('19', '1', '', '', '0', '56', '1502941758'), ('20', '9', '等待11秒\nphp执行完毕', '', '0', '121481', '1502946004');
 COMMIT;
 
 -- ----------------------------
@@ -122,6 +122,7 @@ DROP TABLE IF EXISTS `pp_task_server`;
 CREATE TABLE `pp_task_server` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT '自增ID',
   `server_name` varchar(64) NOT NULL DEFAULT '0' COMMENT '服务器名称',
+  `server_account` varchar(32) NOT NULL DEFAULT 'root' COMMENT '账户名称',
   `server_ip` varchar(20) NOT NULL DEFAULT '0' COMMENT '服务器IP',
   `port` int(4) unsigned NOT NULL DEFAULT '22' COMMENT '服务器端口',
   `password` varchar(64) NOT NULL DEFAULT '0' COMMENT '服务器密码',
@@ -133,13 +134,13 @@ CREATE TABLE `pp_task_server` (
   `update_time` int(11) NOT NULL DEFAULT '0' COMMENT '更新时间',
   `status` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '状态：0-正常，1-删除',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COMMENT='服务器列表';
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COMMENT='服务器列表';
 
 -- ----------------------------
 --  Records of `pp_task_server`
 -- ----------------------------
 BEGIN;
-INSERT INTO `pp_task_server` VALUES ('1', '远程服务器-php', '172.16.210.157', '22', '', '/Users/haodaquan/.ssh/pp_rsa', '/Users/haodaquan/.ssh/pp_rsa.pub', '1', '远程服务器示例', '1502862723', '1502939962', '0');
+INSERT INTO `pp_task_server` VALUES ('1', '密钥验证登录服务器', 'root', '172.16.210.157', '22', '', '/Users/haodaquan/.ssh/pp_rsa', '/Users/haodaquan/.ssh/pp_rsa.pub', '1', '远程服务器示例', '1502862723', '1502945893', '0'), ('4', '密码验证服务器', 'root', '172.16.210.157', '22', 'root', '', '', '0', '这是密码验证服务器', '1502945869', '1502945869', '0');
 COMMIT;
 
 -- ----------------------------

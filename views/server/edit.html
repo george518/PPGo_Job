@@ -31,6 +31,16 @@
         </div>
 
         <div class="form-group" style="margin-top: 15px">
+            <label class="col-sm-3 control-label" for="server_name">登录账户</label>
+            <div class="col-sm-3" >
+                <input type="text"  class="form-control input-sm" placeholder="root" name="server_account" value="{{.server.ServerAccount}}" required />
+            </div>
+            <div class="col-sm-6" style="padding-top:5px;">
+
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 15px">
             <label class="col-sm-3 control-label" for="server_ip">服务器IP</label>
             <div class="col-sm-3" >
                 <input type="text"  class="form-control input-sm" placeholder="" name="server_ip" value="{{.server.ServerIp}}" required />
@@ -70,7 +80,7 @@
         <div class="form-group {{if eq .server.Type 1}}hide{{end}}" style="margin-top: 15px" id="password">
             <label class="col-sm-3 control-label" for="password">服务器密码</label>
             <div class="col-sm-3" >
-                <input type="text"  class="form-control input-sm" placeholder="" name="password" value="{{.server.Password}}" />
+                <input type="text"  class="form-control input-sm" placeholder="/Users/haodaquan/.ssh/pp_rsa" name="password" value="{{.server.Password}}" />
             </div>
             <div class="col-sm-6" style="padding-top:5px;">
 
@@ -80,7 +90,7 @@
         <div class="form-group {{if eq .server.Type 0}}hide{{end}}" style="margin-top: 15px" id="private_key_src">
             <label class="col-sm-3 control-label" for="private_key_src">私钥地址</label>
             <div class="col-sm-3" >
-                <input type="text"  class="form-control input-sm"  placeholder="" name="private_key_src" value="{{.server.PrivateKeySrc}}" />
+                <input type="text"  class="form-control input-sm"  placeholder="/Users/haodaquan/.ssh/pp_rsa.pub" name="private_key_src" value="{{.server.PrivateKeySrc}}" />
             </div>
             <div class="col-sm-6" style="padding-top:5px;">
 

@@ -15,6 +15,7 @@ import (
 type TaskServer struct {
 	Id            int
 	ServerName    string
+	ServerAccount string
 	ServerIp      string
 	Port          int
 	Password      string
@@ -39,6 +40,10 @@ func (t *TaskServer) Update(fields ...string) error {
 		return fmt.Errorf("服务器IP不能为空")
 	}
 
+	if t.ServerAccount == "" {
+		return fmt.Errorf("登录账户不能为空")
+	}
+
 	if t.Type == 0 && t.Password == "" {
 		return fmt.Errorf("服务器密码不能为空")
 	}
@@ -55,7 +60,22 @@ func (t *TaskServer) Update(fields ...string) error {
 
 func TaskServerAdd(obj *TaskServer) (int64, error) {
 	if obj.ServerName == "" {
-		return 0, fmt.Errorf("服务器名不能为空")
+		return 0,fmt.Errorf("服务器名不能为空")
+	}
+	if obj.ServerIp == "" {
+		return 0,fmt.Errorf("服务器IP不能为空")
+	}
+
+	if obj.ServerAccount == "" {
+		return 0,fmt.Errorf("登录账户不能为空")
+	}
+
+	if obj.Type == 0 && obj.Password == "" {
+		return 0,fmt.Errorf("服务器密码不能为空")
+	}
+
+	if obj.Type == 1 && obj.PrivateKeySrc == "" {
+		return 0,fmt.Errorf("私钥不能为空")
 	}
 	return orm.NewOrm().Insert(obj)
 }

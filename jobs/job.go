@@ -43,13 +43,22 @@ func NewJobFromTask(task *models.Task) (*Job, error) {
 		job.task = task
 		job.Concurrent = task.Concurrent == 1
 		return job, nil
-	}else{
-		server, _ := models.TaskServerGetById(task.ServerId)
-		job := RemoteCommandJob(task.Id, task.TaskName, task.Command,server)
+	}
+
+	server, _ := models.TaskServerGetById(task.ServerId)
+	if(server.Type==0){
+		//密码验证登录服务器
+		job := RemoteCommandJobByPassword(task.Id, task.TaskName, task.Command,server)
 		job.task = task
 		job.Concurrent = task.Concurrent == 1
 		return job, nil
 	}
+
+	job := RemoteCommandJob(task.Id, task.TaskName, task.Command,server)
+	job.task = task
+	job.Concurrent = task.Concurrent == 1
+	return job, nil
+
 }
 
 func NewCommandJob(id int, name string, command string) *Job {
@@ -71,7 +80,7 @@ func NewCommandJob(id int, name string, command string) *Job {
 	}
 	return job
 }
-//远程执行任务
+//远程执行任务 密钥验证
 func RemoteCommandJob(id int,name string,command string,servers *models.TaskServer) *Job {
 	job := &Job{
 		id:   id,
@@ -90,7 +99,7 @@ func RemoteCommandJob(id int,name string,command string,servers *models.TaskServ
 		}
 		addr := fmt.Sprintf("%s:%d", servers.ServerIp, servers.Port)
 		config := &ssh.ClientConfig{
-			User: "root",
+			User: servers.ServerAccount,
 			Auth: []ssh.AuthMethod{
 				// Use the PublicKeys method for remote authentication.
 				ssh.PublicKeys(signer),
@@ -130,6 +139,62 @@ func RemoteCommandJob(id int,name string,command string,servers *models.TaskServ
 	return job
 }
 
+func RemoteCommandJobByPassword(id int,name string,command string,servers *models.TaskServer) *Job{
+	var (
+		auth         []ssh.AuthMethod
+		addr         string
+		clientConfig *ssh.ClientConfig
+		client       *ssh.Client
+		session      *ssh.Session
+		err          error
+	)
+
+	job := &Job{
+		id:   id,
+		name: name,
+	}
+	job.runFunc = func(timeout time.Duration) (string, string, error, bool) {
+		// get auth method
+		auth = make([]ssh.AuthMethod, 0)
+		auth = append(auth, ssh.Password(servers.Password))
+
+		clientConfig = &ssh.ClientConfig{
+			User: servers.ServerAccount,
+			Auth: auth,
+			HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
+				return nil
+			},
+			//Timeout: 1000 * time.Second,
+		}
+
+		// connet to ssh
+		addr = fmt.Sprintf("%s:%d", servers.ServerIp, servers.Port)
+
+		if client, err = ssh.Dial("tcp", addr, clientConfig); err != nil {
+			return "", "", err, false
+		}
+
+		// create session
+		if session, err = client.NewSession(); err != nil {
+			return "", "", err, false
+		}
+
+
+		var b bytes.Buffer
+		var c bytes.Buffer
+		session.Stdout = &b
+		session.Stderr = &c
+
+		//session.Output(command)
+		if err := session.Run(command); err != nil {
+			return "","",err,false
+		}
+		isTimeout := false
+		return b.String(), c.String(), err, isTimeout
+	}
+
+	return job
+}
 
 
 func (j *Job) Status() int {
