@@ -57,6 +57,21 @@
             </div>
 
             <div class="form-group" style="margin-top: 15px">
+                <label class="col-sm-3 control-label" for="server_id">服务器</label>
+                <div class="col-sm-3" >
+                    <select name="server_id" class="form-control">
+                        <option value="0">本地服务器</option>
+                        {{range $ks, $vs := .servers}}
+                        <option value="{{$vs.Id}}" {{if eq $vs.Id $.task.ServerId}}selected{{end}}>{{$vs.ServerName}}</option>
+                        {{end}}
+                    </select>
+                </div>
+                <div class="col-sm-6" style="padding-top:5px;">
+
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 15px">
                 <label class="col-sm-3 control-label" for="concurrent">是否单例</label>
                 <div class="col-sm-3" >
                     <label class="radio-inline">
@@ -102,35 +117,6 @@
                 </div>
             </div>
 
-            <div class="form-group" style="margin-top: 15px">
-                <label class="col-sm-3 control-label" for="concurrent">邮件通知</label>
-                <div class="col-sm-6" >
-                    <label class="radio-inline">
-                        <input type="radio" name="notify"  value="0" {{if eq .task.Notify 0}}checked{{end}}> 不通知
-                    </label>
-                    <label class="radio-inline">
-                        <input type="radio" name="notify" value="1" {{if eq .task.Notify 1}}checked{{end}}> 执行失败通知
-                    </label>
-
-                    <label class="radio-inline">
-                        <input type="radio" name="notify" value="2" {{if eq .task.Notify 2}}checked{{end}}> 执行结束通知
-                    </label>
-                </div>
-                <div class="col-sm-3" style="padding-top:5px;">
-                    <i style="font-size: 12px;color: red">暂不支持</i>
-                </div>
-            </div>
-            
-            <div class="form-group notify_email {{if eq .task.Notify 0}}hide{{end}}" style="margin-top: 15px">
-                <label class="col-sm-3 control-label" for="task_name">通知邮件抄送人</label>
-                <div class="col-sm-5" >
-                    <textarea name="notify_email" class="form-control" id="notify_email" rows="3">{{.task.NotifyEmail}}</textarea>
-                </div>
-                <div class="col-sm-4" style="padding-top:5px;">
-                    每行一个email地址，如果不需要抄送给其他人请留空
-                </div>
-            </div>
-            
             <br />
             <input type="hidden" name="id" value="{{.task.Id}}" />
             <div class="modal-footer" style="text-align:center">
@@ -154,14 +140,6 @@ $(function () {
             }
         }, "json");
         return false;
-    });
-
-    $("input[name='notify']").click(function () {
-        if ($(this).val() > 0) {
-            $('.notify_email').removeClass('hide');
-        } else {
-            $('.notify_email').addClass('hide');
-        }
     });
 });
 </script>

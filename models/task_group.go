@@ -60,9 +60,7 @@ func TaskGroupDelById(id int) error {
 
 func TaskGroupGetList(page, pageSize int) ([]*TaskGroup, int64) {
 	offset := (page - 1) * pageSize
-
 	list := make([]*TaskGroup, 0)
-
 	query := orm.NewOrm().QueryTable(TableName("task_group"))
 	total, _ := query.Count()
 	query.OrderBy("-id").Limit(pageSize, offset).All(&list)

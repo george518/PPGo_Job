@@ -22,6 +22,7 @@ const (
 type Task struct {
 	Id           int
 	UserId       int
+	ServerId	 int
 	GroupId      int
 	TaskName     string
 	TaskType     int
@@ -30,8 +31,6 @@ type Task struct {
 	Concurrent   int
 	Command      string
 	Status       int
-	Notify       int
-	NotifyEmail  string
 	Timeout      int
 	ExecuteTimes int
 	PrevTime     int64

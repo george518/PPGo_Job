@@ -32,7 +32,7 @@
             <div class="collapse navbar-collapse">
                 <ul class="nav navbar-nav">
                     <li class="li-border">
-                        <a class="mystyle-color" href="#" style="font-size: 20px">渠道定时任务管理后台 <span style="font-size: 12px">V1.1</span></a>
+                        <a class="mystyle-color" href="#" style="font-size: 20px">定时任务管理后台 <span style="font-size: 12px">V1.2</span></a>
                     </li>
                 </ul>
 
@@ -129,7 +129,6 @@
                                     <span class="sub-title">任务分类</span>
                                 </a>
                             </li>
-
                             <li {{if eq .curRoute "help.index"}}class="active"{{end}}>
                                 <div class="showtitle" style="width:100px;">
                                     使用帮助
@@ -138,6 +137,27 @@
                                     <span class="sublist-icon glyphicon glyphicon-question-sign"></span>
                                     <span class="sub-title">使用帮助</span>
                                 </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="subNavBox">
+                    <div class="sBox">
+                        <div class="subNav sublist-down">
+                            <span class="title-icon glyphicon glyphicon-chevron-down"></span>
+                            <span class="sublist-title">资源管理</span>
+                        </div>
+                        <ul class="navContent" >
+
+                            <li {{if eq .menuTag "server"}}class="active"{{end}}>
+                            <div class="showtitle" style="width:100px;">
+                                服务器
+                            </div>
+                            <a href="/server/list">
+                                <span class="sublist-icon glyphicon glyphicon-hdd"></span>
+                                <span class="sub-title">服务器</span>
+                            </a>
                             </li>
                         </ul>
                     </div>

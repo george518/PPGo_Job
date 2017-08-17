@@ -43,12 +43,23 @@ func (this *TaskController) List() {
 	result, count := models.TaskGetList(page, this.pageSize, filters...)
 
 	list := make([]map[string]interface{}, len(result))
+
+
 	// 分组列表
 	groups, _ := models.TaskGroupGetList(1, 100)
 	groups_map := make(map[int]string)
 	for _, gname := range groups {
 		groups_map[gname.Id] = gname.GroupName
 	}
+
+	//服务器列表
+	servers, _ := models.TaskServerGetList(1, 100)
+
+	server_map := make(map[int]string)
+	for _, sname := range servers {
+		server_map[sname.Id] = sname.ServerName
+	}
+	server_map[0] = "本地"
 	for k, v := range result {
 		row := make(map[string]interface{})
 		row["id"] = v.Id
@@ -58,6 +69,7 @@ func (this *TaskController) List() {
 		row["description"] = v.Description
 		row["group_id"] = v.GroupId
 		row["group_name"] = groups_map[v.GroupId]
+		row["server_name"] = server_map[v.ServerId]
 		row["is_odd"] = k % 2
 
 		e := jobs.GetEntryById(v.Id)
@@ -81,6 +93,7 @@ func (this *TaskController) List() {
 		}
 		list[k] = row
 	}
+
 	this.Data["pageTitle"] = "任务列表"
 	this.Data["list"] = list
 	this.Data["groups"] = groups
@@ -99,25 +112,10 @@ func (this *TaskController) Add() {
 		task.TaskName = strings.TrimSpace(this.GetString("task_name"))
 		task.Description = strings.TrimSpace(this.GetString("description"))
 		task.Concurrent, _ = this.GetInt("concurrent")
+		task.ServerId, _ = this.GetInt("server_id")
 		task.CronSpec = strings.TrimSpace(this.GetString("cron_spec"))
 		task.Command = strings.TrimSpace(this.GetString("command"))
-		task.Notify, _ = this.GetInt("notify")
 		task.Timeout, _ = this.GetInt("timeout")
-
-		notifyEmail := strings.TrimSpace(this.GetString("notify_email"))
-		if notifyEmail != "" {
-			emailList := make([]string, 0)
-			tmp := strings.Split(notifyEmail, "\n")
-			for _, v := range tmp {
-				v = strings.TrimSpace(v)
-				if !libs.IsEmail([]byte(v)) {
-					this.ajaxMsg("无效的Email地址："+v, MSG_ERR)
-				} else {
-					emailList = append(emailList, v)
-				}
-			}
-			task.NotifyEmail = strings.Join(emailList, "\n")
-		}
 
 		if task.TaskName == "" || task.CronSpec == "" || task.Command == "" {
 			this.ajaxMsg("请填写完整信息", MSG_ERR)
@@ -135,6 +133,9 @@ func (this *TaskController) Add() {
 	// 分组列表
 	groups, _ := models.TaskGroupGetList(1, 100)
 	this.Data["groups"] = groups
+	//服务器分组
+	servers, _ := models.TaskServerGetList(1, 100)
+	this.Data["servers"] = servers
 	this.Data["pageTitle"] = "添加任务"
 	this.display()
 }
@@ -153,26 +154,10 @@ func (this *TaskController) Edit() {
 		task.Description = strings.TrimSpace(this.GetString("description"))
 		task.GroupId, _ = this.GetInt("group_id")
 		task.Concurrent, _ = this.GetInt("concurrent")
+		task.ServerId, _ = this.GetInt("server_id")
 		task.CronSpec = strings.TrimSpace(this.GetString("cron_spec"))
 		task.Command = strings.TrimSpace(this.GetString("command"))
-		task.Notify, _ = this.GetInt("notify")
 		task.Timeout, _ = this.GetInt("timeout")
-
-		notifyEmail := strings.TrimSpace(this.GetString("notify_email"))
-		if notifyEmail != "" {
-			tmp := strings.Split(notifyEmail, "\n")
-			emailList := make([]string, 0, len(tmp))
-			for _, v := range tmp {
-				v = strings.TrimSpace(v)
-				if !libs.IsEmail([]byte(v)) {
-					this.ajaxMsg("无效的Email地址："+v, MSG_ERR)
-				} else {
-					emailList = append(emailList, v)
-				}
-			}
-			task.NotifyEmail = strings.Join(emailList, "\n")
-		}
-
 		if task.TaskName == "" || task.CronSpec == "" || task.Command == "" {
 			this.ajaxMsg("请填写完整信息", MSG_ERR)
 		}
@@ -189,6 +174,10 @@ func (this *TaskController) Edit() {
 	// 分组列表
 	groups, _ := models.TaskGroupGetList(1, 100)
 	this.Data["groups"] = groups
+	//服务器分组
+	servers, _ := models.TaskServerGetList(1, 100)
+	this.Data["servers"] = servers
+
 	this.Data["task"] = task
 	this.Data["pageTitle"] = "编辑任务"
 	this.display()

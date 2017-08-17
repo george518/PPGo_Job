@@ -60,7 +60,8 @@
                             <td><input type="checkbox" name="all_check" /></td>
                             <td>ID</td>
                             <td width="20%">任务名称</td>
-                            <td>时间表达式</td>
+                            <td>服务器</td>
+
                             <td>任务说明</td>
                             <td>上次执行时间</td>
                             <td>下次执行时间</td>
@@ -80,7 +81,8 @@
                                 {{end}}
                                 {{$v.group_name}}-{{$v.name}}
                             </td>
-                            <td> {{$v.cron_spec}} </td>
+                            <td> {{$v.server_name}} </td>
+
                             <td> {{$v.description}} </td>
                             <td> {{$v.prev_time}} </td>
                             <td> {{$v.next_time}} </td>
@@ -110,7 +112,7 @@
                     </tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="9">
+                            <td colspan="8">
                                 <div class="pull-right">
                                     {{str2html .pageBar}}
                                 </div>

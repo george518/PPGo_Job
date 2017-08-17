@@ -1,0 +1,121 @@
+<!-- 分组列表 -->
+<div class="container-fluid">
+    <div class="info-center">
+        <!--title-->
+        <div class="info-center">
+            <div class="page-header">
+                <div class="pull-left">
+                    <h4>{{.pageTitle}}</h4>
+                </div>
+                <div class="pull-right">
+                    <!--  <button type="button" class="btn btn-mystyle btn-sm refresh">刷新</button>
+                     <button type="button" class="btn btn-mystyle btn-sm reback">返回</button> -->
+                </div>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <!--content-list-->
+    <div class="content-list">
+        <div class="search-box row">
+            <div class="col-md-4">
+                <div class="btn-group pull-left" role="group" aria-label="...">
+                    <a href='{{urlfor "ServerController.Add"}}' class="btn btn-primary"><span class="glyphicon glyphicon-plus"></span> 新增服务器</a>
+                    <div class="btn-group" role="server">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="glyphicon glyphicon-edit"></span> 批量操作
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a href="javascript:;" onclick="javascript:batch('delete');"><span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span> 删除</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class=" btn-large pull-right" >
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="clearfix"></div>
+        <div class="table-margin">
+            <form id="form-list" method="post" action="">
+                <table class="table table-bordered table-header">
+                    <thead>
+                    <tr>
+                        <td><input type="checkbox" name="all_check" /></td>
+                        <td>ID</td>
+                        <td width="20%">服务器名称</td>
+                        <td width="">IP地址</td>
+                        <td width="">端口号</td>
+                        <td width="">验证类型</td>
+                        <td width="20%">备注</td>
+                        <td width="">创建时间</td>
+                        <td width="10%">操作</td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{range $k,$v := .list}}
+                    <tr>
+                        <td class="chk"><input type="checkbox" name="ids"  value="{{$v.id}}" /></td>
+                        <td class="center">{{$v.id}}</td>
+                        <td>{{$v.server_name}}</td>
+                        <td>{{$v.server_ip}}</td>
+                        <td>{{$v.port}}</td>
+                        <td>{{$v.type}}</td>
+                        <td>{{$v.detail}}</td>
+                        <td>{{$v.create_time}}</td>
+
+                        <td>
+
+                            <a class="btn btn-info  btn-xs" href="{{urlfor "ServerController.Edit"}}?id={{$v.id}}">
+                            <span class="glyphicon glyphicon-file" aria-hidden="true"></span> 编辑
+                            </a>
+                        </td>
+                    </tr>
+                    {{end}}
+
+                    </tbody>
+                    <tfoot>
+                    <tr>
+                        <td colspan="9">
+                            <div class="pull-right">
+                                {{str2html .pageBar}}
+                            </div>
+                        </td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function batch(action) {
+        if ($("input[name='ids']:checked").size() < 1) {
+            alert_message("请选择要操作的任务","alert-danger","alert-success");
+        } else {
+            if(action=='delete'){
+                if(!confirm("确定要删除所选吗？")) return;
+            }
+            var url = "{{urlfor "ServerController.Batch"}}";
+            $.post(url + "?action=" + action, $("#form-list").serialize(), function(out) {
+                if (out.status != 0) {
+                    alert_message(out.msg,"alert-danger","alert-success");
+                } else {
+                    window.location.reload();
+                }
+            }, "json");
+        }
+        return false;
+    }
+
+    //点击行换色
+    $('tbody tr').click(function(){
+        $(this).addClass("warning").siblings().removeClass("warning");
+    });
+</script>

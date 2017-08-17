@@ -11,40 +11,16 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/astaxie/beego"
-	"github.com/george518/PPGo_Job/mail"
 	"github.com/george518/PPGo_Job/models"
-	"html/template"
 	"os/exec"
 	"runtime/debug"
-	"strings"
 	"time"
+	"io/ioutil"
+	"golang.org/x/crypto/ssh"
+	"net"
 )
 
-var mailTpl *template.Template
 
-func init() {
-	mailTpl, _ = template.New("mail_tpl").Parse(`
-	你好 {{.username}}，<br/>
-
-<p>以下是任务执行结果：</p>
-
-<p>
-任务ID：{{.task_id}}<br/>
-任务名称：{{.task_name}}<br/>       
-执行时间：{{.start_time}}<br />
-执行耗时：{{.process_time}}秒<br />
-执行状态：{{.status}}
-</p>
-<p>-------------以下是任务执行输出-------------</p>
-<p>{{.output}}</p>
-<p>
---------------------------------------------<br />
-本邮件由系统自动发出，请勿回复<br />
-如果要取消邮件通知，请登录到系统进行设置<br />
-</p>
-`)
-
-}
 
 type Job struct {
 	id         int                                               // 任务ID
@@ -56,14 +32,24 @@ type Job struct {
 	Concurrent bool                                              // 同一个任务是否允许并行执行
 }
 
+
 func NewJobFromTask(task *models.Task) (*Job, error) {
 	if task.Id < 1 {
 		return nil, fmt.Errorf("ToJob: 缺少id")
 	}
-	job := NewCommandJob(task.Id, task.TaskName, task.Command)
-	job.task = task
-	job.Concurrent = task.Concurrent == 1
-	return job, nil
+	//本地程序执行
+	if(task.ServerId==0) {
+		job := NewCommandJob(task.Id, task.TaskName, task.Command)
+		job.task = task
+		job.Concurrent = task.Concurrent == 1
+		return job, nil
+	}else{
+		server, _ := models.TaskServerGetById(task.ServerId)
+		job := RemoteCommandJob(task.Id, task.TaskName, task.Command,server)
+		job.task = task
+		job.Concurrent = task.Concurrent == 1
+		return job, nil
+	}
 }
 
 func NewCommandJob(id int, name string, command string) *Job {
@@ -85,6 +71,66 @@ func NewCommandJob(id int, name string, command string) *Job {
 	}
 	return job
 }
+//远程执行任务
+func RemoteCommandJob(id int,name string,command string,servers *models.TaskServer) *Job {
+	job := &Job{
+		id:   id,
+		name: name,
+	}
+	job.runFunc = func(timeout time.Duration) (string, string, error, bool) {
+
+		key, err := ioutil.ReadFile(servers.PrivateKeySrc)
+		if err != nil {
+			return "","",err,false
+		}
+		// Create the Signer for this private key.
+		signer, err := ssh.ParsePrivateKey(key)
+		if err != nil {
+			return "","",err,false
+		}
+		addr := fmt.Sprintf("%s:%d", servers.ServerIp, servers.Port)
+		config := &ssh.ClientConfig{
+			User: "root",
+			Auth: []ssh.AuthMethod{
+				// Use the PublicKeys method for remote authentication.
+				ssh.PublicKeys(signer),
+			},
+			//HostKeyCallback: ssh.FixedHostKey(hostKey),
+			HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
+				return nil
+			},
+		}
+		// Connect to the remote server and perform the SSH handshake.47.93.220.5
+		client, err := ssh.Dial("tcp", addr, config)
+		if err != nil {
+			return "","",err,false
+		}
+
+		session, err := client.NewSession()
+		if err != nil {
+			return "","",err,false
+		}
+		defer session.Close()
+
+		// Once a Session is created, you can execute a single command on
+		// the remote side using the Run method.
+
+		var b bytes.Buffer
+		var c bytes.Buffer
+		session.Stdout = &b
+		session.Stderr = &c
+
+		//session.Output(command)
+		if err := session.Run(command); err != nil {
+			return "","",err,false
+		}
+		isTimeout := false
+		return b.String(), c.String(), err, isTimeout
+	}
+	return job
+}
+
+
 
 func (j *Job) Status() int {
 	return j.status
@@ -159,41 +205,41 @@ func (j *Job) Run() {
 	j.task.Update("PrevTime", "ExecuteTimes")
 
 	// 发送邮件通知
-	if (j.task.Notify == 1 && err != nil) || j.task.Notify == 2 {
-		user, uerr := models.UserGetById(j.task.UserId)
-		if uerr != nil {
-			return
-		}
-
-		var title string
-
-		data := make(map[string]interface{})
-		data["task_id"] = j.task.Id
-		data["username"] = user.UserName
-		data["task_name"] = j.task.TaskName
-		data["start_time"] = beego.Date(t, "Y-m-d H:i:s")
-		data["process_time"] = float64(ut) / 1000
-		data["output"] = cmdOut
-
-		if isTimeout {
-			title = fmt.Sprintf("任务执行结果通知 #%d: %s", j.task.Id, "超时")
-			data["status"] = fmt.Sprintf("超时（%d秒）", int(timeout/time.Second))
-		} else if err != nil {
-			title = fmt.Sprintf("任务执行结果通知 #%d: %s", j.task.Id, "失败")
-			data["status"] = "失败（" + err.Error() + "）"
-		} else {
-			title = fmt.Sprintf("任务执行结果通知 #%d: %s", j.task.Id, "成功")
-			data["status"] = "成功"
-		}
-
-		content := new(bytes.Buffer)
-		mailTpl.Execute(content, data)
-		ccList := make([]string, 0)
-		if j.task.NotifyEmail != "" {
-			ccList = strings.Split(j.task.NotifyEmail, "\n")
-		}
-		if !mail.SendMail(user.Email, user.UserName, title, content.String(), ccList) {
-			beego.Error("发送邮件超时：", user.Email)
-		}
-	}
+	//if (j.task.Notify == 1 && err != nil) || j.task.Notify == 2 {
+	//	user, uerr := models.UserGetById(j.task.UserId)
+	//	if uerr != nil {
+	//		return
+	//	}
+	//
+	//	var title string
+	//
+	//	data := make(map[string]interface{})
+	//	data["task_id"] = j.task.Id
+	//	data["username"] = user.UserName
+	//	data["task_name"] = j.task.TaskName
+	//	data["start_time"] = beego.Date(t, "Y-m-d H:i:s")
+	//	data["process_time"] = float64(ut) / 1000
+	//	data["output"] = cmdOut
+	//
+	//	if isTimeout {
+	//		title = fmt.Sprintf("任务执行结果通知 #%d: %s", j.task.Id, "超时")
+	//		data["status"] = fmt.Sprintf("超时（%d秒）", int(timeout/time.Second))
+	//	} else if err != nil {
+	//		title = fmt.Sprintf("任务执行结果通知 #%d: %s", j.task.Id, "失败")
+	//		data["status"] = "失败（" + err.Error() + "）"
+	//	} else {
+	//		title = fmt.Sprintf("任务执行结果通知 #%d: %s", j.task.Id, "成功")
+	//		data["status"] = "成功"
+	//	}
+	//
+	//	content := new(bytes.Buffer)
+	//	mailTpl.Execute(content, data)
+	//	ccList := make([]string, 0)
+	//	if j.task.NotifyEmail != "" {
+	//		ccList = strings.Split(j.task.NotifyEmail, "\n")
+	//	}
+	//	if !mail.SendMail(user.Email, user.UserName, title, content.String(), ccList) {
+	//		beego.Error("发送邮件超时：", user.Email)
+	//	}
+	//}
 }

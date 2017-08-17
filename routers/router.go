@@ -14,4 +14,5 @@ func init() {
 	beego.Router("/help", &controllers.HelpController{}, "*:Index")
 	beego.AutoRouter(&controllers.TaskController{})
 	beego.AutoRouter(&controllers.GroupController{})
+	beego.AutoRouter(&controllers.ServerController{})
 }

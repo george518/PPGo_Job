@@ -13,6 +13,7 @@ import (
 	"github.com/george518/PPGo_Job/models"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type GroupController struct {
@@ -39,6 +40,7 @@ func (this *GroupController) Add() {
 		group.GroupName = strings.TrimSpace(this.GetString("group_name"))
 		group.UserId = this.userId
 		group.Description = strings.TrimSpace(this.GetString("description"))
+		group.CreateTime = time.Now().Unix()
 
 		_, err := models.TaskGroupAdd(group)
 		if err != nil {

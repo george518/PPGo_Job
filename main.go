@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/astaxie/beego"
-	_ "github.com/george518/PPGo_Job/mail"
 	"github.com/george518/PPGo_Job/models"
 	_ "github.com/george518/PPGo_Job/routers"
 	"github.com/george518/PPGo_Job/jobs"

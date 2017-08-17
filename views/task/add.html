@@ -56,6 +56,21 @@
             </div>
 
             <div class="form-group" style="margin-top: 15px">
+                <label class="col-sm-3 control-label" for="server_id">服务器</label>
+                <div class="col-sm-3" >
+                    <select name="server_id" class="form-control">
+                        <option value="0">本地服务器</option>
+                        {{range $ks, $vs := .servers}}
+                        <option value="{{$vs.Id}}">{{$vs.ServerName}}</option>
+                        {{end}}
+                    </select>
+                </div>
+                <div class="col-sm-6" style="padding-top:5px;">
+
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 15px">
                 <label class="col-sm-3 control-label" for="concurrent">是否单例</label>
                 <div class="col-sm-3" >
                     <label class="radio-inline">
@@ -100,35 +115,6 @@
                 </div>
             </div>
 
-            <div class="form-group" style="margin-top: 15px">
-                <label class="col-sm-3 control-label" for="notify">邮件通知</label>
-                <div class="col-sm-6" >
-                    <label class="radio-inline">
-                        <input type="radio" name="notify"  value="0" checked readonly> 不通知
-                    </label>
-                    <label class="radio-inline">
-                        <input type="radio" name="notify"  value="1" > 执行失败通知
-                    </label>
-
-                    <label class="radio-inline">
-                        <input type="radio" name="notify" value="2" > 执行结束通知
-                    </label>
-                </div>
-                <div class="col-sm-3" style="padding-top:5px;">
-                    <i style="font-size: 12px;color: red">暂不支持</i>
-                </div>
-            </div>
-            
-            <div class="form-group notify_email hide" style="margin-top: 15px">
-                <label class="col-sm-3 control-label" for="notify_email">通知邮件抄送人</label>
-                <div class="col-sm-5" >
-                    <textarea name="notify_email" class="form-control" id="notify_email" rows="3"></textarea>
-                </div>
-                <div class="col-sm-4" style="padding-top:5px;">
-                    每行一个email地址，如果不需要抄送给其他人请留空
-                </div>
-            </div>
-            
             <br />    
             <div class="modal-footer" style="text-align:center">
                 <button type="submit" class="btn btn-primary submit_attr_button">保存</button>
@@ -141,28 +127,17 @@
 <script>
 $(function () {
     $("form").submit(function () {
-        // $(".alert").hide();
         $("button[type='submit']").attr('disabled', true);
         $.post('{{urlfor "TaskController.Add"}}', $(this).serialize(), function (out) {
             if (out.status == 0) {
                 window.location.href = '{{urlfor "TaskController.List"}}';
             } else {
                 alert_message(out.msg,"alert-danger","alert-success");
-                // $(".alert").text(out.msg);
-                // $(".alert").show();
                 $("button[type='submit']").attr('disabled', false);
             }
         }, "json");
         return false;
     });
-    $("input[name='notify']").click(function () {
-//        alert("暂不启用");
-//        return;
-        if ($(this).val() > 0) {
-            $('.notify_email').removeClass('hide');
-        } else {
-            $('.notify_email').addClass('hide');
-        }
-    });
+
 });
 </script>
