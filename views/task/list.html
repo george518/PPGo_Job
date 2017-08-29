@@ -105,6 +105,10 @@
                                     <a class="btn btn-info  btn-xs" href="{{urlfor "TaskController.Logs"}}?id={{$v.id}}">
                                         <span class="glyphicon glyphicon-file" aria-hidden="true"></span> 日志
                                    </a>
+
+                                   <a class="btn btn-info  btn-xs" href="{{urlfor "TaskController.Copy"}}?id={{$v.id}}">
+                                        <span class="glyphicon glyphicon-copy" aria-hidden="true"></span> 复制
+                                   </a>
                             </td>
                         </tr>
                         {{end}}

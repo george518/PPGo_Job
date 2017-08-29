@@ -8,14 +8,15 @@
 package controllers
 
 import (
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/astaxie/beego"
 	crons "github.com/george518/PPGo_Job/crons"
 	"github.com/george518/PPGo_Job/jobs"
 	"github.com/george518/PPGo_Job/libs"
 	"github.com/george518/PPGo_Job/models"
-	"strconv"
-	"strings"
-	"time"
 )
 
 type TaskController struct {
@@ -37,13 +38,12 @@ func (this *TaskController) List() {
 	}
 
 	filters := make([]interface{}, 0)
-	if groupId > 0 && groupId!=99 {
+	if groupId > 0 && groupId != 99 {
 		filters = append(filters, "group_id", groupId)
 	}
 	result, count := models.TaskGetList(page, this.pageSize, filters...)
 
 	list := make([]map[string]interface{}, len(result))
-
 
 	// 分组列表
 	groups, _ := models.TaskGroupGetList(1, 100)
@@ -180,6 +180,26 @@ func (this *TaskController) Edit() {
 
 	this.Data["task"] = task
 	this.Data["pageTitle"] = "编辑任务"
+	this.display()
+}
+
+//复制任务
+func (this *TaskController) Copy() {
+
+	id, _ := this.GetInt("id")
+	task, err := models.TaskGetById(id)
+	if err != nil {
+		this.showMsg(err.Error())
+	}
+	// 分组列表
+	groups, _ := models.TaskGroupGetList(1, 100)
+	this.Data["groups"] = groups
+	//服务器分组
+	servers, _ := models.TaskServerGetList(1, 100)
+	this.Data["servers"] = servers
+
+	this.Data["task"] = task
+	this.Data["pageTitle"] = "复制任务"
 	this.display()
 }
 

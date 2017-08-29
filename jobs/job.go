@@ -10,17 +10,16 @@ package jobs
 import (
 	"bytes"
 	"fmt"
-	"github.com/astaxie/beego"
-	"github.com/george518/PPGo_Job/models"
+	"io/ioutil"
+	"net"
 	"os/exec"
 	"runtime/debug"
 	"time"
-	"io/ioutil"
+
+	"github.com/astaxie/beego"
+	"github.com/george518/PPGo_Job/models"
 	"golang.org/x/crypto/ssh"
-	"net"
 )
-
-
 
 type Job struct {
 	id         int                                               // 任务ID
@@ -32,13 +31,12 @@ type Job struct {
 	Concurrent bool                                              // 同一个任务是否允许并行执行
 }
 
-
 func NewJobFromTask(task *models.Task) (*Job, error) {
 	if task.Id < 1 {
 		return nil, fmt.Errorf("ToJob: 缺少id")
 	}
 	//本地程序执行
-	if(task.ServerId==0) {
+	if task.ServerId == 0 {
 		job := NewCommandJob(task.Id, task.TaskName, task.Command)
 		job.task = task
 		job.Concurrent = task.Concurrent == 1
@@ -46,15 +44,15 @@ func NewJobFromTask(task *models.Task) (*Job, error) {
 	}
 
 	server, _ := models.TaskServerGetById(task.ServerId)
-	if(server.Type==0){
+	if server.Type == 0 {
 		//密码验证登录服务器
-		job := RemoteCommandJobByPassword(task.Id, task.TaskName, task.Command,server)
+		job := RemoteCommandJobByPassword(task.Id, task.TaskName, task.Command, server)
 		job.task = task
 		job.Concurrent = task.Concurrent == 1
 		return job, nil
 	}
 
-	job := RemoteCommandJob(task.Id, task.TaskName, task.Command,server)
+	job := RemoteCommandJob(task.Id, task.TaskName, task.Command, server)
 	job.task = task
 	job.Concurrent = task.Concurrent == 1
 	return job, nil
@@ -80,8 +78,9 @@ func NewCommandJob(id int, name string, command string) *Job {
 	}
 	return job
 }
+
 //远程执行任务 密钥验证
-func RemoteCommandJob(id int,name string,command string,servers *models.TaskServer) *Job {
+func RemoteCommandJob(id int, name string, command string, servers *models.TaskServer) *Job {
 	job := &Job{
 		id:   id,
 		name: name,
@@ -90,12 +89,12 @@ func RemoteCommandJob(id int,name string,command string,servers *models.TaskServ
 
 		key, err := ioutil.ReadFile(servers.PrivateKeySrc)
 		if err != nil {
-			return "","",err,false
+			return "", "", err, false
 		}
 		// Create the Signer for this private key.
 		signer, err := ssh.ParsePrivateKey(key)
 		if err != nil {
-			return "","",err,false
+			return "", "", err, false
 		}
 		addr := fmt.Sprintf("%s:%d", servers.ServerIp, servers.Port)
 		config := &ssh.ClientConfig{
@@ -112,12 +111,12 @@ func RemoteCommandJob(id int,name string,command string,servers *models.TaskServ
 		// Connect to the remote server and perform the SSH handshake.47.93.220.5
 		client, err := ssh.Dial("tcp", addr, config)
 		if err != nil {
-			return "","",err,false
+			return "", "", err, false
 		}
 
 		session, err := client.NewSession()
 		if err != nil {
-			return "","",err,false
+			return "", "", err, false
 		}
 		defer session.Close()
 
@@ -131,7 +130,7 @@ func RemoteCommandJob(id int,name string,command string,servers *models.TaskServ
 
 		//session.Output(command)
 		if err := session.Run(command); err != nil {
-			return "","",err,false
+			return "", "", err, false
 		}
 		isTimeout := false
 		return b.String(), c.String(), err, isTimeout
@@ -139,7 +138,7 @@ func RemoteCommandJob(id int,name string,command string,servers *models.TaskServ
 	return job
 }
 
-func RemoteCommandJobByPassword(id int,name string,command string,servers *models.TaskServer) *Job{
+func RemoteCommandJobByPassword(id int, name string, command string, servers *models.TaskServer) *Job {
 	var (
 		auth         []ssh.AuthMethod
 		addr         string
@@ -179,7 +178,6 @@ func RemoteCommandJobByPassword(id int,name string,command string,servers *model
 			return "", "", err, false
 		}
 
-
 		var b bytes.Buffer
 		var c bytes.Buffer
 		session.Stdout = &b
@@ -187,7 +185,7 @@ func RemoteCommandJobByPassword(id int,name string,command string,servers *model
 
 		//session.Output(command)
 		if err := session.Run(command); err != nil {
-			return "","",err,false
+			return "", "", err, false
 		}
 		isTimeout := false
 		return b.String(), c.String(), err, isTimeout
@@ -195,7 +193,6 @@ func RemoteCommandJobByPassword(id int,name string,command string,servers *model
 
 	return job
 }
-
 
 func (j *Job) Status() int {
 	return j.status

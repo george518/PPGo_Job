@@ -1,0 +1,144 @@
+<!-- 新增任务 -->
+<div class="container-fluid">
+    <div class="info-center">
+        <!--title-->
+        <div class="info-center">
+            <div class="page-header">
+                <div class="pull-left">
+                    <h4>{{.pageTitle}}</h4>      
+                </div>
+                <div class="pull-right">
+                   <!--  <button type="button" class="btn btn-mystyle btn-sm refresh">刷新</button>
+                    <button type="button" class="btn btn-mystyle btn-sm reback">返回</button> -->
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+
+    <!--content-list--> 
+    <div class="content-list">
+        <form  action="{{urlfor "TaskController.Add"}}" method="post" class="form-horizontal">
+            <div class="form-group" style="margin-top: 15px">
+                <label class="col-sm-3 control-label" for="task_name">任务名称</label>
+                <div class="col-sm-3" >
+                    <input type="text"  class="form-control input-sm" placeholder="" name="task_name" value="{{.task.TaskName}}" />
+                </div>
+                <div class="col-sm-6" style="padding-top:5px;">
+                    
+                </div>
+            </div>
+
+
+            <div class="form-group" style="margin-top: 15px">
+                <label class="col-sm-3 control-label" for="task_name">任务说明</label>
+                <div class="col-sm-5" >
+                    <textarea name="description" class="form-control" id="description" rows="3">{{.task.Description}}</textarea>
+                </div>
+                <div class="col-sm-4" style="padding-top:5px;">
+                    
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 15px">
+                <label class="col-sm-3 control-label" for="task_name">任务分组</label>
+                <div class="col-sm-3" >
+                    <select name="group_id" class="form-control">
+                        <option value="0">未分组</option>
+                        {{range $k, $v := .groups}}
+                        <option value="{{$v.Id}}"  {{if eq $v.Id $.task.GroupId}}selected{{end}}>{{$v.GroupName}}</option>
+                        {{end}}
+                    </select>
+                </div>
+                <div class="col-sm-6" style="padding-top:5px;">
+                    
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 15px">
+                <label class="col-sm-3 control-label" for="server_id">服务器</label>
+                <div class="col-sm-3" >
+                    <select name="server_id" class="form-control">
+                        <option value="0">本地服务器</option>
+                        {{range $ks, $vs := .servers}}
+                        <option value="{{$vs.Id}}" {{if eq $vs.Id $.task.ServerId}}selected{{end}}>{{$vs.ServerName}}</option>
+                        {{end}}
+                    </select>
+                </div>
+                <div class="col-sm-6" style="padding-top:5px;">
+
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 15px">
+                <label class="col-sm-3 control-label" for="concurrent">是否单例</label>
+                <div class="col-sm-3" >
+                    <label class="radio-inline">
+                        <input type="radio" name="concurrent"  value="0" {{if eq .task.Concurrent 0}}checked{{end}}> 是
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="concurrent" value="1" {{if eq .task.Concurrent 1}}checked{{end}}> 否
+                    </label>
+                </div>
+                <div class="col-sm-6" style="padding-top:5px;">
+                    <i>设为“是”的话，如果该任务在上一个时间点还没执行完，则略过不执行</i>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 15px">
+                <label class="col-sm-3 control-label" for="cron_spec">时间表达式</label>
+                <div class="col-sm-3" >
+                     <input type="text"  class="form-control input-sm" placeholder="" name="cron_spec" value="{{.task.CronSpec}}" />
+                </div>
+                <div class="col-sm-6" style="padding-top:5px;">
+                    <a href="{{urlfor "HelpController.Index"}}" target="_blank">参见使用帮助</a>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 15px">
+                <label class="col-sm-3 control-label" for="task_name">命令脚本</label>
+                <div class="col-sm-5" >
+                    <textarea name="command" class="form-control" id="command" rows="3">{{.task.Command}}</textarea>
+                </div>
+                <div class="col-sm-4" style="padding-top:5px;">
+                    
+                </div>
+            </div>
+            
+
+            <div class="form-group" style="margin-top: 15px">
+                <label class="col-sm-3 control-label" for="cron_spec">超时设置</label>
+                <div class="col-sm-3" >
+                     <input type="text"  class="form-control input-sm" placeholder="秒" name="timeout" value="{{.task.Timeout}}" />
+                </div>
+                <div class="col-sm-6" style="padding-top:5px;">
+                    单位秒，不设置的话，默认超时时间为1天
+                </div>
+            </div>
+
+            <br />
+            <div class="modal-footer" style="text-align:center">
+                <button type="submit" class="btn btn-primary submit_attr_button">保存</button>
+                <button type="button" class="btn btn-default reback">返回</button>
+            </div>
+        </form>
+    </div> 
+</div> 
+
+<script>
+$(function () {
+    $("form").submit(function () {
+        $("button[type='submit']").attr('disabled', true);
+        $.post('{{urlfor "TaskController.Add"}}', $(this).serialize(), function (out) {
+            if (out.status == 0) {
+                window.location.href = '{{urlfor "TaskController.List"}}';
+            } else {
+                alert_message(out.msg,"alert-danger","alert-success");
+                $("button[type='submit']").attr('disabled', false);
+            }
+        }, "json");
+        return false;
+    });
+});
+</script>
