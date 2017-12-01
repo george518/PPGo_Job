@@ -149,6 +149,10 @@ func (this *TaskController) Edit() {
 		this.showMsg(err.Error())
 	}
 
+	if task.Status != 0 {
+		this.ajaxMsg("激活状态无法编辑任务，请先暂停任务", MSG_ERR)
+	}
+
 	if this.isPost() {
 		task.TaskName = strings.TrimSpace(this.GetString("task_name"))
 		task.Description = strings.TrimSpace(this.GetString("description"))
