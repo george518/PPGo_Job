@@ -1,10 +1,20 @@
-PPGo_Job
+PPGo_Job定时任务管理系统
 ====
-定时任务管理  
-代码参考自https://github.com/lisijie/webcron.git
+原由：公司运行php定时任务比较多，已经无法通过crontab来进行管理：定时任务是否执行？是否按时执行？执行结果是什么？多台服务器里的定时任务怎么管理？定时任务如何排错……，为了解决以上问题，利用业余时间开发了PPGo_Job定时任务管理系统。 
+目前生产环境已经无故障运行了近一年时间。   
+
+主要特点：
+----
+- 1、支持本地定时任务、跨服务器管理（密码或者密钥两种方式）
+- 2、支持秒级定时任务
+- 3、支持复制任务，快速添加任务，支持批量启动和停止任务
+- 4、定时任务日志详细（任务运行用时，执行结果等），方便任务排错
+- 5、资源占用小，支持大并发
+- 6、支持任务分组，常用小功能多，更方便管理定时任务
+- 7、跨平台，易部署，分分钟搞定
 
 感觉不错的话，给个星星吧 ：）
-
+ 
 效果展示
 ----
 任务界面<br/>
@@ -33,6 +43,10 @@ jobs/job.go:19:2: cannot find package "golang.org/x/crypto/ssh" in any of:
 
 需要 git clone https://github.com/golang/crypto.git
 并拷贝到 $GOPATH/src/golang.org/x/ 下就OK
+
+感谢
+----
+https://github.com/lisijie/webcron.git 
 
 升级日志
 ----
