@@ -114,6 +114,8 @@ func RemoteCommandJob(id int, name string, command string, servers *models.TaskS
 			return "", "", err, false
 		}
 
+		defer client.Close()
+
 		session, err := client.NewSession()
 		if err != nil {
 			return "", "", err, false
@@ -172,6 +174,8 @@ func RemoteCommandJobByPassword(id int, name string, command string, servers *mo
 		if client, err = ssh.Dial("tcp", addr, clientConfig); err != nil {
 			return "", "", err, false
 		}
+
+		defer client.Close()
 
 		// create session
 		if session, err = client.NewSession(); err != nil {
