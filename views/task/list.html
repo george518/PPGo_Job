@@ -91,21 +91,17 @@
                                     <a class="btn btn-danger btn-xs" href="{{urlfor "TaskController.Start"}}?id={{$v.id}}">
                                         <span class="glyphicon glyphicon-expand" aria-hidden="true"></span> 激活
                                     </a>
+                                    <a class="btn btn-info btn-xs" href="{{urlfor "TaskController.Edit"}}?id={{$v.id}}">
+                                        <span class="glyphicon glyphicon-edit" aria-hidden="true"></span> 编辑
+                                    </a>
                                 {{else}}
                                     <a class="btn btn-success  btn-xs" href="{{urlfor "TaskController.Pause"}}?id={{$v.id}}">
                                         <span class="glyphicon glyphicon-pause" aria-hidden="true"></span> 暂停
                                     </a>
-                                {{end}}
-                                {{if eq $v.status 0}}
-                                    <a class="btn btn-info btn-xs" href="{{urlfor "TaskController.Edit"}}?id={{$v.id}}">
-                                       <span class="glyphicon glyphicon-edit" aria-hidden="true"></span> 编辑
-                                    </a>
-                                {{else}}
-                                    <a class="btn btn-default btn-xs" href="javascript:return alert('激活状态无法编辑任务，请先暂停任务');">
-                                       <span class="glyphicon glyphicon-edit" aria-hidden="true"></span> 编辑
+                                    <a class="btn btn-default btn-xs" href="javascript:void(0)" onclick="alert('激活状态无法编辑任务，请先暂停任务');">
+                                        <span class="glyphicon glyphicon-edit" aria-hidden="true"></span> 编辑
                                     </a>
                                 {{end}}
-
                                     <a class="btn btn-info btn-run  btn-xs" href="{{urlfor "TaskController.Run"}}?id={{$v.id}}">
                                         <span class="glyphicon glyphicon-flash" aria-hidden="true"></span> 执行
                                     </a>
