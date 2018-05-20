@@ -26,17 +26,64 @@ PPGo_Job定时任务管理系统
 
 安装方法    
 ----
-1、go get github.com/george518/PPGo_Job    
-2、创建mysql数据库，并将ppgo_job.sql导入    
-3、修改config 配置数据库    
-4、运行 go build    
-5、运行 ./run.sh start|stop
+
+方法一、 编译安装
+
+- go get github.com/george518/PPGo_Job
+- 创建mysql数据库，并将ppgo_job.sql导入
+- 修改config 配置数据库
+- 运行 go build
+- 运行 ./run.sh start|stop
+
+方法二、直接使用
+
+linux
+
+- 下载 ppgo_job-linux-1.2.1.zip 并解压
+- 进入文件夹，设置好数据库(创建数据库，导入ppgo_job.sql)和配置文件(conf/app.conf)
+- 运行 ./run.sh start|stop
+
+mac
+
+- 下载 ppgo_job-mac-1.2.1.zip 并解压
+- 进入文件夹，设置好数据库(创建数据库，导入ppgo_job.sql)和配置文件(conf/app.conf)
+- 运行 ./run.sh start|stop
+
+windows
+
+- 下载 ppgo_job-windows-1.2.0.zip 并解压
+- 进入文件夹，设置好数据库(创建数据库，导入ppgo_job.sql)和配置文件(conf/app.conf)
+- 运行 PPGo_Job.exe
 
 
 前台访问：http://your_host:8080
 用户名：admin 密码：123456
 
-排错
+配置文件
+----
+根据自己的情况修改数据库和启动端口
+```
+appname = PPGo_Job
+httpport = 8080
+runmode = dev
+
+# 允许同时运行的任务数
+jobs.pool = 1000
+
+# 站点名称
+site.name = 定时任务管理器
+
+# 数据库配置
+db.host = 127.0.0.1
+db.user = root
+db.password = "123456"
+db.port = 3306
+db.name = ppgo_job
+db.prefix = pp_
+db.timezone = Asia/Shanghai
+```
+
+编译安装-排错
 ----
 go build 时遇到以下错误：
 jobs/job.go:19:2: cannot find package "golang.org/x/crypto/ssh" in any of:
@@ -46,7 +93,7 @@ jobs/job.go:19:2: cannot find package "golang.org/x/crypto/ssh" in any of:
 
 感谢
 ----
-https://github.com/lisijie/webcron.git 
+https://github.com/lisijie/webcron.git
 
 升级日志
 ----
@@ -64,4 +111,7 @@ v1.2
 1、新增服务器资源添加 （新增数据表pp_task_server）
 2、新增远程服务器任务执行(密码验证和密钥验证登录)
 3、删除邮件通知功能（pp_task删除两个有关字段）
+
+v12.1
+修复远程ssh问题
 
