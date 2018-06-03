@@ -39,21 +39,21 @@ PPGo_Job定时任务管理系统
 
 linux
 
+- 进入 https://github.com/george518/PPGo_Job/releases
 - 下载 ppgo_job-linux-1.2.1.zip 并解压
 - 进入文件夹，设置好数据库(创建数据库，导入ppgo_job.sql)和配置文件(conf/app.conf)
 - 运行 ./run.sh start|stop
 
 mac
 
+- 进入https://github.com/george518/PPGo_Job/releases
 - 下载 ppgo_job-mac-1.2.1.zip 并解压
 - 进入文件夹，设置好数据库(创建数据库，导入ppgo_job.sql)和配置文件(conf/app.conf)
 - 运行 ./run.sh start|stop
 
 windows
 
-- 下载 ppgo_job-windows-1.2.0.zip 并解压
-- 进入文件夹，设置好数据库(创建数据库，导入ppgo_job.sql)和配置文件(conf/app.conf)
-- 运行 PPGo_Job.exe
+- 暂不支持
 
 
 前台访问：http://your_host:8080
