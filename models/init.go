@@ -8,10 +8,12 @@
 package models
 
 import (
+	"net/url"
+
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
-	"net/url"
+	"github.com/gpmgo/gopm/modules/log"
 )
 
 func Init() {
@@ -25,12 +27,13 @@ func Init() {
 		dbport = "3306"
 	}
 	dsn := dbuser + ":" + dbpassword + "@tcp(" + dbhost + ":" + dbport + ")/" + dbname + "?charset=utf8"
+	log.Fatal(dsn)
 
 	if timezone != "" {
 		dsn = dsn + "&loc=" + url.QueryEscape(timezone)
 	}
 	orm.RegisterDataBase("default", "mysql", dsn)
-	orm.RegisterModel(new(User), new(Task), new(TaskGroup), new(TaskLog),new(TaskServer))
+	orm.RegisterModel(new(User), new(Task), new(TaskGroup), new(TaskLog), new(TaskServer))
 
 	if beego.AppConfig.String("runmode") == "dev" {
 		orm.Debug = true

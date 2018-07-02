@@ -1,0 +1,152 @@
+<div class="layui-layout layui-layout-admin" style="padding-left: 40px;margin-top: 20px;">
+{{/*<div style="margin: 10px 0px">*/}}
+{{/*<blockquote class="layui-elem-quote">*/}}
+{{/*说明：创建新的服务器资源*/}}
+{{/*</blockquote>*/}}
+{{/*</div>*/}}
+    <form class="layui-form" action="" method="post" >
+
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200">所属分组</label>
+            <div class="layui-input-inline">
+                <select name="group_id" lay-verify="required">
+                {{range $k, $v := .serverGroup}}
+                    <option value="{{$k}}" {{if eq $.server.group_id $k}} selected {{end}}>{{$v}}</option>
+                {{end}}
+                </select>
+            </div>
+            <div class="layui-form-mid layui-word-aux"></div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200">服务器名称</label>
+            <div class="layui-input-inline mw400">
+                <input type="text" name="server_name" id="server_name" lay-verify="required" autocomplete="off" placeholder="服务器名称" class="layui-input" value="{{.server.server_name}}">
+            </div>
+            <div class="layui-form-mid layui-word-aux"></div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200">登录账号</label>
+            <div class="layui-input-inline mw400">
+                <input type="text" name="server_account" id="server_account" lay-verify="required" autocomplete="off" placeholder="root" class="layui-input" value="{{.server.server_account}}">
+            </div>
+            <div class="layui-form-mid layui-word-aux"></div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200">内网IP</label>
+            <div class="layui-input-inline mw400">
+                <input type="text" name="server_ip" id="server_ip" lay-verify="required" autocomplete="off" placeholder="192.168.1.12" class="layui-input" value="{{.server.server_ip}}">
+            </div>
+            <div class="layui-form-mid layui-word-aux"></div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200">外网IP</label>
+            <div class="layui-input-inline mw400">
+                <input type="text" name="server_outer_ip" id="server_outer_ip" lay-verify="required" autocomplete="off" placeholder="200.200.200.12" class="layui-input" value="{{.server.server_outer_ip}}">
+            </div>
+            <div class="layui-form-mid layui-word-aux"></div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label  mw200">端口号</label>
+            <div class="layui-input-inline mw400">
+                <input type="text" name="port" id="port" lay-verify="required" autocomplete="off" placeholder="22" class="layui-input" value="{{.server.port}}">
+            </div>
+            <div class="layui-form-mid layui-word-aux"></div>
+        </div>
+
+
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200">验证登录类型</label>
+            <div class="layui-input-inline mw400">
+                <input type="radio" name="type" lay-verify="type" value="0" title="密码" {{if eq .server.type 0}}checked{{end}}>
+                <input type="radio" name="type" lay-verify="type" value="1" title="密钥" {{if eq .server.type 1}}checked{{end}}>
+            </div>
+            <div class="layui-form-mid layui-word-aux"></div>
+        </div>
+
+        <div class="layui-form-item password" style="{{if eq .server.type 1}}display:none{{end}}">
+            <label class="layui-form-label mw200">密码</label>
+            <div class="layui-input-inline mw400">
+                <input type="text" name="password" id="password" lay-verify="" autocomplete="off" placeholder="服务器登录密码" class="layui-input" value="{{.server.password}}">
+            </div>
+            <div class="layui-form-mid layui-word-aux"></div>
+        </div>
+
+        <div class="layui-form-item key" style="{{if eq .server.type 0}}display:none{{end}}">
+            <label class="layui-form-label mw200">公钥地址</label>
+            <div class="layui-input-inline mw400">
+                <input type="text" name="public_key_src" id="public_key_src" lay-verify="" autocomplete="off" placeholder="/Users/haodaquan/.ssh/pp_rsa.pub" class="layui-input" value="{{.server.public_key_src}}">
+            </div>
+            <div class="layui-form-mid layui-word-aux"><span id="des" style="cursor: pointer">说明</span></div>
+        </div>
+
+        <div class="layui-form-item key" style="{{if eq .server.type 0}}display:none{{end}}">
+            <label class="layui-form-label mw200">私钥地址</label>
+            <div class="layui-input-inline mw400">
+                <input type="text" name="private_key_src" id="private_key_src" lay-verify="" autocomplete="off" placeholder="/Users/haodaquan/.ssh/pp_rsa" class="layui-input" value="{{.server.private_key_src}}">
+            </div>
+            <div class="layui-form-mid layui-word-aux"></div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200">资源说明</label>
+            <div class="layui-input-inline mw400">
+                <textarea name="detail" id="detail" placeholder="请输入内容" class="layui-textarea">{{.server.detail}}</textarea>
+            </div>
+
+        </div>
+        <input type="hidden" name="id" id="id" value="{{.server.id}}">
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200"></label>
+            <div class="layui-input-inline mw400">
+                <button class="layui-btn" lay-submit="" lay-filter="sub">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    var $;
+    layui.use(['form','element','layer','jquery'],function(){
+        var form = layui.form; //只有执行了这一步，部分表单元素才会自动修饰成功
+        var $ = layui.jquery;
+
+        form.on('radio', function(data){
+            if(data.value==1){
+                $(".key").show();
+                $(".password").hide();
+            }else{
+                $(".password").show();
+                $(".key").hide();
+            }
+        });
+
+        $("#des").on('click',function () {
+            layer.tips('公钥和私钥地址请在本地服务器生成,命令：ssh-keygen -t rsa -f pp_rsa', '#des', {
+                tips: [1, '#0FA6D8'] //还可配置颜色
+            });
+        })
+
+
+        form.on('submit(sub)', function(data){
+            var form_data = $("form").serialize();
+            $.post('{{urlfor "ServerController.AjaxSave"}}', form_data, function (out) {
+                if (out.status == 0) {
+                    layer.msg("操作成功",{icon: 1},function () {
+                        window.history.go(-1)
+                    })
+                } else {
+                    layer.msg(out.message)
+                }
+            }, "json");
+            return false;
+        });
+
+        //但是，如果你的HTML是动态生成的，自动渲染就会失效
+        //因此你需要在相应的地方，执行下述方法来手动渲染，跟这类似的还有 element.init();
+        form.render();
+    });
+</script>

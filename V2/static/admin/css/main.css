@@ -1,0 +1,106 @@
+/*
+* @Author: georgehao
+* @Date:   2018-04-08 09:50:56
+* @Last Modified by:   haodaquan
+* @Last Modified time: 2018-04-08 22:33:36
+*/
+
+.layui-header{
+	height:50px;
+}
+
+.layui-layout-admin .layui-logo{
+	line-height:50px;
+	height:50px;
+    font-size:20px;
+}
+.layui-nav layui-layout-right{
+	line-height:50px;
+	height: 50px;
+}
+
+.layui-layout-admin .layui-side{
+	top:50px;
+}
+
+.layui-layout-admin .layui-body{
+	top:50px;
+}
+
+.pp-nav-item{
+	line-height: 50px !important;
+	height: 50px !important;
+}
+
+.pp-nav-child a{
+	line-height: 30px!important;
+	height: 30px!important;
+}
+
+.pp-nav-item a{
+	line-height: 50px;
+	height: 50px;
+}
+
+.layui-nav .layui-nav-item .layui-nav-itemed{
+	line-height: 50px;
+	height: 50px;
+}
+
+.layui-nav-child{
+	top:50px;
+}
+
+
+
+
+
+.layui-layout-admin .layui-footer{
+	line-height: 35px;
+	height: 35px;
+}
+.pp-side-fold {
+	height: 30px;
+	background-color: #4A5064;
+	color: #aeb9c2;
+	line-height: 30px;
+	text-align: center;
+	cursor: pointer
+}
+
+.back_space1{
+	margin-right: 5px;
+}
+
+a.pointer{
+	cursor: pointer;
+}
+
+.pp-ddsided{
+	width: 50px;
+}
+
+a.pp-pointer{
+	padding-right: 0px !important;
+}
+
+.pp-sided{
+	width: 50px;
+}
+
+.pp-main{
+	left: 50px !important;
+}
+
+.pp-tab{
+	margin-top:0px;
+}
+.pp-tab-title{
+	background: #000;
+}
+.layui-this{
+	background: #fff;
+}
+.layui-tab-title li.pp-tab-li{
+	border: 0px;
+}

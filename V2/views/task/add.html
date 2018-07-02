@@ -1,0 +1,130 @@
+<div class="layui-layout layui-layout-admin" style="padding-left: 40px;margin-top: 20px;">
+{{/*<div style="margin: 10px 0px">*/}}
+{{/*<blockquote class="layui-elem-quote">*/}}
+{{/*说明：创建新的服务器资源*/}}
+{{/*</blockquote>*/}}
+{{/*</div>*/}}
+    <form class="layui-form" action="" method="post" >
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200">任务名称</label>
+            <div class="layui-input-inline mw400">
+                <input type="text" name="task_name" id="task_name" lay-verify="required" autocomplete="off" placeholder="任务名称" class="layui-input" value="">
+            </div>
+            <div class="layui-form-mid layui-word-aux"></div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200">所属分组</label>
+            <div class="layui-input-inline">
+                <select name="group_id" lay-verify="required">
+                {{range $k, $v := .taskGroup}}
+                    <option value="{{$k}}">{{$v}}</option>
+                {{end}}
+                </select>
+            </div>
+            <div class="layui-form-mid layui-word-aux"></div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200">服务分组</label>
+            <div class="layui-input-inline">
+                <select name="group_id" lay-verify="required">
+                {{range $k, $v := .serverGroup}}
+                    <option value="{{$k}}">{{$v}}</option>
+                {{end}}
+                </select>
+            </div>
+            <div class="layui-form-mid layui-word-aux"></div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200">任务说明</label>
+            <div class="layui-input-inline mw400">
+                <textarea name="description" id="description" rows="2" placeholder="请输入内容" class="layui-textarea"></textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200">是否单例</label>
+            <div class="layui-input-inline mw400">
+
+                <input type="radio" name="concurrent" lay-verify="concurrent" value="0" title="是" checked>
+                <input type="radio" name="concurrent" lay-verify="concurrent" value="1" title="否" >
+
+            </div>
+            <div class="layui-form-mid layui-word-aux">设为“是”的话，如果该任务在上一个时间点还没执行完，则略过不执行</div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200">时间表达式</label>
+            <div class="layui-input-inline mw400">
+                <input type="text" name="cron_spec" id="cron_spec" lay-verify="required" autocomplete="off" placeholder="时间表达式" class="layui-input" value="">
+            </div>
+            <div class="layui-form-mid layui-word-aux"><a href="/help" target="_blank"><i style="font-size: 12px">支持秒级定时，详见《参见使用帮助》</i></a></div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200">命令脚本</label>
+            <div class="layui-input-inline mw400">
+                <textarea name="command" id="command" rows="10" placeholder="请输入内容" class="layui-textarea"></textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200">超时设置</label>
+            <div class="layui-input-inline mw400">
+                <input type="text" name="timeout" id="timeout" lay-verify="required" autocomplete="off" placeholder="单位：秒，默认一天" class="layui-input" value="">
+            </div>
+            <div class="layui-form-mid layui-word-aux">单位：秒，默认一天</div>
+        </div>
+        <input type="hidden" name="id" id="id" value="0">
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200"></label>
+            <div class="layui-input-inline mw400">
+                <button class="layui-btn" lay-submit="" lay-filter="sub">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    var $;
+    layui.use(['form','element','layer','jquery'],function(){
+        var form = layui.form; //只有执行了这一步，部分表单元素才会自动修饰成功
+        var $ = layui.jquery;
+
+        form.on('radio', function(data){
+            if(data.value==1){
+                $(".key").show();
+                $(".password").hide();
+            }else{
+                $(".password").show();
+                $(".key").hide();
+            }
+        });
+
+        $("#des").on('click',function () {
+            layer.tips('公钥和私钥地址请在本地服务器生成,命令：ssh-keygen -t rsa -f pp_rsa', '#des', {
+                tips: [1, '#0FA6D8'] //还可配置颜色
+            });
+        })
+
+
+        form.on('submit(sub)', function(data){
+            var form_data = $("form").serialize();
+            $.post('{{urlfor "ServerController.AjaxSave"}}', form_data, function (out) {
+                if (out.status == 0) {
+                    layer.msg("操作成功",{icon: 1},function () {
+                        window.history.go(-1)
+                    })
+                } else {
+                    layer.msg(out.message)
+                }
+            }, "json");
+            return false;
+        });
+
+        //但是，如果你的HTML是动态生成的，自动渲染就会失效
+        //因此你需要在相应的地方，执行下述方法来手动渲染，跟这类似的还有 element.init();
+        form.render();
+    });
+</script>

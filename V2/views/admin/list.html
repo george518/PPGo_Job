@@ -1,0 +1,110 @@
+<div class="layui-layout layui-layout-admin" style="padding-left: 20px;">
+    <div class="layui-row" style="margin-top: 20px;">
+        <div class="layui-col-xs6">
+            <a class="layui-btn" data-type="tabAdd" href="/admin/add">新增</a>  
+        </div>
+        <div class="layui-col-xs6 search_text">
+            <form class="layui-form" action="" onsubmit="javascript:return false;">
+                <div class="demoTable">
+                    <div class="layui-inline" style="width: 40%">
+                        <input class="layui-input" name="realName" id="realName" autocomplete="off" placeholder="真实姓名" >
+                    </div>
+                    <button class="layui-btn" data-type="reload">查询</button>
+                </div>
+            </form>
+            
+        </div>
+    </div>
+
+    <table class="layui-hide" id="table_list" lay-filter="table_filter">
+    </table>
+
+    <script type="text/html" id="bar">
+       <!--  <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a> -->
+        <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="status">启|禁</a>
+
+    </script>
+</div>
+<script>
+
+    layui.use(['table','form','element'], function(){
+        var table = layui.table;
+        var form = layui.form;
+        var element = layui.element;
+
+        //方法级渲染
+        table.render({
+            elem: '#table_list'
+            ,url: '/admin/table'
+            ,cols: [[
+                // {checkbox: true, fixed: true},
+                {field:'id', title: 'ID', align:'center',sort: true, width:150}
+                ,{field:'login_name',title: '登录账号'}
+                ,{field:'real_name', title: '真实姓名'}
+                ,{field:'phone', title: '联系电话'}
+                ,{field:'email', title: '电子邮箱'}
+                ,{field:'status_text', title: '状态'}
+                ,{fixed: 'right', width:160, align:'center', toolbar: '#bar'}
+            ]]
+            ,id: 'listReload'
+            ,page: true
+            ,height: "full-130"
+        });
+
+        var $ = layui.$, active = {
+            reload: function(){
+                table.reload('listReload', {
+                    where: {
+                        realName: $('#realName').val(),
+                    }
+                });
+            }
+        };
+
+        //监听工具条
+        table.on('tool(table_filter)', function(obj){
+            var data = obj.data;
+            if(obj.event === 'edit'){
+                window.location.href="/admin/edit?id="+data.id
+            } else if(obj.event === 'status'){
+
+                acts = "禁用";
+                status = "disable";
+                if (data.status === 0) {
+                    acts = '启用';
+                    status = "enable";
+                }
+                if (data.id==1 && obj.event === 'disable') {
+                   layer.msg('超级管理员不允许操作');
+                   return false;
+                }
+
+                layer.confirm('真的'+acts+'【'+data.login_name+'】账号么', function(index){
+                    var jsData = {'id':data.id,'status':status}
+                    $.post('{{urlfor "AdminController.AjaxDel"}}', jsData, function (out) {
+                        if (out.status == 0) {
+                            layer.alert(out.message, {icon: 1},function(index){
+                                layer.close(index);
+                                window.location.reload();
+                            });
+                        } else {
+                            layer.msg(out.message)
+                        }
+                    }, "json");
+                    // obj.del();
+                    layer.close(index);
+                })
+                
+            }else{
+                layer.msg('操作不存在');
+            }
+        });
+
+        $('.demoTable .layui-btn').on('click', function(){
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+    });
+
+</script>
