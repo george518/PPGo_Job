@@ -269,43 +269,4 @@ func (j *Job) Run() {
 	j.task.PrevTime = t.Unix()
 	j.task.ExecuteTimes++
 	j.task.Update("PrevTime", "ExecuteTimes")
-
-	// 发送邮件通知
-	//if (j.task.Notify == 1 && err != nil) || j.task.Notify == 2 {
-	//	user, uerr := models.UserGetById(j.task.UserId)
-	//	if uerr != nil {
-	//		return
-	//	}
-	//
-	//	var title string
-	//
-	//	data := make(map[string]interface{})
-	//	data["task_id"] = j.task.Id
-	//	data["username"] = user.UserName
-	//	data["task_name"] = j.task.TaskName
-	//	data["start_time"] = beego.Date(t, "Y-m-d H:i:s")
-	//	data["process_time"] = float64(ut) / 1000
-	//	data["output"] = cmdOut
-	//
-	//	if isTimeout {
-	//		title = fmt.Sprintf("任务执行结果通知 #%d: %s", j.task.Id, "超时")
-	//		data["status"] = fmt.Sprintf("超时（%d秒）", int(timeout/time.Second))
-	//	} else if err != nil {
-	//		title = fmt.Sprintf("任务执行结果通知 #%d: %s", j.task.Id, "失败")
-	//		data["status"] = "失败（" + err.Error() + "）"
-	//	} else {
-	//		title = fmt.Sprintf("任务执行结果通知 #%d: %s", j.task.Id, "成功")
-	//		data["status"] = "成功"
-	//	}
-	//
-	//	content := new(bytes.Buffer)
-	//	mailTpl.Execute(content, data)
-	//	ccList := make([]string, 0)
-	//	if j.task.NotifyEmail != "" {
-	//		ccList = strings.Split(j.task.NotifyEmail, "\n")
-	//	}
-	//	if !mail.SendMail(user.Email, user.UserName, title, content.String(), ccList) {
-	//		beego.Error("发送邮件超时：", user.Email)
-	//	}
-	//}
 }
