@@ -1,16 +1,17 @@
-/*
-* @Author: haodaquan
-* @Date:   2017-06-21 12:22:00
-* @Last Modified by:   haodaquan
-* @Last Modified time: 2017-06-21 12:22:10
- */
-
+/************************************************************
+** @Description: models
+** @Author: haodaquan
+** @Date:   2018-06-11 21:26
+** @Last Modified by:   haodaquan
+** @Last Modified time: 2018-06-11 21:26
+*************************************************************/
 package models
 
 import (
 	"fmt"
-	"github.com/astaxie/beego/orm"
 	"time"
+
+	"github.com/astaxie/beego/orm"
 )
 
 const (
@@ -21,20 +22,21 @@ const (
 
 type Task struct {
 	Id           int
-	UserId       int
-	ServerId	 int
 	GroupId      int
+	ServerId     int
 	TaskName     string
-	TaskType     int
 	Description  string
 	CronSpec     string
 	Concurrent   int
 	Command      string
-	Status       int
 	Timeout      int
 	ExecuteTimes int
 	PrevTime     int64
+	Status       int
+	CreateId     int
+	UpdateId     int
 	CreateTime   int64
+	UpdateTime   int64
 }
 
 func (t *Task) TableName() string {
@@ -50,14 +52,14 @@ func (t *Task) Update(fields ...string) error {
 
 func TaskAdd(task *Task) (int64, error) {
 	if task.TaskName == "" {
-		return 0, fmt.Errorf("TaskName字段不能为空")
+		return 0, fmt.Errorf("任务名称不能为空")
 	}
 
 	if task.CronSpec == "" {
-		return 0, fmt.Errorf("CronSpec字段不能为空")
+		return 0, fmt.Errorf("时间表达式不能为空")
 	}
 	if task.Command == "" {
-		return 0, fmt.Errorf("Command字段不能为空")
+		return 0, fmt.Errorf("命令内容不能为空")
 	}
 	if task.CreateTime == 0 {
 		task.CreateTime = time.Now().Unix()

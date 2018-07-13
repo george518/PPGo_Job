@@ -1,0 +1,97 @@
+/*
+* @Author: georgehao
+* @Date:   2018-04-08 09:50:56
+* @Last Modified by:   george
+* @Last Modified time: 2018-04-10 15:47:52
+*/
+
+.nav-title{
+	height: 45px;
+	border: #e4e4e4 1px solid;
+	line-height: 45px;
+	padding-left: 10px;
+	padding-right: 10px;
+	margin-bottom: 10px;
+}
+
+.tl{
+	text-align: left;
+}
+.tr{
+	text-align: right;
+}
+
+.fl{
+	float: left;
+}
+.fr{
+	float: right;
+}
+
+.ml20{
+	margin-left: 20px; 
+}
+
+.pp-main{
+	padding-left: 20px;
+	padding-right: 20px;
+}
+
+
+.pp-form .width20{
+	width: 20%;
+}
+.pp-form .width40{
+	width: 40%;
+}
+
+.pp-form .width60{
+	width: 60%;
+}
+
+.pp-form .width90{
+	width: 90%;
+}
+/*pre.prettyprinted,pre.prettyprinted ol li{
+	background: #393D49 !important;
+}*/
+
+
+/*上传框*/
+.input-file{
+    display: inline-block;
+    position: relative;
+    overflow: hidden;
+}
+.input-file input[type="file"] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-size: 14px;
+    background-color: #fff;
+    transform: translate(-300px, 0px) scale(4);
+    height: 40px;
+    opacity: 0;
+    filter: alpha(opacity=0);
+ }
+
+.search_text{
+	text-align: right;padding-right: 10px;
+}
+
+.mw400{
+	min-width: 400px;
+}
+.mw200{
+	min-width: 200px;
+}
+.c66{
+	color:#666666;
+}
+.c33{
+	color:#333333;
+}
+
+.lh36{
+	line-height: 36px;
+}

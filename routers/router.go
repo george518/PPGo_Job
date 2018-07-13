@@ -6,13 +6,26 @@ import (
 )
 
 func init() {
-	beego.Router("/", &controllers.MainController{}, "*:Index")
-	beego.Router("/login", &controllers.MainController{}, "*:Login")
-	beego.Router("/logout", &controllers.MainController{}, "*:Logout")
-	beego.Router("/profile", &controllers.MainController{}, "*:Profile")
-	beego.Router("/gettime", &controllers.MainController{}, "*:GetTime")
-	beego.Router("/help", &controllers.HelpController{}, "*:Index")
+	// 默认登录
+	beego.Router("/", &controllers.LoginController{}, "*:Login")
+	beego.Router("/login_in", &controllers.LoginController{}, "*:LoginIn")
+	beego.Router("/login_out", &controllers.LoginController{}, "*:LoginOut")
+	//beego.Router("/no_auth", &controllers.LoginController{}, "*:NoAuth")
+	beego.Router("/home", &controllers.HomeController{}, "*:Index")
+	beego.Router("/home/start", &controllers.HomeController{}, "*:Start")
+
 	beego.AutoRouter(&controllers.TaskController{})
 	beego.AutoRouter(&controllers.GroupController{})
+	beego.AutoRouter(&controllers.TaskLogController{})
+	//资源分组管理
+	beego.AutoRouter(&controllers.ServerGroupController{})
 	beego.AutoRouter(&controllers.ServerController{})
+	beego.AutoRouter(&controllers.BanController{})
+
+	//权限用户相关
+	beego.AutoRouter(&controllers.AuthController{})
+	beego.AutoRouter(&controllers.RoleController{})
+	beego.AutoRouter(&controllers.AdminController{})
+	beego.AutoRouter(&controllers.UserController{})
+
 }

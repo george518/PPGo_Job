@@ -1,0 +1,125 @@
+<div class="layui-layout layui-layout-admin" style="padding-left: 20px;">
+    <div class="layui-row" style="margin-top: 20px;">
+        <div class="layui-col-xs6">
+            <button class="layui-btn layui-btn-danger" data-type="tabDel" id="tabDel">批量删除</button>
+        </div>
+        <div class="layui-col-xs6 search_text">
+            <form class="layui-form" action="" onsubmit="javascript:return false;">
+                <div class="demoTable">
+                    <div class="layui-inline" style="width: 20%;text-align: left">
+                        <select name="status" lay-filter="status">
+                            <option value="9">全部</option>
+                            <option value="-1">正常</option>
+                            <option value="-2">错误</option>
+                        </select>
+                    </div>
+                    <button class="layui-btn" data-type="reload" id="reload">查询</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <table class="layui-hide" id="table_list" lay-filter="table_filter">
+    </table>
+
+    <script type="text/html" id="bar">
+        <a class="layui-btn layui-btn-xs layui-btn-primary" lay-event="detail">详细</a>
+    </script>
+</div>
+<script>
+    layui.use(['table','form','element'], function(){
+        var table = layui.table;
+
+        var error_info = "{{.flash.error}}";
+        if(error_info){
+            layer.msg(error_info,{icon: 2,shade:0.3},function () {
+                window.history.go(-1)
+            })
+            return;
+        }
+
+        //方法级渲染
+        table.render({
+            elem: '#table_list'
+            ,url: "/tasklog/table?task_id={{.task_id}}"
+            ,cols: [[
+                {checkbox: true, fixed: true}
+                ,{field:'id', title: 'ID', align:'center',sort: true, width:150}
+                ,{field:'task_id', title: '任务ID', align:'center',sort: true, width:150}
+                ,{field:'start_time',title: '开始时间'}
+                ,{field:'process_time',width:100, title: '执行时间'}
+                ,{field:'ouput_size',title: '输出'}
+                ,{field:'status', width:170,title: '状态'}
+                ,{fixed: 'right', align:'center', title:'操作', toolbar: '#bar'}
+            ]]
+            ,id: 'listReload'
+            ,page: true
+            ,height: "full-130"
+        });
+
+        var $ = layui.$, active = {
+            reload: function(){
+                table.reload('listReload', {
+                    where: {
+                        status: $("select[name=status]").val()
+                    }
+                });
+            }
+        };
+
+        $("#tabDel").on("click",function (obj) {
+            var checkStatus = table.checkStatus('listReload');
+            var data = checkStatus.data;
+            if(data.length<1){
+                layer.msg("请选择操作数据");
+                return
+            }
+            layer.confirm('是否确认删除选中项', {icon: 3, title:'提示'}, function(index){
+                //do something
+
+                var ids = "";
+                $.each(data,function (k,v) {
+                    ids += v.id+",";
+                });
+                ids = ids.substr(0,ids.length-1)
+                $.post('/tasklog/ajaxdel', {ids:ids}, function (out) {
+                    if (out.status == 0) {
+                        layer.msg("操作成功",{icon: 1},function () {
+                            $('#reload').click();
+                        })
+                    } else {
+                        layer.msg(out.message)
+                    }
+                }, "json");
+
+                layer.close(index);
+            });
+
+            return;
+
+        })
+
+
+
+
+
+        //监听工具条
+        table.on('tool(table_filter)', function(obj){
+            var data = obj.data;
+            if(obj.event === 'detail'){
+                window.location.href="/tasklog/detail?id="+data.id
+            } else{
+                layer.msg('操作不存在')
+            }
+        });
+
+        $('.demoTable .layui-btn').on('click', function(){
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+
+
+    });
+
+</script>

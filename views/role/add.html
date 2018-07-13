@@ -1,0 +1,234 @@
+<script type="text/javascript" src="/static/admin/js/jquery.min.js"></script>
+<script type="text/javascript" src="/static/zTree3/js/jquery.ztree.core.js"></script>
+<script type="text/javascript" src="/static/zTree3/js/jquery.ztree.excheck.js"></script>
+<script type="text/javascript" src="/static/zTree3/js/jquery.ztree.exedit.js"></script>
+
+<div class="layui-row">
+    <div style="margin: 10px 20px">
+        <blockquote class="layui-elem-quote">
+            说明：新增角色
+        </blockquote>
+    </div>
+
+    <div class="layui-col-md12">
+        <div class="layui-layout layui-layout-admin" style="padding-left: 40px;margin-top: 20px;">
+            <form class="layui-form" action="" onsubmit="javascript:;" name="form" method="post">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">菜单操作</label>
+                    <div class="layui-input-inline mw400 zTreeDemoBackground">
+                        <ul id="treeDemo" class="ztree" style="height:320px; width: auto; margin-bottom: 10px;">
+                        </ul>
+                    </div>
+                    <div class="layui-form-mid layui-word-aux"></div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">资源分组</label>
+                    <div class="layui-input-inline mw400 ">
+                        <input type="checkbox" name="server_group_id" lay-filter="server_group_id" title="本地服务器组" value="0" lay-skin="primary" checked>
+                        {{range $k, $v := .serverGroup}}
+                            <input type="checkbox" name="server_group_id" lay-filter="server_group_id" title="{{$v.GroupName}}" value="{{$v.GroupId}}" lay-skin="primary">
+                        {{end}}
+                         <input type="hidden" name="server_group_ids" id="server_group_ids" value="">
+                    </div>
+                    <div class="layui-form-mid layui-word-aux"></div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">任务分组</label>
+                    <div class="layui-input-inline mw400 ">
+                        {{range $k, $v := .taskGroup}}
+                            <input type="checkbox" name="task_group_id" lay-filter="task_group_id" title="{{$v}}" value="{{$k}}" lay-skin="primary">
+                        {{end}}
+
+                        <input type="hidden" name="task_group_ids" id="task_group_ids" value="">
+                    </div>
+                    <div class="layui-form-mid layui-word-aux"></div>
+                </div>
+
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">角色名称</label>
+                    <div class="layui-input-inline mw400">
+                        <input type="text" name="role_name" id="role_name" lay-verify="required" autocomplete="off" placeholder="请输入角色名称" class="layui-input">
+                    </div>
+                    <div class="layui-form-mid layui-word-aux"></div>
+                </div>
+
+                <div class="layui-form-item layui-form-text">
+                    <label class="layui-form-label ">备注</label>
+                    <div class="layui-input-inline mw400">
+                        <textarea name="detail" id="detail" placeholder="请输入内容" class="layui-textarea"></textarea>
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" lay-submit="" lay-filter="save">保存</button>
+                        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+
+<script>
+var $,form;
+    layui.config({
+            base : "js/"
+    }).use(['form','element','layer','jquery'],function(){
+        form = layui.form; //只有执行了这一步，部分表单元素才会自动修饰成功
+        $ = layui.jquery;
+        var error_info = "{{.flash.error}}";
+        if(error_info){
+            layer.msg(error_info,{icon: 2,shade:0.3},function () {
+                window.history.go(-1)
+            })
+            return;
+        }
+        // layer = layui.layer
+        var server_group_ids = [];
+        form.on('checkbox(server_group_id)', function(data){
+            if(data.elem.checked==true){
+                server_group_ids.push(data.value)
+            }else{
+                $.each(server_group_ids,function(index,item){
+                    // index是索引值（即下标）   item是每次遍历得到的值；
+                    if(item==data.value){
+                        server_group_ids.splice(index,1);
+                    }
+                });
+            }
+            $("#server_group_ids").val(server_group_ids.join(","));
+        });
+
+        var task_group_ids = [];
+        form.on('checkbox(task_group_id)', function(data){
+            if(data.elem.checked==true){
+                task_group_ids.push(data.value)
+            }else{
+                $.each(task_group_ids,function(index,item){
+                    // index是索引值（即下标）   item是每次遍历得到的值；
+                    if(item==data.value){
+                        task_group_ids.splice(index,1);
+                    }
+                });
+            }
+            $("#task_group_ids").val(task_group_ids.join(","));
+        });
+
+
+        $("form").submit(function () {
+            var role_name = $("#role_name").val();
+            if(!role_name){
+                layer.msg('请填写角色名称');
+                return false;
+            }
+            var detail = $("#detail").val();
+            var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
+            var nodes = treeObj.getCheckedNodes(true);
+            var nodes_data = nodes_select_data(nodes,{});
+
+            var server_group_ids = $("#server_group_ids").val();
+            var task_group_ids = $("#task_group_ids").val();
+
+            if (!task_group_ids){
+                layer.msg('请选择任务分组！');
+                return false;
+            }
+
+
+            var data = {'role_name':role_name,'detail':detail,'nodes_data':nodes_data,'server_group_ids':server_group_ids,'task_group_ids':task_group_ids}
+            $.post('{{urlfor "RoleController.AjaxSave"}}', data, function (out) {
+                if (out.status == 0) {
+                    layer.alert('保存成功了', {icon: 1},function(index){
+                        window.history.go(-1)
+                    });
+                } else {
+                    layer.msg(out.message)
+                }
+            }, "json");
+            return false;
+        });
+
+        form.render();
+        //但是，如果你的HTML是动态生成的，自动渲染就会失效
+        //因此你需要在相应的地方，执行下述方法来手动渲染，跟这类似的还有 element.init();
+        
+    }); 
+</script>
+
+<script type="text/javascript">
+    var zNodes = [{ id:1, pId:0, name:"数据错误"}]; 
+    // $(document).ready(function(){ 
+        var setting = {
+            check: {
+                enable: true
+            },
+            data: {
+                simpleData: {
+                    enable: true
+                }
+            }
+        };  
+        //加载树
+        refresh_tree();
+
+        function refresh_tree()
+        {
+            var time   = Date.parse(new Date());
+            $.ajax({
+                type: "POST",
+                url: "/auth/getnodes",
+                data: {time:time},
+                dataType: 'json',
+                success: function(data) {
+                    if(data.code==0){
+                        zNodes = data.data;
+                        $.fn.zTree.init($("#treeDemo"), setting, zNodes);
+                    }
+                }
+            }); 
+            setCheck();
+            $("#py").bind("change", setCheck);
+            $("#sy").bind("change", setCheck);
+            $("#pn").bind("change", setCheck);
+            $("#sn").bind("change", setCheck);
+        }
+
+        function nodes_select_data(obj,nodes)
+        {
+            var nodes_str = '';
+            $.each(obj,function(k,v){
+                if(!v['name']) return nodes;
+                node_id = v["id"] 
+                var i = 0;
+                for (var j in nodes) { i++}
+                nodes_str += v['id']+","
+            });
+
+            return nodes_str;
+        }
+
+        function setCheck() {
+            type = { "Y" : "ps", "N" : "ps" };
+            setting.check.chkboxType = type;
+        }
+
+        function showCode(str) {
+            var code = $("#code");
+            code.empty();
+            for (var i=0, l=str.length; i<l; i++) {
+                code.append("<li>"+str[i]+"</li>");
+            }
+        }
+
+        function formSubmit() {
+
+
+        }
+
+    // });
+</script>

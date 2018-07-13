@@ -1,143 +1,127 @@
-<!-- 新增任务 -->
-<div class="container-fluid">
-    <div class="info-center">
-        <!--title-->
-        <div class="info-center">
-            <div class="page-header">
-                <div class="pull-left">
-                    <h4>{{.pageTitle}}</h4>      
-                </div>
-                <div class="pull-right">
-                   <!--  <button type="button" class="btn btn-mystyle btn-sm refresh">刷新</button>
-                    <button type="button" class="btn btn-mystyle btn-sm reback">返回</button> -->
+<div class="layui-layout layui-layout-admin" style="padding-left: 40px;margin-top: 20px;">
+    <form class="layui-form" action="" method="post" >
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200">任务名称</label>
+            <div class="layui-input-inline mw400">
+                <input type="text" name="task_name" id="task_name" lay-verify="required" autocomplete="off" placeholder="任务名称" class="layui-input" value="">
+            </div>
+            <div class="layui-form-mid layui-word-aux"></div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200">所属分组</label>
+            <div class="layui-input-inline">
+                <select name="group_id" lay-verify="required">
+                {{range $k, $v := .taskGroup}}
+                    <option value="{{$k}}">{{$v}}</option>
+                {{end}}
+                </select>
+            </div>
+            <div class="layui-form-mid layui-word-aux"></div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200">服务器资源</label>
+            <div class="layui-inline">
+
+                <div class="layui-input-inline">
+                    <select name="server_id">
+                        <option value="0">本地服务器</option>
+                        {{range $k, $v := .serverGroup}}
+                            <optgroup label="{{$v.GroupName}}">
+                                {{range $kk, $vv := $v.Servers}}
+                                    <option value="{{$kk}}">{{$vv}}</option>
+                                {{end}}
+                            </optgroup>
+                        {{end}}
+                    </select>
                 </div>
             </div>
         </div>
-        
-    </div>
 
-
-    <!--content-list--> 
-    <div class="content-list">
-        <form  action="{{urlfor "TaskController.Add"}}" method="post" class="form-horizontal">
-            <div class="form-group" style="margin-top: 15px">
-                <label class="col-sm-3 control-label" for="task_name">任务名称</label>
-                <div class="col-sm-3" >
-                    <input type="text"  class="form-control input-sm" placeholder="不需要带分组名称" name="task_name" value="" required />
-                </div>
-                <div class="col-sm-6" style="padding-top:5px;">
-                    <i style="color:red">*</i>
-                </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200">任务说明</label>
+            <div class="layui-input-inline mw400">
+                <textarea name="description" id="description" rows="2" placeholder="请输入内容" class="layui-textarea"></textarea>
             </div>
+        </div>
 
-            <div class="form-group" style="margin-top: 15px">
-                <label class="col-sm-3 control-label" for="description">任务说明</label>
-                <div class="col-sm-5" >
-                    <textarea name="description" class="form-control" id="description" rows="3" placeholder="注明执行周期"></textarea>
-                </div>
-                <div class="col-sm-4" style="padding-top:5px;">
-                    
-                </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200">是否单例</label>
+            <div class="layui-input-inline ">
+
+                <input type="radio" name="concurrent" lay-verify="concurrent" value="0" title="是" checked>
+                <input type="radio" name="concurrent" lay-verify="concurrent" value="1" title="否" >
+
             </div>
+            <div class="layui-form-mid layui-word-aux"><i class="fa fa-info-circle" aria-hidden="true" id="des"></i></div>
+        </div>
 
-            <div class="form-group" style="margin-top: 15px">
-                <label class="col-sm-3 control-label" for="group_id">任务分组</label>
-                <div class="col-sm-3" >
-                    <select name="group_id" class="form-control">
-                        <option value="0">未分组</option>
-                        {{range $k, $v := .groups}}
-                        <option value="{{$v.Id}}">{{$v.GroupName}}</option>
-                        {{end}}
-                    </select>
-                </div>
-                <div class="col-sm-6" style="padding-top:5px;">
-                    
-                </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200">时间表达式</label>
+            <div class="layui-input-inline mw400">
+                <input type="text" name="cron_spec" id="cron_spec" lay-verify="required" autocomplete="off" placeholder="时间表达式" class="layui-input" value="">
             </div>
+            <div class="layui-form-mid layui-word-aux"><a href="/help" target="_blank"><i class="fa fa-question-circle" aria-hidden="true"></i></a></div>
+        </div>
 
-            <div class="form-group" style="margin-top: 15px">
-                <label class="col-sm-3 control-label" for="server_id">服务器</label>
-                <div class="col-sm-3" >
-                    <select name="server_id" class="form-control">
-                        <option value="0">本地服务器</option>
-                        {{range $ks, $vs := .servers}}
-                        <option value="{{$vs.Id}}">{{$vs.ServerName}}</option>
-                        {{end}}
-                    </select>
-                </div>
-                <div class="col-sm-6" style="padding-top:5px;">
-
-                </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200">命令脚本</label>
+            <div class="layui-input-inline mw400">
+                <textarea name="command" id="command" rows="5" placeholder="请输入命令内容" class="layui-textarea"></textarea>
             </div>
+        </div>
 
-            <div class="form-group" style="margin-top: 15px">
-                <label class="col-sm-3 control-label" for="concurrent">是否单例</label>
-                <div class="col-sm-3" >
-                    <label class="radio-inline">
-                        <input type="radio" name="concurrent"  value="0" checked> 是
-                    </label>
-                    <label class="radio-inline">
-                        <input type="radio" name="concurrent" value="1"> 否
-                    </label>
-                </div>
-                <div class="col-sm-6" style="padding-top:5px;">
-                    <i style="font-size: 12px">设为“是”的话，如果该任务在上一个时间点还没执行完，则略过不执行</i>
-                </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200">超时设置</label>
+            <div class="layui-input-inline">
+                <input type="text" name="timeout" id="timeout" lay-verify="required" autocomplete="off" placeholder="单位：秒，默认一天" class="layui-input" value="">
             </div>
-
-            <div class="form-group" style="margin-top: 15px">
-                <label class="col-sm-3 control-label" for="cron_spec">时间表达式</label>
-                <div class="col-sm-3" >
-                     <input type="text"  class="form-control input-sm" placeholder="" name="cron_spec" value="" />
-                </div>
-                <div class="col-sm-6" style="padding-top:5px;">
-                    <a href="{{urlfor "HelpController.Index"}}" target="_blank"><i style="font-size: 12px">支持秒级定时，详见《参见使用帮助》</i></a>
-                </div>
+            <div class="layui-form-mid layui-word-aux"></div>
+        </div>
+        <input type="hidden" name="id" id="id" value="0">
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200"></label>
+            <div class="layui-input-inline mw400">
+                <button class="layui-btn" lay-submit="" lay-filter="sub">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
             </div>
-
-            <div class="form-group" style="margin-top: 15px">
-                <label class="col-sm-3 control-label" for="command">命令脚本</label>
-                <div class="col-sm-5" >
-                    <textarea name="command" class="form-control" id="command" rows="3" placeholder="支持bash命令和shell文件"></textarea>
-                </div>
-                <div class="col-sm-4" style="padding-top:5px;">
-                </div>
-            </div>
-            
-
-            <div class="form-group" style="margin-top: 15px">
-                <label class="col-sm-3 control-label" for="timeout">超时设置</label>
-                <div class="col-sm-3" >
-                     <input type="text"  class="form-control input-sm" placeholder="秒,默认一天" name="timeout" value="" />
-                </div>
-                <div class="col-sm-6" style="padding-top:5px;">
-
-                </div>
-            </div>
-
-            <br />    
-            <div class="modal-footer" style="text-align:center">
-                <button type="submit" class="btn btn-primary submit_attr_button">保存</button>
-                <button type="button" class="btn btn-default reback">返回</button>
-            </div>
-        </form>
-    </div> 
-</div> 
-
+        </div>
+    </form>
+</div>
 <script>
-$(function () {
-    $("form").submit(function () {
-        $("button[type='submit']").attr('disabled', true);
-        $.post('{{urlfor "TaskController.Add"}}', $(this).serialize(), function (out) {
-            if (out.status == 0) {
-                window.location.href = '{{urlfor "TaskController.List"}}';
-            } else {
-                alert_message(out.msg,"alert-danger","alert-success");
-                $("button[type='submit']").attr('disabled', false);
-            }
-        }, "json");
-        return false;
-    });
+    layui.use(['form','element','layer','jquery'],function(){
+        var form = layui.form; //只有执行了这一步，部分表单元素才会自动修饰成功
+        var $ = layui.jquery;
+        var error_info = "{{.flash.error}}";
+        if(error_info){
+            layer.msg(error_info,{icon: 2,shade:0.3},function () {
+                window.history.go(-1)
+            })
+            return;
+        }
+        $("#des").on('click',function () {
+            layer.tips('设为“是”的话，如果该任务在上一个时间点还没执行完，则略过不执行', '#des', {
+                tips: [1, '#0FA6D8'] //还可配置颜色
+            });
+        })
 
-});
+
+        form.on('submit(sub)', function(data){
+            var form_data = data.field;
+            $.post('{{urlfor "TaskController.AjaxSave"}}', form_data, function (out) {
+                if (out.status == 0) {
+                    layer.msg("操作成功",{icon: 1},function () {
+                        window.history.go(-1)
+                    })
+                } else {
+                    layer.msg(out.message)
+                }
+            }, "json");
+            return false;
+        });
+
+        //但是，如果你的HTML是动态生成的，自动渲染就会失效
+        //因此你需要在相应的地方，执行下述方法来手动渲染，跟这类似的还有 element.init();
+        form.render();
+    });
 </script>

@@ -1,0 +1,158 @@
+<!-- 新增服务器 -->
+<div class="container-fluid">
+    <div class="info-center">
+        <!--title-->
+        <div class="info-center">
+            <div class="page-header">
+                <div class="pull-left">
+                    <h4>{{.pageTitle}}</h4>
+                </div>
+                <div class="pull-right">
+                    <!--  <button type="button" class="btn btn-mystyle btn-sm refresh">刷新</button>
+                     <button type="button" class="btn btn-mystyle btn-sm reback">返回</button> -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!--content-list-->
+    <div class="content-list">
+        <form  action="{{urlfor "ServerController.Add"}}" method="post" class="form-horizontal">
+        <div class="form-group" style="margin-top: 15px">
+            <label class="col-sm-3 control-label" for="server_name">服务器名</label>
+            <div class="col-sm-3" >
+                <input type="text"  class="form-control input-sm" placeholder="" name="server_name" value="" required />
+            </div>
+            <div class="col-sm-6" style="padding-top:5px;">
+
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 15px">
+            <label class="col-sm-3 control-label" for="server_account">登录账户</label>
+            <div class="col-sm-3" >
+                <input type="text"  class="form-control input-sm" placeholder="root" name="server_account" value="" required />
+            </div>
+            <div class="col-sm-6" style="padding-top:5px;">
+
+            </div>
+        </div>
+        <div class="form-group" style="margin-top: 15px">
+            <label class="col-sm-3 control-label" for="server_ip">服务器IP</label>
+            <div class="col-sm-3" >
+                <input type="text"  class="form-control input-sm" placeholder="" name="server_ip" value="" required />
+            </div>
+            <div class="col-sm-6" style="padding-top:5px;">
+
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 15px">
+            <label class="col-sm-3 control-label" for="port">服务器ssh端口</label>
+            <div class="col-sm-3" >
+                <input type="text"  class="form-control input-sm" placeholder="22" name="port" value="" required />
+            </div>
+            <div class="col-sm-6" style="padding-top:5px;">
+
+            </div>
+        </div>
+
+
+        <div class="form-group" style="margin-top: 15px">
+            <label class="col-sm-3 control-label" for="type">验证类型</label>
+            <div class="col-sm-6" >
+                <label class="radio-inline">
+                    <input type="radio" name="type"  value="0" > 密码
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" name="type"  value="1" checked > 密钥
+                </label>
+
+            </div>
+            <div class="col-sm-3" style="padding-top:5px;">
+
+            </div>
+        </div>
+
+        <div class="form-group hide" style="margin-top: 15px" id="password">
+            <label class="col-sm-3 control-label" for="password">服务器密码</label>
+            <div class="col-sm-3" >
+                <input type="text"  class="form-control input-sm" placeholder="" name="password" value="" />
+            </div>
+            <div class="col-sm-6" style="padding-top:5px;">
+
+            </div>
+        </div>
+
+        <div class="form-group " style="margin-top: 15px" id="private_key_src">
+            <label class="col-sm-3 control-label" for="private_key_src">私钥地址</label>
+            <div class="col-sm-3" >
+                <input type="text"  class="form-control input-sm"  placeholder="/Users/haodaquan/.ssh/pp_rsa" name="private_key_src" value="" />
+            </div>
+            <div class="col-sm-6" style="padding-top:5px;">
+            </div>
+        </div>
+
+        <div class="form-group " style="margin-top: 15px" id="public_key_src">
+            <label class="col-sm-3 control-label" for="public_key_src">公钥地址</label>
+            <div class="col-sm-3" >
+                <input type="text"  class="form-control input-sm"  placeholder="/Users/haodaquan/.ssh/pp_rsa.pub" name="public_key_src" value="" />
+            </div>
+            <div class="col-sm-6" style="padding-top:5px;">
+                <i style="font-size: 12px">公钥和私钥地址请在本地服务器生成,命令：ssh-keygen -t rsa -f pp_rsa</i>
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 15px">
+            <label class="col-sm-3 control-label" for="detail">说明</label>
+            <div class="col-sm-5" >
+                <textarea name="detail" class="form-control" id="detail" rows="3"></textarea>
+            </div>
+            <div class="col-sm-4" style="padding-top:5px;">
+
+            </div>
+        </div>
+
+
+
+        <br />
+        <div class="modal-footer" style="text-align:center">
+            <button type="submit" class="btn btn-primary submit_attr_button">保存</button>
+            <button type="button" class="btn btn-default reback">返回</button>
+        </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $("form").submit(function () {
+            // $(".alert").hide();
+            $("button[type='submit']").attr('disabled', true);
+            $.post('{{urlfor "ServerController.Add"}}', $(this).serialize(), function (out) {
+                if (out.status == 0) {
+                    window.location.href = '{{urlfor "ServerController.List"}}';
+                } else {
+                    alert_message(out.msg,"alert-danger","alert-success");
+                    $("button[type='submit']").attr('disabled', false);
+                }
+            }, "json");
+            return false;
+        });
+
+        $("input[name='type']").click(function () {
+            if ($(this).val() > 0) {
+                $("#password").addClass('hide');
+                $("#public_key_src").removeClass('hide');
+                $("#private_key_src").removeClass('hide');
+            } else {
+                $("#password").removeClass('hide');
+                $("#public_key_src").addClass('hide');
+                $("#private_key_src").addClass('hide');
+
+            }
+        });
+    });
+</script>

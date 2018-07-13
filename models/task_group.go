@@ -1,30 +1,35 @@
-/*
-* @Author: haodaquan
-* @Date:   2017-06-21 12:22:37
-* @Last Modified by:   haodaquan
-* @Last Modified time: 2017-06-21 12:22:55
- */
+/************************************************************
+** @Description: models
+** @Author: haodaquan
+** @Date:   2018-06-10 22:24
+** @Last Modified by:   haodaquan
+** @Last Modified time: 2018-06-10 22:24
+*************************************************************/
 
 package models
 
 import (
 	"fmt"
+
 	"github.com/astaxie/beego/orm"
 )
 
-type TaskGroup struct {
+type Group struct {
 	Id          int
-	UserId      int
+	CreateId    int
+	UpdateId    int
 	GroupName   string
 	Description string
 	CreateTime  int64
+	UpdateTime  int64
+	Status      int
 }
 
-func (t *TaskGroup) TableName() string {
+func (t *Group) TableName() string {
 	return TableName("task_group")
 }
 
-func (t *TaskGroup) Update(fields ...string) error {
+func (t *Group) Update(fields ...string) error {
 	if t.GroupName == "" {
 		return fmt.Errorf("组名不能为空")
 	}
@@ -34,18 +39,17 @@ func (t *TaskGroup) Update(fields ...string) error {
 	return nil
 }
 
-func TaskGroupAdd(obj *TaskGroup) (int64, error) {
+func GroupAdd(obj *Group) (int64, error) {
 	if obj.GroupName == "" {
 		return 0, fmt.Errorf("组名不能为空")
 	}
 	return orm.NewOrm().Insert(obj)
 }
 
-func TaskGroupGetById(id int) (*TaskGroup, error) {
-	obj := &TaskGroup{
+func GroupGetById(id int) (*Group, error) {
+	obj := &Group{
 		Id: id,
 	}
-
 	err := orm.NewOrm().Read(obj)
 	if err != nil {
 		return nil, err
@@ -53,17 +57,22 @@ func TaskGroupGetById(id int) (*TaskGroup, error) {
 	return obj, nil
 }
 
-func TaskGroupDelById(id int) error {
+func GroupDelById(id int) error {
 	_, err := orm.NewOrm().QueryTable(TableName("task_group")).Filter("id", id).Delete()
 	return err
 }
 
-func TaskGroupGetList(page, pageSize int) ([]*TaskGroup, int64) {
+func GroupGetList(page, pageSize int, filters ...interface{}) ([]*Group, int64) {
 	offset := (page - 1) * pageSize
-	list := make([]*TaskGroup, 0)
+	list := make([]*Group, 0)
 	query := orm.NewOrm().QueryTable(TableName("task_group"))
+	if len(filters) > 0 {
+		l := len(filters)
+		for k := 0; k < l; k += 2 {
+			query = query.Filter(filters[k].(string), filters[k+1])
+		}
+	}
 	total, _ := query.Count()
 	query.OrderBy("-id").Limit(pageSize, offset).All(&list)
-
 	return list, total
 }

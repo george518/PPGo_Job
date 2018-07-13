@@ -1,9 +1,10 @@
-/*
-* @Author: haodaquan
-* @Date:   2017-06-19 22:27:09
-* @Last Modified by:   haodaquan
-* @Last Modified time: 2017-06-22 11:15:33
- */
+/**********************************************
+** @Des: base controller
+** @Author: haodaquan
+** @Date:   2017-09-07 16:54:40
+** @Last Modified by:   haodaquan
+** @Last Modified time: 2017-09-18 10:28:01
+***********************************************/
 package controllers
 
 import (
@@ -23,106 +24,291 @@ type BaseController struct {
 	beego.Controller
 	controllerName string
 	actionName     string
-	user           *models.User
+	user           *models.Admin
 	userId         int
 	userName       string
+	loginName      string
 	pageSize       int
+	allowUrl       string
+	serverGroups   string
+	taskGroups     string
 }
 
-func (this *BaseController) Prepare() {
-	this.pageSize = 20
-	controllerName, actionName := this.GetControllerAndAction()
-	this.controllerName = strings.ToLower(controllerName[0 : len(controllerName)-10])
-	this.actionName = strings.ToLower(actionName)
-	this.auth()
+//前期准备
+func (self *BaseController) Prepare() {
+	self.pageSize = 20
+	controllerName, actionName := self.GetControllerAndAction()
+	self.controllerName = strings.ToLower(controllerName[0 : len(controllerName)-10])
+	self.actionName = strings.ToLower(actionName)
+	self.Data["version"] = beego.AppConfig.String("version")
+	self.Data["siteName"] = beego.AppConfig.String("site.name")
+	self.Data["curRoute"] = self.controllerName + "." + self.actionName
+	self.Data["curController"] = self.controllerName
+	self.Data["curAction"] = self.actionName
+	// noAuth := "ajaxsave/ajaxdel/table/loginin/loginout/getnodes/start"
+	// isNoAuth := strings.Contains(noAuth, self.actionName)
+	//fmt.Println(self.controllerName)
+	//if (strings.Compare(self.controllerName, "apidoc")) != 0 {
+	//
+	//}
 
-	this.Data["version"] = beego.AppConfig.String("version")
-	this.Data["siteName"] = beego.AppConfig.String("site.name")
-	this.Data["curRoute"] = this.controllerName + "." + this.actionName
-	this.Data["curController"] = this.controllerName
-	this.Data["curAction"] = this.actionName
-	this.Data["loginUserId"] = this.userId
-	this.Data["loginUserName"] = this.userName
-	this.Data["menuTag"] = this.controllerName
+	self.Auth()
+	self.Data["loginUserId"] = self.userId
+	self.Data["loginUserName"] = self.userName
 }
 
-//登录状态验证
-func (this *BaseController) auth() {
-	arr := strings.Split(this.Ctx.GetCookie("auth"), "|")
+//登录权限验证
+func (self *BaseController) Auth() {
+	arr := strings.Split(self.Ctx.GetCookie("auth"), "|")
+	self.userId = 0
 	if len(arr) == 2 {
 		idstr, password := arr[0], arr[1]
 		userId, _ := strconv.Atoi(idstr)
 		if userId > 0 {
-			user, err := models.UserGetById(userId)
-			if err == nil && password == libs.Md5([]byte(this.getClientIp()+"|"+user.Password+user.Salt)) {
-				this.userId = user.Id
-				this.userName = user.UserName
-				this.user = user
+			user, err := models.AdminGetById(userId)
+
+			if err == nil && password == libs.Md5([]byte(self.getClientIp()+"|"+user.Password+user.Salt)) {
+				self.userId = user.Id
+				self.loginName = user.LoginName
+				self.userName = user.RealName
+				self.user = user
+				self.AdminAuth()
+				self.dataAuth(user)
+			}
+
+			isHasAuth := strings.Contains(self.allowUrl, self.controllerName+"/"+self.actionName)
+			noAuth := "ajaxsave/table/loginin/loginout/getnodes/start"
+			isNoAuth := strings.Contains(noAuth, self.actionName)
+
+			if isHasAuth == false && isNoAuth == false {
+				if strings.Contains(self.actionName, "ajax") {
+					self.ajaxMsg("没有权限", MSG_ERR)
+					return
+				}
+
+				flash := beego.NewFlash()
+				flash.Error("没有权限")
+				flash.Store(&self.Controller)
+				return
 			}
 		}
 	}
 
-	if this.userId == 0 && (this.controllerName != "main" ||
-		(this.controllerName == "main" && this.actionName != "logout" && this.actionName != "login")) {
-		this.redirect(beego.URLFor("MainController.Login"))
+	if self.userId == 0 && (self.controllerName != "login" && self.actionName != "loginin") {
+		self.redirect(beego.URLFor("LoginController.Login"))
 	}
 }
 
-//渲染模版
-func (this *BaseController) display(tpl ...string) {
-	var tplname string
-	if len(tpl) > 0 {
-		tplname = tpl[0] + ".html"
-	} else {
-		tplname = this.controllerName + "/" + this.actionName + ".html"
+func (self *BaseController) dataAuth(user *models.Admin) {
+	if user.RoleIds == "0" || user.Id == 1 {
+		return
 	}
-	this.Layout = "public/layout.html"
-	this.TplName = tplname
+
+	Filters := make([]interface{}, 0)
+	Filters = append(Filters, "status", 1)
+
+	RoleIdsArr := strings.Split(user.RoleIds, ",")
+
+	RoleIds := make([]int, 0)
+	for _, v := range RoleIdsArr {
+		id, _ := strconv.Atoi(v)
+		RoleIds = append(RoleIds, id)
+	}
+
+	Filters = append(Filters, "id__in", RoleIds)
+
+	Result, _ := models.RoleGetList(1, 1000, Filters...)
+	serverGroups := ""
+	taskGroups := ""
+	for _, v := range Result {
+		serverGroups += v.ServerGroupIds + ","
+		taskGroups += v.TaskGroupIds + ","
+	}
+
+	self.serverGroups = strings.Trim(serverGroups, ",")
+	self.taskGroups = strings.Trim(taskGroups, ",")
 }
 
-// 重定向
-func (this *BaseController) redirect(url string) {
-	this.Redirect(url, 302)
-	this.StopRun()
+func (self *BaseController) AdminAuth() {
+	// 左侧导航栏
+	filters := make([]interface{}, 0)
+	filters = append(filters, "status", 1)
+	if self.userId != 1 {
+		//普通管理员
+		adminAuthIds, _ := models.RoleAuthGetByIds(self.user.RoleIds)
+		adminAuthIdArr := strings.Split(adminAuthIds, ",")
+		filters = append(filters, "id__in", adminAuthIdArr)
+	}
+	result, _ := models.AuthGetList(1, 1000, filters...)
+	list := make([]map[string]interface{}, len(result))
+	list2 := make([]map[string]interface{}, len(result))
+	allow_url := ""
+	i, j := 0, 0
+	for _, v := range result {
+		if v.AuthUrl != " " || v.AuthUrl != "/" {
+			allow_url += v.AuthUrl
+		}
+		row := make(map[string]interface{})
+		if v.Pid == 1 && v.IsShow == 1 {
+			row["Id"] = int(v.Id)
+			row["Sort"] = v.Sort
+			row["AuthName"] = v.AuthName
+			row["AuthUrl"] = v.AuthUrl
+			row["Icon"] = v.Icon
+			row["Pid"] = int(v.Pid)
+			list[i] = row
+			i++
+		}
+		if v.Pid != 1 && v.IsShow == 1 {
+			row["Id"] = int(v.Id)
+			row["Sort"] = v.Sort
+			row["AuthName"] = v.AuthName
+			row["AuthUrl"] = v.AuthUrl
+			row["Icon"] = v.Icon
+			row["Pid"] = int(v.Pid)
+			list2[j] = row
+			j++
+		}
+	}
+
+	self.Data["SideMenu1"] = list[:i]  //一级菜单
+	self.Data["SideMenu2"] = list2[:j] //二级菜单
+
+	self.allowUrl = allow_url + "/home/index"
 }
 
 // 是否POST提交
-func (this *BaseController) isPost() bool {
-	return this.Ctx.Request.Method == "POST"
-}
-
-// 显示错误信息
-func (this *BaseController) showMsg(args ...string) {
-	this.Data["message"] = args[0]
-	redirect := this.Ctx.Request.Referer()
-	if len(args) > 1 {
-		redirect = args[1]
-	}
-
-	this.Data["redirect"] = redirect
-	this.Data["pageTitle"] = "系统提示"
-	this.display("error/message")
-	this.Render()
-	this.StopRun()
-}
-
-// 输出json
-func (this *BaseController) jsonResult(out interface{}) {
-	this.Data["json"] = out
-	this.ServeJSON()
-	this.StopRun()
-}
-
-func (this *BaseController) ajaxMsg(msg interface{}, msgno int) {
-	out := make(map[string]interface{})
-	out["status"] = msgno
-	out["msg"] = msg
-
-	this.jsonResult(out)
+func (self *BaseController) isPost() bool {
+	return self.Ctx.Request.Method == "POST"
 }
 
 //获取用户IP地址
-func (this *BaseController) getClientIp() string {
-	s := strings.Split(this.Ctx.Request.RemoteAddr, ":")
+func (self *BaseController) getClientIp() string {
+	s := strings.Split(self.Ctx.Request.RemoteAddr, ":")
 	return s[0]
+}
+
+// 重定向
+func (self *BaseController) redirect(url string) {
+	self.Redirect(url, 302)
+	self.StopRun()
+}
+
+//加载模板
+func (self *BaseController) display(tpl ...string) {
+	var tplname string
+	if len(tpl) > 0 {
+		tplname = strings.Join([]string{tpl[0], "html"}, ".")
+	} else {
+		tplname = self.controllerName + "/" + self.actionName + ".html"
+	}
+	self.Layout = "public/layout.html"
+	self.TplName = tplname
+}
+
+//ajax返回
+func (self *BaseController) ajaxMsg(msg interface{}, msgno int) {
+	out := make(map[string]interface{})
+	out["status"] = msgno
+	out["message"] = msg
+	self.Data["json"] = out
+	self.ServeJSON()
+	self.StopRun()
+}
+
+//ajax返回 列表
+func (self *BaseController) ajaxList(msg interface{}, msgno int, count int64, data interface{}) {
+	out := make(map[string]interface{})
+	out["code"] = msgno
+	out["msg"] = msg
+	out["count"] = count
+	out["data"] = data
+	self.Data["json"] = out
+	self.ServeJSON()
+	self.StopRun()
+}
+
+//资源分组信息
+func serverGroupLists(authStr string, adminId int) (sgl map[int]string) {
+	Filters := make([]interface{}, 0)
+	Filters = append(Filters, "status", 1)
+	if authStr != "0" && adminId != 1 {
+		serverGroupIdsArr := strings.Split(authStr, ",")
+		serverGroupIds := make([]int, 0)
+		for _, v := range serverGroupIdsArr {
+			id, _ := strconv.Atoi(v)
+			serverGroupIds = append(serverGroupIds, id)
+		}
+		Filters = append(Filters, "id__in", serverGroupIds)
+	}
+
+	groupResult, n := models.ServerGroupGetList(1, 1000, Filters...)
+	sgl = make(map[int]string, n)
+	for _, gv := range groupResult {
+		sgl[gv.Id] = gv.GroupName
+	}
+	//sgl[0] = "默认分组"
+	return sgl
+}
+
+func taskGroupLists(authStr string, adminId int) (gl map[int]string) {
+	groupFilters := make([]interface{}, 0)
+	groupFilters = append(groupFilters, "status", 1)
+	if authStr != "0" && adminId != 1 {
+		taskGroupIdsArr := strings.Split(authStr, ",")
+		taskGroupIds := make([]int, 0)
+		for _, v := range taskGroupIdsArr {
+			id, _ := strconv.Atoi(v)
+			taskGroupIds = append(taskGroupIds, id)
+		}
+		groupFilters = append(groupFilters, "id__in", taskGroupIds)
+	}
+	groupResult, n := models.GroupGetList(1, 1000, groupFilters...)
+	gl = make(map[int]string, n)
+	for _, gv := range groupResult {
+		gl[gv.Id] = gv.GroupName
+	}
+	return gl
+}
+
+func serverListByGroupId(groupId int) []string {
+	Filters := make([]interface{}, 0)
+	Filters = append(Filters, "status", 1)
+	Filters = append(Filters, "group_id", groupId)
+	Result, _ := models.TaskServerGetList(1, 1000, Filters...)
+
+	servers := make([]string, 0)
+	for _, v := range Result {
+		servers = append(servers, strconv.Itoa(v.Id), v.ServerName)
+	}
+
+	return servers
+}
+
+type serverList struct {
+	GroupId   int
+	GroupName string
+	Servers   map[int]string
+}
+
+func serverLists(authStr string, adminId int) (sls []serverList) {
+	serverGroup := serverGroupLists(authStr, adminId)
+	Filters := make([]interface{}, 0)
+	Filters = append(Filters, "status", 0)
+
+	Result, _ := models.TaskServerGetList(1, 1000, Filters...)
+	for k, v := range serverGroup {
+		sl := serverList{}
+		sl.GroupId = k
+		sl.GroupName = v
+		servers := make(map[int]string)
+		for _, sv := range Result {
+			if sv.GroupId == k {
+				servers[sv.Id] = sv.ServerName
+			}
+		}
+		sl.Servers = servers
+		sls = append(sls, sl)
+	}
+	return sls
 }

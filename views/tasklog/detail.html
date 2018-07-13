@@ -1,0 +1,185 @@
+<style>
+    .layui-form-item{
+        margin-bottom: 0px;
+    }
+    legend{
+        font-size: 14px !important;
+        color: #009688;
+        font-weight: bold !important;
+    }
+</style>
+
+
+<div class="layui-layout layui-layout-admin" style="padding-left: 40px;margin-top: 20px;padding-right: 10px;">
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+        <legend>{{.task.TaskName}}（#{{.task.Id}}）日志</legend>
+    </fieldset>
+
+    <table class="layui-table" lay-skin="nob" lay-size="sm">
+        <colgroup>
+            <col width="80">
+            <col width="400">
+            <col>
+        </colgroup>
+
+        <tbody>
+        <tr>
+            <td>日志ID</td>
+            <td>#{{.taskLog.id}}</td>
+            <td></td>
+
+        </tr>
+        <tr>
+            <td>执行时间</td>
+            <td>{{.taskLog.start_time}}</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>执行耗时</td>
+            <td>{{.taskLog.process_time}}</td>
+            <td></td>
+        </tr>
+
+        <tr>
+            <td>输出大小</td>
+            <td>{{.taskLog.ouput_size}}</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>运行结果</td>
+            <td>{{.taskLog.status|str2html}}</td>
+            <td></td>
+        </tr>
+        </tbody>
+    </table>
+
+
+</div>
+
+<div class="layui-layout layui-layout-admin" style="padding-left: 40px;margin-top: 20px;padding-right: 10px;">
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+        <legend>任务命令</legend>
+    </fieldset>
+    <pre class="layui-code">{{.task.Command}}</pre>
+</div>
+
+<div class="layui-layout layui-layout-admin" style="padding-left: 40px;margin-top: 20px;padding-right: 10px;">
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+        <legend>执行输出</legend>
+    </fieldset>
+    <pre class="layui-code">{{.taskLog.ouput}}</pre>
+</div>
+
+<div class="layui-layout layui-layout-admin" style="padding-left: 40px;margin-top: 20px;padding-right: 10px;">
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+        <legend>错误输出</legend>
+    </fieldset>
+    <pre class="layui-code">{{.taskLog.error}}</pre>
+</div>
+
+<div class="layui-layout layui-layout-admin" style="padding-left: 40px;margin-top: 20px;padding-right: 10px;">
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+        <legend>{{.task.TaskName}}（#{{.task.Id}}）任务详细</legend>
+    </fieldset>
+    <table class="layui-table" lay-skin="nob" lay-size="sm">
+        <colgroup>
+            <col width="80">
+            <col width="400">
+            <col>
+        </colgroup>
+
+        <tbody>
+        <tr>
+            <td>任务名称</td>
+            <td> {{.task.TaskName}}</td>
+            <td></td>
+
+        </tr>
+        <tr>
+            <td>任务说明</td>
+            <td>{{.task.TaskName}}</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>任务状态</td>
+            <td>{{.TextStatus|str2html}}</td>
+            <td></td>
+        </tr>
+
+        <tr>
+            <td>执行次数</td>
+            <td>{{.task.ExecuteTimes}}</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>服务资源</td>
+            <td> {{.serverName}}</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>是否单例：</td>
+            <td>{{if eq .task.Concurrent 0}}是{{end}} {{if eq .task.Concurrent 1}}否{{end}}</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>执行时间</td>
+            <td> {{.task.CronSpec}}</td>
+            <td></td>
+        </tr>
+
+        <tr>
+            <td>命令脚本</td>
+            <td>{{.task.Command}}</td>
+            <td></td>
+        </tr>
+
+        <tr>
+            <td>超时设置</td>
+            <td>{{.task.Timeout}}</td>
+            <td></td>
+        </tr>
+
+        <tr>
+            <td>创建时间</td>
+            <td>{{.CreateTime}}</td>
+            <td></td>
+        </tr>
+
+        <tr>
+            <td>创建人</td>
+            <td>{{.task.CreateId}}</td>
+            <td></td>
+        </tr>
+
+        <tr>
+            <td>修改时间</td>
+            <td>{{.UpdateTime}}</td>
+            <td></td>
+        </tr>
+
+        <tr>
+            <td>最后修改人</td>
+            <td>{{.task.UpdateId}}</td>
+            <td></td>
+        </tr>
+
+        </tbody>
+    </table>
+</div>
+
+<script>
+    layui.use(['form','element','layer','jquery'],function(){
+        var form = layui.form; //只有执行了这一步，部分表单元素才会自动修饰成功
+
+        var error_info = "{{.flash.error}}";
+        if(error_info){
+            layer.msg(error_info,{icon: 2,shade:0.3},function () {
+                window.history.go(-1)
+            })
+            return;
+        }
+        //但是，如果你的HTML是动态生成的，自动渲染就会失效
+        //因此你需要在相应的地方，执行下述方法来手动渲染，跟这类似的还有 element.init();
+        form.render();
+    });
+</script>

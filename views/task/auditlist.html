@@ -1,0 +1,160 @@
+<div class="layui-layout layui-layout-admin" style="padding-left: 20px;">
+    <div class="layui-row" style="margin-top: 20px;">
+        <div class="layui-col-xs6">
+            <div class="layui-btn-group">
+                <a class="layui-btn" data-type="tabAdd" href="/task/add">新增任务</a>
+                <button class="layui-btn batch" data-type="batchaudit" >审核通过</button>
+                <button class="layui-btn layui-btn-danger batch" data-type="batchnopass" >审核不通过</button>
+            </div>
+        </div>
+        <div class="layui-col-xs6 search_text">
+            <form class="layui-form" action="" onsubmit="javascript:return false;">
+                <div class="demoTable">
+
+                    <div class="layui-inline" style="width: 40%">
+
+                        <input class="layui-input" name="taskName" id="taskName" autocomplete="off" placeholder="任务名称" >
+                    </div>
+                    <button class="layui-btn" data-type="reload" id="reload">查询</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    <table class="layui-hide" id="table_list" lay-filter="table_filter">
+    </table>
+
+    <script type="text/html" id="bar">
+        {{/*<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="status">启|停</a>*/}}
+        {{/*<a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>*/}}
+        <a class="layui-btn layui-btn-xs" lay-event="detail">查看</a>
+        <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="del">删除</a>
+        {{/*<a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="run">测试</a>*/}}
+        {{/*<a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="log">日志</a>*/}}
+    </script>
+</div>
+<script>
+
+    layui.use(['table','form','element'], function(){
+        var table = layui.table;
+        var form = layui.form;
+        var element = layui.element;
+        var error_info = "{{.flash.error}}";
+        if(error_info){
+            layer.msg(error_info,{icon: 2,shade:0.3},function () {
+                window.history.go(-1)
+            })
+            return;
+        }
+        //方法级渲染
+        table.render({
+            elem: '#table_list'
+            ,url: '/task/table?status=2'
+            ,cols: [[
+                {checkbox: true, fixed: true},
+                {field:'id', title: 'ID', align:'center',sort: true, width:50}
+                ,{field:'task_name',title: '任务名称'}
+                ,{field:'description',title: '任务说明'}
+                ,{field:'pre_time', width:170,title: '上次执行时间'}
+                ,{field:'execute_times', width:70,title: '次数'}
+                ,{fixed:'right', width:150, align:'center', title:'操作', toolbar: '#bar'}
+            ]]
+            ,id: 'listReload'
+            ,page: true
+            ,height: "full-130"
+        });
+
+        var $ = layui.$, active = {
+            reload: function(){
+                table.reload('listReload', {
+                    where: {
+                        taskName: $('#taskName').val(),
+                    }
+                });
+            }
+        };
+
+        //监听工具条
+        table.on('tool(table_filter)', function(obj){
+            var data = obj.data;
+            if(obj.event === 'edit'){
+                window.location.href="/task/edit?id="+data.id
+            } else if(obj.event === 'log'){
+                window.location.href="/tasklog/list?task_id="+data.id;
+            }else if (obj.event==='detail'){
+                window.location.href='/task/detail?id='+data.id;
+            }else if (obj.event==='del'){
+                layer.confirm("确认要删除这条任务吗？", {icon: 3, title:'提示'}, function(index){
+                    layer.load();
+                    $.post('/task/ajaxdel', {id:data.id}, function (out) {
+
+                        if (out.status == 0) {
+                            layer.msg("操作成功",{icon: 1},function () {
+                                $('#reload').click();
+                            })
+                        } else {
+                            layer.msg(out.message)
+                            return
+                        }
+                    }, "json");
+                    setTimeout(function(){
+                        layer.closeAll('loading');
+                    }, 2000);
+
+                    layer.close(index);
+                });
+            }else{
+                layer.msg('操作不存在')
+            }
+        });
+
+        $(".batch").on('click',function (obj) {
+            var action = $(this).attr('data-type');
+            var checkStatus = table.checkStatus('listReload');
+            var data = checkStatus.data;
+            if(data.length<1){
+                layer.msg("请选择操作数据");
+                return;
+            }
+
+            var  msg = "确认审核通过这些任务吗";
+            var  msgok = "审核通过的任务已经被转移到【任务列表】，请前去操作";
+            if (action=='batchnopass'){
+                msg = "确定审核不通过这些任务吗";
+                msgok = "操作成功";
+            }
+            layer.confirm(msg, {icon: 3, title:'提示'}, function(index){
+                var ids = "";
+                $.each(data,function (k,v) {
+                    ids += v.id+",";
+                });
+                ids = ids.substr(0,ids.length-1);
+                layer.load();
+                $.post('/task/ajax'+action, {"ids":ids}, function (out) {
+                    if (out.status == 0) {
+                        layer.msg(msgok,{icon: 1},function () {
+                            $('#reload').click();
+                        })
+                    } else {
+                        layer.msg(out.message)
+                        return
+                    }
+                }, "json");
+                setTimeout(function(){
+                    layer.closeAll('loading');
+                }, 2000);
+
+
+                layer.close(index);
+            });
+            return ;
+        })
+
+        $('.demoTable .layui-btn').on('click', function(){
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+    });
+
+</script>

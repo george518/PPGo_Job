@@ -1,76 +1,477 @@
-/*
-* @Author: haodaquan
-* @Date:   2017-06-21 10:22:29
-* @Last Modified by:   haodaquan
-* @Last Modified time: 2017-06-23 11:04:54
- */
-
+/************************************************************
+** @Description: controllers
+** @Author: haodaquan
+** @Date:   2018-06-11 21:11
+** @Last Modified by:   haodaquan
+** @Last Modified time: 2018-06-11 21:11
+*************************************************************/
 package controllers
 
 import (
+	"github.com/astaxie/beego"
+	"github.com/george518/PPGo_Job/jobs"
+	"github.com/george518/PPGo_Job/models"
+	"github.com/robfig/cron"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/astaxie/beego"
-	crons "github.com/george518/PPGo_Job/crons"
-	"github.com/george518/PPGo_Job/jobs"
-	"github.com/george518/PPGo_Job/libs"
-	"github.com/george518/PPGo_Job/models"
 )
 
 type TaskController struct {
 	BaseController
 }
 
-// 任务列表
-func (this *TaskController) List() {
-	page, _ := this.GetInt("page")
-	if page < 1 {
-		page = 1
-	}
-	groupId, _ := this.GetInt("groupid")
-	if groupId > 0 {
-		this.Ctx.SetCookie("groupid", strconv.Itoa(groupId)+"|job")
-	} else {
-		arr := strings.Split(this.Ctx.GetCookie("groupid"), "|")
-		groupId, _ = strconv.Atoi(arr[0])
+func (self *TaskController) List() {
+	self.Data["pageTitle"] = "任务管理"
+	self.display()
+}
+
+func (self *TaskController) AuditList() {
+	self.Data["pageTitle"] = "任务审核"
+	self.display()
+}
+
+func (self *TaskController) Add() {
+	self.Data["pageTitle"] = "新增任务"
+	self.Data["taskGroup"] = taskGroupLists(self.taskGroups, self.userId)
+	self.Data["serverGroup"] = serverLists(self.serverGroups, self.userId)
+	self.display()
+}
+
+func (self *TaskController) Edit() {
+	self.Data["pageTitle"] = "编辑任务"
+
+	id, _ := self.GetInt("id")
+	task, err := models.TaskGetById(id)
+	if err != nil {
+		self.ajaxMsg(err.Error(), MSG_ERR)
 	}
 
-	filters := make([]interface{}, 0)
-	if groupId > 0 && groupId != 99 {
-		filters = append(filters, "group_id", groupId)
+	if task.Status == 1 {
+		self.ajaxMsg("运行状态无法编辑任务，请先暂停任务", MSG_ERR)
 	}
-	result, count := models.TaskGetList(page, this.pageSize, filters...)
+	self.Data["task"] = task
+
+	// 分组列表
+	self.Data["taskGroup"] = taskGroupLists(self.taskGroups, self.userId)
+	self.Data["serverGroup"] = serverLists(self.serverGroups, self.userId)
+	self.display()
+}
+
+func (self *TaskController) Copy() {
+	self.Data["pageTitle"] = "复制任务"
+
+	id, _ := self.GetInt("id")
+	task, err := models.TaskGetById(id)
+	if err != nil {
+		self.ajaxMsg(err.Error(), MSG_ERR)
+	}
+	self.Data["task"] = task
+
+	// 分组列表
+	self.Data["taskGroup"] = taskGroupLists(self.taskGroups, self.userId)
+	self.Data["serverGroup"] = serverLists(self.serverGroups, self.userId)
+	self.display()
+}
+
+func (self *TaskController) Detail() {
+	self.Data["pageTitle"] = "任务详细"
+
+	id, _ := self.GetInt("id")
+	task, err := models.TaskGetById(id)
+	if err != nil {
+		self.ajaxMsg(err.Error(), MSG_ERR)
+	}
+
+	TextStatus := []string{
+		"<font color='red'><i class='fa fa-minus-square'></i> 暂停</font>",
+		"<font color='green'><i class='fa fa-check-square'></i> 运行中</font>",
+		"<font color='orange'><i class='fa fa-question-circle'></i> 待审核</font>",
+		"<font color='red'><i class='fa fa-times-circle'></i> 审核失败</font>",
+	}
+
+	self.Data["TextStatus"] = TextStatus[task.Status]
+	self.Data["CreateTime"] = beego.Date(time.Unix(task.CreateTime, 0), "Y-m-d H:i:s")
+	self.Data["UpdateTime"] = beego.Date(time.Unix(task.UpdateTime, 0), "Y-m-d H:i:s")
+	self.Data["task"] = task
+	// 分组列表
+	self.Data["taskGroup"] = taskGroupLists(self.taskGroups, self.userId)
+
+	serverName := "本地服务器"
+	if task.ServerId == 0 {
+		serverName = "本地服务器"
+	} else {
+		server, err := models.TaskServerGetById(task.ServerId)
+		if err == nil {
+			serverName = server.ServerName
+		}
+	}
+	self.Data["serverName"] = serverName
+	self.display()
+}
+
+func (self *TaskController) AjaxSave() {
+	task_id, _ := self.GetInt("id")
+	if task_id == 0 {
+		task := new(models.Task)
+		task.CreateId = self.userId
+		task.GroupId, _ = self.GetInt("group_id")
+		task.TaskName = strings.TrimSpace(self.GetString("task_name"))
+		task.Description = strings.TrimSpace(self.GetString("description"))
+		task.Concurrent, _ = self.GetInt("concurrent")
+		task.ServerId, _ = self.GetInt("server_id")
+		task.CronSpec = strings.TrimSpace(self.GetString("cron_spec"))
+		task.Command = strings.TrimSpace(self.GetString("command"))
+		task.Timeout, _ = self.GetInt("timeout")
+
+		msg, isBan := checkCommand(task.Command)
+		if !isBan {
+			self.ajaxMsg("含有禁止命令："+msg, MSG_ERR)
+		}
+
+		task.CreateTime = time.Now().Unix()
+		task.UpdateTime = time.Now().Unix()
+		task.Status = 2 //审核中
+
+		if task.TaskName == "" || task.CronSpec == "" || task.Command == "" {
+			self.ajaxMsg("请填写完整信息", MSG_ERR)
+		}
+		if _, err := cron.Parse(task.CronSpec); err != nil {
+			self.ajaxMsg("cron表达式无效", MSG_ERR)
+		}
+		if _, err := models.TaskAdd(task); err != nil {
+			self.ajaxMsg(err.Error(), MSG_ERR)
+		}
+
+		self.ajaxMsg("", MSG_OK)
+	}
+
+	task, _ := models.TaskGetById(task_id)
+	//修改
+	task.Id = task_id
+	task.UpdateTime = time.Now().Unix()
+	task.TaskName = strings.TrimSpace(self.GetString("task_name"))
+	task.Description = strings.TrimSpace(self.GetString("description"))
+	task.GroupId, _ = self.GetInt("group_id")
+	task.Concurrent, _ = self.GetInt("concurrent")
+	task.ServerId, _ = self.GetInt("server_id")
+	task.CronSpec = strings.TrimSpace(self.GetString("cron_spec"))
+	task.Command = strings.TrimSpace(self.GetString("command"))
+	task.Timeout, _ = self.GetInt("timeout")
+	task.UpdateId = self.userId
+	task.Status = 2 //审核中
+
+	msg, isBan := checkCommand(task.Command)
+	if !isBan {
+		self.ajaxMsg("含有禁止命令："+msg, MSG_ERR)
+	}
+
+	if err := task.Update(); err != nil {
+		self.ajaxMsg(err.Error(), MSG_ERR)
+	}
+	self.ajaxMsg("", MSG_OK)
+}
+
+//检查是否含有禁用命令
+func checkCommand(command string) (string, bool) {
+
+	filters := make([]interface{}, 0)
+	filters = append(filters, "status", 0)
+	ban, _ := models.BanGetList(1, 1000, filters...)
+	for _, v := range ban {
+		if strings.Contains(command, v.Code) {
+			return v.Code, false
+		}
+	}
+	return "", true
+}
+
+func (self *TaskController) AjaxAudit() {
+
+	taskId, _ := self.GetInt("id")
+	if taskId == 0 {
+		self.ajaxMsg("任务不存在", MSG_ERR)
+	}
+	res := changeStatus(taskId, 0, self.userId)
+	if !res {
+		self.ajaxMsg("审核失败", MSG_ERR)
+	}
+	self.ajaxMsg("", MSG_OK)
+}
+
+func (self *TaskController) AjaxNopass() {
+	taskId, _ := self.GetInt("id")
+	if taskId == 0 {
+		self.ajaxMsg("任务不存在", MSG_ERR)
+	}
+	res := changeStatus(taskId, 3, self.userId)
+	if !res {
+		self.ajaxMsg("操作失败", MSG_ERR)
+	}
+	self.ajaxMsg("", MSG_OK)
+}
+
+func (self *TaskController) AjaxStart() {
+	taskId, _ := self.GetInt("id")
+	if taskId == 0 {
+		self.ajaxMsg("任务不存在", MSG_ERR)
+	}
+
+	task, err := models.TaskGetById(taskId)
+	if err != nil {
+		self.ajaxMsg("查不到该任务", MSG_ERR)
+	}
+
+	if task.Status != 0 {
+		self.ajaxMsg("任务状态有误", MSG_ERR)
+	}
+
+	job, err := jobs.NewJobFromTask(task)
+	if err != nil {
+		self.ajaxMsg("创建任务失败", MSG_ERR)
+	}
+
+	if jobs.AddJob(task.CronSpec, job) {
+		task.Status = 1
+		task.Update()
+	}
+	self.ajaxMsg("", MSG_OK)
+}
+
+func (self *TaskController) AjaxPause() {
+	taskId, _ := self.GetInt("id")
+	if taskId == 0 {
+		self.ajaxMsg("任务不存在", MSG_ERR)
+	}
+
+	task, err := models.TaskGetById(taskId)
+	if err != nil {
+		self.ajaxMsg("查不到该任务", MSG_ERR)
+	}
+
+	jobs.RemoveJob(taskId)
+	task.Status = 0
+	task.Update()
+	self.ajaxMsg("", MSG_OK)
+
+}
+
+// 立即执行
+func (self *TaskController) AjaxRun() {
+	id, _ := self.GetInt("id")
+	task, err := models.TaskGetById(id)
+	if err != nil {
+		self.ajaxMsg(err.Error(), MSG_ERR)
+	}
+
+	job, err := jobs.NewJobFromTask(task)
+	if err != nil {
+		self.ajaxMsg(err.Error(), MSG_ERR)
+	}
+	job.Run()
+	self.ajaxMsg("", MSG_OK)
+}
+
+func (self *TaskController) AjaxBatchStart() {
+	idArr := self.GetStrings("ids")
+	ids := strings.Split(idArr[0], ",")
+	if len(ids) < 1 {
+		self.ajaxMsg("请选择要操作的任务", MSG_ERR)
+	}
+	for _, v := range ids {
+		id, _ := strconv.Atoi(v)
+		if id < 1 {
+			continue
+		}
+
+		if task, err := models.TaskGetById(id); err == nil {
+			job, err := jobs.NewJobFromTask(task)
+			if err == nil {
+				jobs.AddJob(task.CronSpec, job)
+				task.Status = 1
+				task.Update()
+			}
+		}
+	}
+	self.ajaxMsg("", MSG_OK)
+}
+
+func (self *TaskController) AjaxBatchPause() {
+	idArr := self.GetStrings("ids")
+	ids := strings.Split(idArr[0], ",")
+	if len(ids) < 1 {
+		self.ajaxMsg("请选择要操作的任务", MSG_ERR)
+	}
+	for _, v := range ids {
+		id, _ := strconv.Atoi(v)
+		if id < 1 {
+			continue
+		}
+		jobs.RemoveJob(id)
+
+		if task, err := models.TaskGetById(id); err == nil {
+			task.Status = 0
+			task.Update()
+		}
+	}
+	self.ajaxMsg("", MSG_OK)
+}
+
+func (self *TaskController) AjaxBatchDel() {
+	idArr := self.GetStrings("ids")
+	ids := strings.Split(idArr[0], ",")
+	if len(ids) < 1 {
+		self.ajaxMsg("请选择要操作的任务", MSG_ERR)
+	}
+	for _, v := range ids {
+		id, _ := strconv.Atoi(v)
+		if id < 1 {
+			continue
+		}
+		models.TaskDel(id)
+		models.TaskLogDelByTaskId(id)
+		jobs.RemoveJob(id)
+	}
+	self.ajaxMsg("", MSG_OK)
+}
+
+func (self *TaskController) AjaxBatchAudit() {
+	idArr := self.GetStrings("ids")
+	ids := strings.Split(idArr[0], ",")
+	if len(ids) < 1 {
+		self.ajaxMsg("请选择要操作的任务", MSG_ERR)
+	}
+	for _, v := range ids {
+		id, _ := strconv.Atoi(v)
+		if id < 1 {
+			continue
+		}
+		changeStatus(id, 0, self.userId)
+	}
+	self.ajaxMsg("", MSG_OK)
+}
+
+func (self *TaskController) AjaxBatchNoPass() {
+	idArr := self.GetStrings("ids")
+	ids := strings.Split(idArr[0], ",")
+	if len(ids) < 1 {
+		self.ajaxMsg("请选择要操作的任务", MSG_ERR)
+	}
+	for _, v := range ids {
+		id, _ := strconv.Atoi(v)
+		if id < 1 {
+			continue
+		}
+		changeStatus(id, 3, self.userId)
+	}
+	self.ajaxMsg("", MSG_OK)
+}
+
+func changeStatus(taskId, status, userId int) bool {
+
+	if taskId == 0 {
+		return false
+	}
+	task, _ := models.TaskGetById(taskId)
+	//修改
+	task.Id = taskId
+	task.UpdateTime = time.Now().Unix()
+	task.UpdateId = userId
+	task.Status = status //0,1,2,3,9
+
+	if err := task.Update(); err != nil {
+		return false
+	}
+	return true
+}
+
+func (self *TaskController) AjaxDel() {
+	id, _ := self.GetInt("id")
+	task, _ := models.TaskGetById(id)
+
+	task.UpdateTime = time.Now().Unix()
+	task.UpdateId = self.userId
+	task.Status = -1
+	task.Id = id
+
+	//TODO 查询服务器是否用于定时任务
+	if err := task.Update(); err != nil {
+		self.ajaxMsg(err.Error(), MSG_ERR)
+	}
+	self.ajaxMsg("操作成功", MSG_OK)
+}
+
+func (self *TaskController) Table() {
+	//列表
+	page, err := self.GetInt("page")
+	if err != nil {
+		page = 1
+	}
+	limit, err := self.GetInt("limit")
+	if err != nil {
+		limit = 30
+	}
+
+	status, _ := self.GetInt("status")
+
+	taskName := strings.TrimSpace(self.GetString("taskName"))
+	StatusText := []string{
+		"<font color='red'><i class='fa fa-minus-square'></i></font>",
+		"<font color='green'><i class='fa fa-check-square'></i></font>",
+		"<font color='orange'><i class='fa fa-question-circle'></i></font>",
+		"<font color='red'><i class='fa fa-times-circle'></i></font>",
+	}
+
+	taskGroup := taskGroupLists(self.taskGroups, self.userId)
+	self.pageSize = limit
+	//查询条件
+	filters := make([]interface{}, 0)
+
+	if status == 2 {
+		//审核中，审核失败
+		ids := []int{2, 3}
+		filters = append(filters, "status__in", ids)
+	} else {
+		ids := []int{0, 1}
+		filters = append(filters, "status__in", ids)
+	}
+
+	if self.userId != 1 {
+		groups := strings.Split(self.taskGroups, ",")
+
+		groupsIds := make([]int, 0)
+		for _, v := range groups {
+			id, _ := strconv.Atoi(v)
+			groupsIds = append(groupsIds, id)
+		}
+		filters = append(filters, "group_id__in", groupsIds)
+	}
+
+	if taskName != "" {
+		filters = append(filters, "task_name__icontains", taskName)
+	}
+	result, count := models.TaskGetList(page, self.pageSize, filters...)
 
 	list := make([]map[string]interface{}, len(result))
 
-	// 分组列表
-	groups, _ := models.TaskGroupGetList(1, 100)
-	groups_map := make(map[int]string)
-	for _, gname := range groups {
-		groups_map[gname.Id] = gname.GroupName
-	}
-
-	//服务器列表
-	servers, _ := models.TaskServerGetList(1, 100)
-
-	server_map := make(map[int]string)
-	for _, sname := range servers {
-		server_map[sname.Id] = sname.ServerName
-	}
-	server_map[0] = "本地"
 	for k, v := range result {
 		row := make(map[string]interface{})
 		row["id"] = v.Id
-		row["name"] = v.TaskName
-		row["cron_spec"] = v.CronSpec
-		row["status"] = v.Status
+
+		groupName := "默认分组"
+
+		if name, ok := taskGroup[v.GroupId]; ok {
+			groupName = name
+		}
+
+		row["group_name"] = groupName
+		row["task_name"] = StatusText[v.Status] + " " + groupName + "-" + "&nbsp;" + v.TaskName
 		row["description"] = v.Description
-		row["group_id"] = v.GroupId
-		row["group_name"] = groups_map[v.GroupId]
-		row["server_name"] = server_map[v.ServerId]
-		row["is_odd"] = k % 2
+
+		//row["status_text"] = StatusText[v.Status]
+		row["status"] = v.Status
+		row["pre_time"] = beego.Date(time.Unix(v.PrevTime, 0), "Y-m-d H:i:s")
+		row["execute_times"] = v.ExecuteTimes
 
 		e := jobs.GetEntryById(v.Id)
 		if e != nil {
@@ -91,305 +492,9 @@ func (this *TaskController) List() {
 			}
 			row["running"] = 0
 		}
+
 		list[k] = row
 	}
 
-	this.Data["pageTitle"] = "任务列表"
-	this.Data["list"] = list
-	this.Data["groups"] = groups
-	this.Data["groupid"] = groupId
-	this.Data["pageBar"] = libs.NewPager(page, int(count), this.pageSize, beego.URLFor("TaskController.List", "groupid", groupId), true).ToString()
-	this.display()
-}
-
-// 添加任务
-func (this *TaskController) Add() {
-
-	if this.isPost() {
-		task := new(models.Task)
-		task.UserId = this.userId
-		task.GroupId, _ = this.GetInt("group_id")
-		task.TaskName = strings.TrimSpace(this.GetString("task_name"))
-		task.Description = strings.TrimSpace(this.GetString("description"))
-		task.Concurrent, _ = this.GetInt("concurrent")
-		task.ServerId, _ = this.GetInt("server_id")
-		task.CronSpec = strings.TrimSpace(this.GetString("cron_spec"))
-		task.Command = strings.TrimSpace(this.GetString("command"))
-		task.Timeout, _ = this.GetInt("timeout")
-
-		if task.TaskName == "" || task.CronSpec == "" || task.Command == "" {
-			this.ajaxMsg("请填写完整信息", MSG_ERR)
-		}
-		if _, err := crons.Parse(task.CronSpec); err != nil {
-			this.ajaxMsg("cron表达式无效", MSG_ERR)
-		}
-		if _, err := models.TaskAdd(task); err != nil {
-			this.ajaxMsg(err.Error(), MSG_ERR)
-		}
-
-		this.ajaxMsg("", MSG_OK)
-	}
-
-	// 分组列表
-	groups, _ := models.TaskGroupGetList(1, 100)
-	this.Data["groups"] = groups
-	//服务器分组
-	servers, _ := models.TaskServerGetList(1, 100)
-	this.Data["servers"] = servers
-	this.Data["pageTitle"] = "添加任务"
-	this.display()
-}
-
-// 编辑任务
-func (this *TaskController) Edit() {
-	id, _ := this.GetInt("id")
-
-	task, err := models.TaskGetById(id)
-	if err != nil {
-		this.showMsg(err.Error())
-	}
-
-	if task.Status != 0 {
-		this.ajaxMsg("激活状态无法编辑任务，请先暂停任务", MSG_ERR)
-	}
-
-	if this.isPost() {
-		task.TaskName = strings.TrimSpace(this.GetString("task_name"))
-		task.Description = strings.TrimSpace(this.GetString("description"))
-		task.GroupId, _ = this.GetInt("group_id")
-		task.Concurrent, _ = this.GetInt("concurrent")
-		task.ServerId, _ = this.GetInt("server_id")
-		task.CronSpec = strings.TrimSpace(this.GetString("cron_spec"))
-		task.Command = strings.TrimSpace(this.GetString("command"))
-		task.Timeout, _ = this.GetInt("timeout")
-		if task.TaskName == "" || task.CronSpec == "" || task.Command == "" {
-			this.ajaxMsg("请填写完整信息", MSG_ERR)
-		}
-		if _, err := crons.Parse(task.CronSpec); err != nil {
-			this.ajaxMsg("cron表达式无效", MSG_ERR)
-		}
-		if err := task.Update(); err != nil {
-			this.ajaxMsg(err.Error(), MSG_ERR)
-		}
-
-		this.ajaxMsg("", MSG_OK)
-	}
-
-	// 分组列表
-	groups, _ := models.TaskGroupGetList(1, 100)
-	this.Data["groups"] = groups
-	//服务器分组
-	servers, _ := models.TaskServerGetList(1, 100)
-	this.Data["servers"] = servers
-
-	this.Data["task"] = task
-	this.Data["pageTitle"] = "编辑任务"
-	this.display()
-}
-
-//复制任务
-func (this *TaskController) Copy() {
-
-	id, _ := this.GetInt("id")
-	task, err := models.TaskGetById(id)
-	if err != nil {
-		this.showMsg(err.Error())
-	}
-	// 分组列表
-	groups, _ := models.TaskGroupGetList(1, 100)
-	this.Data["groups"] = groups
-	//服务器分组
-	servers, _ := models.TaskServerGetList(1, 100)
-	this.Data["servers"] = servers
-
-	this.Data["task"] = task
-	this.Data["pageTitle"] = "复制任务"
-	this.display()
-}
-
-// 任务执行日志列表
-func (this *TaskController) Logs() {
-	taskId, _ := this.GetInt("id")
-	page, _ := this.GetInt("page")
-	if page < 1 {
-		page = 1
-	}
-
-	task, err := models.TaskGetById(taskId)
-	if err != nil {
-		this.showMsg(err.Error())
-	}
-
-	result, count := models.TaskLogGetList(page, this.pageSize, "task_id", task.Id)
-
-	list := make([]map[string]interface{}, len(result))
-	for k, v := range result {
-		row := make(map[string]interface{})
-		row["id"] = v.Id
-		row["start_time"] = beego.Date(time.Unix(v.CreateTime, 0), "Y-m-d H:i:s")
-		row["process_time"] = float64(v.ProcessTime) / 1000
-		row["ouput_size"] = libs.SizeFormat(float64(len(v.Output)))
-		row["status"] = v.Status
-		list[k] = row
-	}
-
-	this.Data["pageTitle"] = "任务执行日志"
-	this.Data["list"] = list
-	this.Data["task"] = task
-	this.Data["pageBar"] = libs.NewPager(page, int(count), this.pageSize, beego.URLFor("TaskController.Logs", "id", taskId), true).ToString()
-	this.display()
-}
-
-// 查看日志详情
-func (this *TaskController) ViewLog() {
-	id, _ := this.GetInt("id")
-
-	taskLog, err := models.TaskLogGetById(id)
-	if err != nil {
-		this.showMsg(err.Error())
-	}
-
-	task, err := models.TaskGetById(taskLog.TaskId)
-	if err != nil {
-		this.showMsg(err.Error())
-	}
-
-	data := make(map[string]interface{})
-	data["id"] = taskLog.Id
-	data["output"] = taskLog.Output
-	data["error"] = taskLog.Error
-	data["start_time"] = beego.Date(time.Unix(taskLog.CreateTime, 0), "Y-m-d H:i:s")
-	data["process_time"] = float64(taskLog.ProcessTime) / 1000
-	data["ouput_size"] = libs.SizeFormat(float64(len(taskLog.Output)))
-	data["status"] = taskLog.Status
-
-	this.Data["task"] = task
-	this.Data["data"] = data
-	this.Data["pageTitle"] = "查看日志"
-	this.display()
-}
-
-// 批量操作日志
-func (this *TaskController) LogBatch() {
-	action := this.GetString("action")
-	ids := this.GetStrings("ids")
-	if len(ids) < 1 {
-		this.ajaxMsg("请选择要操作的项目", MSG_ERR)
-	}
-	for _, v := range ids {
-		id, _ := strconv.Atoi(v)
-		if id < 1 {
-			continue
-		}
-		switch action {
-		case "delete":
-			models.TaskLogDelById(id)
-		}
-	}
-
-	this.ajaxMsg("", MSG_OK)
-}
-
-// 批量操作
-func (this *TaskController) Batch() {
-	action := this.GetString("action")
-	ids := this.GetStrings("ids")
-	if len(ids) < 1 {
-		this.ajaxMsg("请选择要操作的项目", MSG_ERR)
-	}
-
-	for _, v := range ids {
-		id, _ := strconv.Atoi(v)
-		if id < 1 {
-			continue
-		}
-		switch action {
-		case "active":
-			if task, err := models.TaskGetById(id); err == nil {
-				job, err := jobs.NewJobFromTask(task)
-				if err == nil {
-					jobs.AddJob(task.CronSpec, job)
-					task.Status = 1
-					task.Update()
-				}
-			}
-		case "pause":
-			jobs.RemoveJob(id)
-
-			if task, err := models.TaskGetById(id); err == nil {
-				task.Status = 0
-				task.Update()
-			}
-
-		case "delete":
-			models.TaskDel(id)
-			models.TaskLogDelByTaskId(id)
-			jobs.RemoveJob(id)
-		}
-	}
-
-	this.ajaxMsg("", MSG_OK)
-}
-
-// 启动任务
-func (this *TaskController) Start() {
-	id, _ := this.GetInt("id")
-
-	task, err := models.TaskGetById(id)
-	if err != nil {
-		this.showMsg(err.Error())
-	}
-
-	job, err := jobs.NewJobFromTask(task)
-	if err != nil {
-		this.showMsg(err.Error())
-	}
-
-	if jobs.AddJob(task.CronSpec, job) {
-		task.Status = 1
-		task.Update()
-	}
-
-	refer := this.Ctx.Request.Referer()
-	if refer == "" {
-		refer = beego.URLFor("TaskController.List")
-	}
-	this.redirect(refer)
-}
-
-// 暂停任务
-func (this *TaskController) Pause() {
-	id, _ := this.GetInt("id")
-
-	task, err := models.TaskGetById(id)
-	if err != nil {
-		this.showMsg(err.Error())
-	}
-
-	jobs.RemoveJob(id)
-	task.Status = 0
-	task.Update()
-
-	refer := this.Ctx.Request.Referer()
-	if refer == "" {
-		refer = beego.URLFor("TaskController.List")
-	}
-	this.redirect(refer)
-}
-
-// 立即执行
-func (this *TaskController) Run() {
-	id, _ := this.GetInt("id")
-
-	task, err := models.TaskGetById(id)
-	if err != nil {
-		this.showMsg(err.Error())
-	}
-
-	job, err := jobs.NewJobFromTask(task)
-	if err != nil {
-		this.showMsg(err.Error())
-	}
-	job.Run()
-	this.redirect(beego.URLFor("TaskController.ViewLog", "id", job.GetLogId()))
+	self.ajaxList("成功", MSG_OK, count, list)
 }

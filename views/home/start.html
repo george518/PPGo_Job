@@ -1,0 +1,173 @@
+<div class="layui-row ml20" >
+    <style>
+        .info-box {
+            height: 85px;
+            background-color: white;
+            background-color: #ecf0f5;
+        }
+
+
+        .info-box .info-box-icon {
+            border-top-left-radius: 2px;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            border-bottom-left-radius: 2px;
+            display: block;
+            float: left;
+            height: 85px;
+            width: 85px;
+            text-align: center;
+            font-size: 45px;
+            line-height: 85px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .info-box .info-box-content {
+            padding: 5px 10px;
+            margin-left: 85px;
+        }
+
+        .info-box-content .info-box-text{
+            font-size: 18px;
+            width: 100%;
+            display: block;
+            text-align: center;
+            color: #999;
+            margin: 10px auto;
+        }
+
+        .info-box-content .info-box-number{
+            font-size: 24px;
+            width: 100%;
+            display: block;
+            text-align: center;
+        }
+    </style>
+    <div>
+        <div class="layui-row">
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-body">
+                        <div class="layui-row layui-col-space15">
+                            <div class="layui-col-md3">
+                                <div class="info-box">
+                                    <span class="info-box-icon" style="background-color:#00a65a !important;color:white;"><i class="fa fa-check" aria-hidden="true"></i></span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">最近执行成功</span>
+                                        <span class="info-box-number">{{.okJob}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-col-md3">
+                                <div class="info-box">
+                                    <span class="info-box-icon" style="background-color:#dd4b39 !important;color:white;"><i class="fa fa-exclamation" aria-hidden="true"></i></span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">最近执行失败</span>
+                                        <span class="info-box-number">{{.failJob}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-col-md3">
+                                <div class="info-box">
+                                    <span class="info-box-icon" style="background-color:#f39c12 !important;color:white;"><i class="fa fa-hourglass" aria-hidden="true"></i></span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">即将执行的任务</span>
+                                        <span class="info-box-number">{{.startJob}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-col-md3">
+                                <div class="info-box">
+                                    <span class="info-box-icon" style="background-color:#00c0ef !important;color:white;"><i class="fa fa-database" aria-hidden="true"></i></span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">定时任务总数量</span>
+                                        <span class="info-box-number">{{.totalJob}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md6">
+                <div class="layui-card">
+                    <div class="layui-card-header">最近执行的任务</div>
+                    <div class="layui-card-body" style="height: 300px; padding-bottom: 10px; overflow: auto">
+                        <table class="layui-table" lay-size="sm">
+                            <colgroup>
+                                <col width="50">
+                                <col >
+                                <col >
+                                <col>
+                            </colgroup>
+                            <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>任务名称</th>
+                                <th>开始时间</th>
+                                <th>执行结果</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+
+                            {{range $k, $v := .recentLogs}}
+                                <tr>
+                                    <td>{{$k}}</td>
+                                    <td><a href="{{urlfor "TaskLogController.Detail" "id" $v.id}}" class="news-item-title">
+                                    {{$v.task_name}} # {{$v.id}}
+                                    </a></td>
+                                    <td>{{$v.start_time}}</td>
+                                    <td>{{if eq $v.status 0}}
+                                        正常
+                                    {{else if eq $v.status -1}}
+                                        <span style="color:red">异常</span>
+                                    {{else}}
+                                        <span style="color:red">超时</span>
+                                    {{end}}</td>
+                                </tr>
+                            {{else}}
+                                <tr>
+                                    <td colspan="3">暂无信息</td>
+                                </tr>
+                            {{end}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md6">
+                <div class="layui-card" style="background: #fff">
+                    <div class="layui-card-header">即将执行的任务</div>
+                    <div class="layui-card-body">
+                        <table class="layui-table" lay-size="sm">
+                            <colgroup>
+                                <col>
+                                <col>
+                            </colgroup>
+                            <thead>
+                            <tr>
+                                <th>任务名称</th>
+                                <th>执行时间</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+
+                            {{range $k, $v := .jobs}}
+                            <tr>
+                                <td><a href="{{urlfor "TaskController.Logs" "id" $v.task_id}}" class="news-item-title">{{$v.task_name}}-{{$v.task_group}} # {{$v.task_id}}</a></td>
+                                <td>{{$v.next_time}}</td>
+                            </tr>
+                            {{else}}
+                            <tr>
+                                <td colspan="2">暂无信息</td>
+                            </tr>
+                            {{end}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

@@ -1,0 +1,79 @@
+/*
+* @Author: haodaquan
+* @Date:   2017-09-07 22:04:13
+* @Last Modified by:   haodaquan
+* @Last Modified time: 2017-09-07 22:42:01
+*/
+
+.bg-img{
+    background: url(/static/login/img/login-bg.jpg) fixed center center;
+}
+
+body {
+    overflow: hidden;
+}
+.layer_notice {
+    background: #5fb878 none repeat scroll 0 0;
+    float: left;
+    height: 75px;
+    overflow: hidden;
+    padding: 10px;
+    width: 330px;
+}
+.layer_notice ul li {
+    color: #fff;
+}
+.video-player {
+    background-color: transparent;
+    min-width: 100%;
+    min-height: 100%;
+    display: block;
+    position: absolute;
+    z-index: 1;
+    top: 0;
+}
+
+.video_mask {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 90;
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+.login {
+    height: 200px;
+    width: 260px;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 4px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin: -150px 0 0 -150px;
+    z-index: 99;
+}
+
+.login h1 {
+    text-align: center;
+    color: #fff;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.form_code {
+    position: relative;
+}
+
+.form_code .code {
+    position: absolute;
+    right: 0;
+    top: 1px;
+    cursor: pointer;
+}
+
+.login_btn {
+    width: 100%;
+}

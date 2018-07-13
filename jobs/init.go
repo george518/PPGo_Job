@@ -48,4 +48,3 @@ func runCmdWithTimeout(cmd *exec.Cmd, timeout time.Duration) (error, bool) {
 		return err, false
 	}
 }
-

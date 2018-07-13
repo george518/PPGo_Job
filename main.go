@@ -1,10 +1,17 @@
+/************************************************************
+** @Description: PPGo_Job2
+** @Author: haodaquan
+** @Date:   2018-06-05 22:24
+** @Last Modified by:   haodaquan
+** @Last Modified time: 2018-06-05 22:24
+*************************************************************/
 package main
 
 import (
 	"github.com/astaxie/beego"
-	"github.com/george518/PPGo_Job/models"
-	_ "github.com/george518/PPGo_Job/routers"
-	"github.com/george518/PPGo_Job/jobs"
+	"github.com/george518/PPGo_Job2/jobs"
+	"github.com/george518/PPGo_Job2/models"
+	_ "github.com/george518/PPGo_Job2/routers"
 )
 
 const (

@@ -1,0 +1,67 @@
+<!-- 新增任务 -->
+<div class="container-fluid">
+    <div class="info-center">
+        <!--title-->
+        <div class="info-center">
+            <div class="page-header">
+                <div class="pull-left">
+                    <h4>{{.pageTitle}}</h4>      
+                </div>
+                <div class="pull-right">
+                   <!--  <button type="button" class="btn btn-mystyle btn-sm refresh">刷新</button>
+                    <button type="button" class="btn btn-mystyle btn-sm reback">返回</button> -->
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+
+    <!--content-list--> 
+    <div class="content-list">
+        <form  action="{{urlfor "GroupController.Add"}}" method="post" class="form-horizontal">
+            <div class="form-group" style="margin-top: 15px">
+                <label class="col-sm-3 control-label" for="group_name">分类名称</label>
+                <div class="col-sm-3" >
+                    <input type="text"  class="form-control input-sm" placeholder="" name="group_name" value="" required />
+                </div>
+                <div class="col-sm-6" style="padding-top:5px;">
+                    
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 15px">
+                <label class="col-sm-3 control-label" for="description">分类说明</label>
+                <div class="col-sm-5" >
+                    <textarea name="description" class="form-control" id="description" rows="3"></textarea>
+                </div>
+                <div class="col-sm-4" style="padding-top:5px;">
+                    
+                </div>
+            </div>
+            <br />    
+            <div class="modal-footer" style="text-align:center">
+                <button type="submit" class="btn btn-primary submit_attr_button">保存</button>
+                <button type="button" class="btn btn-default reback">返回</button> 
+            </div>
+        </form>
+    </div> 
+</div> 
+
+<script>
+$(function () {
+    $("form").submit(function () {
+        // $(".alert").hide();
+        $("button[type='submit']").attr('disabled', true);
+        $.post('{{urlfor "GroupController.Add"}}', $(this).serialize(), function (out) {
+            if (out.status == 0) {
+                window.location.href = '{{urlfor "GroupController.List"}}';
+            } else {
+                alert_message(out.msg,"alert-danger","alert-success");
+                $("button[type='submit']").attr('disabled', false);
+            }
+        }, "json");
+        return false;
+    });
+});
+</script>

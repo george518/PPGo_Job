@@ -1,0 +1,349 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no">
+        <title>定时任务管理后台</title>
+        <link href="/static/bootstrap/css/bootstrap.min.css" title="" rel="stylesheet" />
+
+        <link title="" href="/static/css/style.css" rel="stylesheet" type="text/css"  />
+        <link title="blue" href="/static/css/dermadefault.css" rel="stylesheet" type="text/css"/>
+        <link title="green" href="/static/css/dermagreen.css" rel="stylesheet" type="text/css" disabled="disabled"/>
+        <link title="orange" href="/static/css/dermaorange.css" rel="stylesheet" type="text/css" disabled="disabled"/>
+
+        <link href="/static/css/templatecss.css" rel="stylesheet" title="" type="text/css" />
+        <script src="/static/js/jquery-1.11.1.min.js" type="text/javascript"></script>
+        <script src="/static/js/jquery.cookie.js" type="text/javascript"></script>
+        <script src="/static/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+    </head>
+
+    <body>
+        <nav class="nav navbar-default navbar-mystyle navbar-fixed-top">
+            <div class="navbar-header">
+                <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse"> 
+                    <span class="icon-bar"></span> 
+                    <span class="icon-bar"></span> 
+                    <span class="icon-bar"></span> 
+                </button>
+                <a class="navbar-brand mystyle-brand">
+                    <span class="glyphicon glyphicon-time"></span>
+                </a>
+            </div>
+            <div class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li class="li-border">
+                        <a class="mystyle-color" href="#" style="font-size: 20px">定时任务管理后台 <span style="font-size: 12px">V1.2</span></a>
+                    </li>
+                </ul>
+
+                <ul class="nav navbar-nav pull-right">
+                    <li class="li-border">
+                        
+                        <a class="mystyle-color" href="#" id="server-time" style="font-size: 10px"></a>
+                    </li>
+                </ul>
+            
+                <ul class="nav navbar-nav pull-right">
+                    <li class="li-border">
+                        <a href="#" class="mystyle-color">
+                            <span class="glyphicon glyphicon-bell"></span>
+                            <span class="topbar-num">0</span>
+                        </a>
+                    </li>
+                   
+                    <li class="dropdown li-border">
+                        <a href="#" class="dropdown-toggle mystyle-color" data-toggle="dropdown">
+                            帮助文档<span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/help">帮助文档</a></li>
+                            
+                        </ul>
+                    </li>
+                    <li class="dropdown li-border">
+                        <a href="#" class="dropdown-toggle mystyle-color" data-toggle="dropdown">
+                            {{.loginUserName}}<span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/logout">退出</a></li>
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle mystyle-color" data-toggle="dropdown">
+                            换肤<span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu changecolor">
+                            <li id="blue"><a href="#">蓝色</a></li>
+                            <li class="divider"></li>
+                            <li id="green"><a href="#">绿色</a></li>
+                            <li class="divider"></li>
+                            <li id="orange"><a href="#">橙色</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+
+        <div class="down-main">
+            <div class="left-main left-full">
+                <div class="sidebar-fold">
+                    <span class="glyphicon glyphicon-menu-hamburger"></span>
+                </div>
+
+                <div class="subNavBox">
+                    <div class="sBox">
+                        <ul class="navContent" >
+                            <li  {{if eq .curRoute "main.index"}}class="active"{{end}} id="home_page">
+                                <a href="/">
+                                    <span class="sublist-icon glyphicon glyphicon-home"></span><span class="sub-title">系统首页</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="subNavBox">
+                    <div class="sBox">
+                        <div class="subNav sublist-down">
+                            <span class="title-icon glyphicon glyphicon-chevron-down"></span>
+                            <span class="sublist-title">任务管理</span>
+                        </div>
+                        <ul class="navContent" style="display:block">
+                            
+                            <li {{if eq .menuTag "task"}}class="active"{{end}}>
+                                <div class="showtitle" style="width:100px;">
+                                    任务列表
+                                </div>
+                                <a href="/task/list">
+                                    <span class="sublist-icon glyphicon glyphicon-th-list"></span>
+                                    <span class="sub-title">任务列表</span>
+                                </a>
+                            </li>
+
+                            <li {{if eq .menuTag "group"}}class="active"{{end}}>
+                                <div class="showtitle" style="width:100px;">
+                                    任务分类
+                                </div>
+                                <a href="/group/list">
+                                    <span class="sublist-icon glyphicon glyphicon-bookmark"></span>
+                                    <span class="sub-title">任务分类</span>
+                                </a>
+                            </li>
+                            <li {{if eq .curRoute "help.index"}}class="active"{{end}}>
+                                <div class="showtitle" style="width:100px;">
+                                    使用帮助
+                                </div>
+                                <a href="/help">
+                                    <span class="sublist-icon glyphicon glyphicon-question-sign"></span>
+                                    <span class="sub-title">使用帮助</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="subNavBox">
+                    <div class="sBox">
+                        <div class="subNav sublist-down">
+                            <span class="title-icon glyphicon glyphicon-chevron-down"></span>
+                            <span class="sublist-title">资源管理</span>
+                        </div>
+                        <ul class="navContent" >
+
+                            <li {{if eq .menuTag "server"}}class="active"{{end}}>
+                            <div class="showtitle" style="width:100px;">
+                                服务器
+                            </div>
+                            <a href="/server/list">
+                                <span class="sublist-icon glyphicon glyphicon-hdd"></span>
+                                <span class="sub-title">服务器</span>
+                            </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="subNavBox">
+                    <div class="sBox">
+                        <div class="subNav sublist-down">
+                            <span class="title-icon glyphicon glyphicon-chevron-down"></span>
+                            <span class="sublist-title">账户管理</span>
+                        </div>
+                        <ul class="navContent" >
+                            
+                            <li {{if eq .curRoute "main.profile"}}class="active"{{end}}>
+                                <div class="showtitle" style="width:100px;">
+                                    资料修改
+                                </div>
+                                <a href="/profile">
+                                    <span class="sublist-icon glyphicon glyphicon-user"></span>
+                                    <span class="sub-title">资料修改</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-product view-product right-full">
+                <!--message     start-->
+                <div class="message">
+                    <div class="alert alert-danger box" role="alert" style="padding: 0px; line-height: 40px">
+                        <div class="col-sm-1 pull-right">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        </div>
+
+                        <div class="col-sm-11 pull-left">
+                            <strong id="message">保存成功</strong>
+                        </div>
+                    </div>
+                </div>
+                <!--message     end-->
+                {{.LayoutContent}}
+            </div>
+        </div>
+        <script type="text/javascript">
+            function alert_message(message,addClass,removeClass)
+            {
+                $('.box').addClass(addClass);
+                $('.box').removeClass(removeClass);
+                $("#message").html(message);
+                $('.message').fadeIn(1000);
+                $('.message').fadeOut(5000);
+            }
+            $(function(){
+                /*换肤*/
+                $(".dropdown .changecolor li").click(function(){
+                    var style = $(this).attr("id");
+                    $("link[title!='']").attr("disabled","disabled"); 
+                    $("link[title='"+style+"']").removeAttr("disabled"); 
+
+                    $.cookie('mystyle', style, { expires: 7 }); // 存储一个带7天期限的 cookie 
+                })
+                var cookie_style = $.cookie("mystyle"); 
+                if(cookie_style!=null){ 
+                    $("link[title!='']").attr("disabled","disabled"); 
+                    $("link[title='"+cookie_style+"']").removeAttr("disabled"); 
+                } 
+                /*左侧导航栏显示隐藏功能*/
+                $(".subNav").click(function(){              
+                    /*显示*/
+                    if($(this).find("span:first-child").attr('class')=="title-icon glyphicon glyphicon-chevron-down")
+                    {
+                        $(this).find("span:first-child").removeClass("glyphicon-chevron-down");
+                        $(this).find("span:first-child").addClass("glyphicon-chevron-up");
+                        $(this).removeClass("sublist-down");
+                        $(this).addClass("sublist-up");
+                    }
+                    /*隐藏*/
+                    else
+                    {
+                        $(this).find("span:first-child").removeClass("glyphicon-chevron-up");
+                        $(this).find("span:first-child").addClass("glyphicon-chevron-down");
+                        $(this).removeClass("sublist-up");
+                        $(this).addClass("sublist-down");
+                    }   
+                    // 修改数字控制速度， slideUp(500)控制卷起速度
+                    $(this).next(".navContent").slideToggle(300).siblings(".navContent").slideUp(300);
+                })
+                /*左侧导航栏缩进功能*/
+                $(".left-main .sidebar-fold").click(function(){
+                    if($(this).parent().attr('class')=="left-main left-full")
+                    {
+                        $(this).parent().removeClass("left-full");
+                        $(this).parent().addClass("left-off");
+                        
+                        $(this).parent().parent().find(".right-product").removeClass("right-full");
+                        $(this).parent().parent().find(".right-product").addClass("right-off");
+                        }
+                    else
+                    {
+                        $(this).parent().removeClass("left-off");
+                        $(this).parent().addClass("left-full");
+                        
+                        $(this).parent().parent().find(".right-product").removeClass("right-off");
+                        $(this).parent().parent().find(".right-product").addClass("right-full");
+                        
+                        }
+                    })  
+             
+                /*左侧鼠标移入提示功能*/
+                $(".sBox ul li").mouseenter(function(){
+                    if($(this).find("span:last-child").css("display")=="none")
+                    {$(this).find("div").show();}
+                    }).mouseleave(function(){$(this).find("div").hide();})  
+                });
+
+                /*刷新*/
+                $(".refresh").on("click",function() {
+                    window.location.reload();
+                });
+
+                /*返回上一页*/
+                $(".reback").on("click",function() {
+                    window.history.go(-1);
+                });
+
+                /*全选*/
+                $("input[name=all_check]").click(function(){
+                    var all_status = this.checked;
+                    //全选
+                    if(all_status == true){
+                        $(".chk").find("input[type=checkbox]").each(function(){
+                            
+                            if($(this).val()>0){
+                                $(this).prop("checked",true);
+                            }
+                        });
+                    }
+                    if(all_status == false){
+                        //反选
+                        $(".chk").find("input[type=checkbox]:checked").each(function(){
+                            if($(this).val()>0){
+                                $(this).prop("checked",false);
+                            }
+                        });
+                    }
+                });
+
+
+            //服务器时间
+            Date.prototype.Format = function (fmt) {
+                var o = {
+                    "M+": this.getMonth() + 1,
+                    "d+": this.getDate(),
+                    "h+": this.getHours(),
+                    "m+": this.getMinutes(), 
+                    "s+": this.getSeconds(),
+                    "q+": Math.floor((this.getMonth() + 3) / 3),
+                    "S": this.getMilliseconds()
+                };
+                if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+                for (var k in o)
+                if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+                return fmt;
+            }
+
+            $(function () {
+                $('.subnavbar').find ('li').each (function (i) {
+                    var mod = i % 3;    
+                    if (mod === 2) {
+                        $(this).addClass ('subnavbar-open-right');
+                    }   
+                });
+                initTime = new Date().getTime();
+                $.getJSON("/gettime", function(out) {
+                    setTime(initTime, out.time);
+                });
+            });
+
+        function setTime(initTime,serverTime) {
+            ellapsedTime = new Date().getTime()-initTime;
+            $('#server-time').html('当前服务器时间: <strong>'+new Date(serverTime+ellapsedTime).Format("yyyy-MM-dd hh:mm:ss")+'</strong>');
+            setTimeout('setTime('+initTime+','+serverTime+');',500);
+        }
+
+
+        </script>
+    </body>
+</html>

@@ -35,6 +35,7 @@ func NewJobFromTask(task *models.Task) (*Job, error) {
 	if task.Id < 1 {
 		return nil, fmt.Errorf("ToJob: 缺少id")
 	}
+
 	//本地程序执行
 	if task.ServerId == 0 {
 		job := NewCommandJob(task.Id, task.TaskName, task.Command)
