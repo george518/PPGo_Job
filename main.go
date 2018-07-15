@@ -9,9 +9,9 @@ package main
 
 import (
 	"github.com/astaxie/beego"
-	"github.com/george518/PPGo_Job2/jobs"
-	"github.com/george518/PPGo_Job2/models"
-	_ "github.com/george518/PPGo_Job2/routers"
+	"github.com/george518/PPGo_Job/jobs"
+	"github.com/george518/PPGo_Job/models"
+	_ "github.com/george518/PPGo_Job/routers"
 )
 
 const (
