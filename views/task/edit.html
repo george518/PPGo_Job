@@ -116,7 +116,8 @@
                 $.post('{{urlfor "TaskController.AjaxSave"}}', form_data, function (out) {
                     if (out.status == 0) {
                         layer.msg("操作成功，可去【任务审核】中查看该任务",{icon: 1},function () {
-                            window.location.href="/task/auditlist"
+                            //window.location.href="/task/list"
+                            window.history.go(-1)
                         })
                     } else {
                         layer.msg(out.message)
