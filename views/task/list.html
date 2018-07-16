@@ -4,7 +4,7 @@
             <div class="layui-btn-group">
                 <a class="layui-btn" data-type="tabAdd" href="/task/add">新增</a>
                 <button class="layui-btn batch" data-type="batchstart" >启动</button>
-                <button class="layui-btn layui-btn-danger batch" data-type="batchpause" >暂停</button>
+                <button class="layui-btn layui-btn-danger batch" data-type="batchpause" >暂停</button>cron
             </div>
         </div>
         <div class="layui-col-xs6 search_text">
@@ -13,9 +13,19 @@
 
                     <div class="layui-inline" style="width: 40%">
 
-                        <input class="layui-input" name="taskName" id="taskName" autocomplete="off" placeholder="任务名称" >
+                            {{/*<label class="layui-form-label">搜索选择框</label>*/}}
+                            <div class="layui-input-inline" style="text-align: left">
+                                <select name="modules" lay-verify="required" lay-filter="select_group" id="group_id" lay-search="">
+                                    <option value="">直接选择或搜索选择</option>
+                                    {{range $k, $v := .taskGroup}}
+                                        <option value="{{$k}}">{{$v}}</option>
+                                    {{end}}
+                                </select>
+                            </div>
+
+                        {{/*<input class="layui-input" name="taskName" id="taskName" autocomplete="off" placeholder="任务名称" >*/}}
                     </div>
-                    <button class="layui-btn" data-type="reload" id="reload">查询</button>
+                    <button class="layui-btn" data-type="reload" id="reload" style="display: none">查询</button>
                 </div>
             </form>
             
@@ -52,12 +62,12 @@
             ,url: '/task/table'
             ,cols: [[
                 {checkbox: true, fixed: true},
-                {field:'id', title: 'ID', align:'center',sort: true, width:50}
+                {field:'id', title: 'ID', align:'center',sort: true, width:100}
                 ,{field:'task_name',width:300, title: '任务名称'}
                 ,{field:'description',title: '任务说明'}
 
                 ,{field:'next_time', width:170,title: '下次执行时间'}
-                ,{field:'pre_time', title: '上次执行时间'}
+                ,{field:'pre_time',width:170, title: '上次执行时间'}
                 ,{field:'execute_times', width:70,title: '次数'}
                 ,{fixed: 'right', width:200, align:'center', title:'操作', toolbar: '#bar'}
             ]]
@@ -70,11 +80,18 @@
             reload: function(){
                 table.reload('listReload', {
                     where: {
-                        taskName: $('#taskName').val(),
+                        group_id: $('#group_id').val(),
                     }
                 });
             }
         };
+
+        form.on('select(select_group)', function(data){
+            // console.log(data.elem); //得到select原始DOM对象
+            // console.log(data.value); //得到被选中的值
+            // console.log(data.othis); //得到美化后的DOM对象
+            $("#reload").click()
+        });
 
         //监听工具条
         table.on('tool(table_filter)', function(obj){

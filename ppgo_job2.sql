@@ -103,7 +103,7 @@ CREATE TABLE `pp_task_group` (
   `create_time` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
   `update_id` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '修改者Id',
   `update_time` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '更新时间',
-  `status` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '状态：1-正常，0-删除',
+  `status` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT '状态：1-正常，0-删除',
   PRIMARY KEY (`id`),
   KEY `idx_user_id` (`create_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;

@@ -11,13 +11,13 @@
 <body class="layui-layout-body">
 <div class="layui-layout layui-layout-admin">
     <div class="layui-header">
-        <div class="layui-logo">{{.siteName}}{{.version}}</div>
+        <div class="layui-logo">{{.siteName}}<font style="font-size: 12px"> {{.version}}</font></div>
         <!-- 头部区域（可配合layui已有的水平导航） -->
         <ul class="layui-nav layui-layout-left">
 
         </ul>
         <ul class="layui-nav layui-layout-right pp-nav-item" >
-            <li class="layui-nav-item"><a href="http://ppgojob.haodaquan.com/index.html">使用手册</a></li>
+            {{/*<li class="layui-nav-item"><a href="http://ppgojob.haodaquan.com/index.html">使用手册</a></li>*/}}
             <li class="layui-nav-item pp-nav-item" >
                 <a href="javascript:;">
                     <img src="/static/admin/images/header.jpg" class="layui-nav-img"> {{.loginUserName}}
@@ -83,7 +83,7 @@
 
     <div class="layui-footer" style="border-top: 2px solid #e4e4e4">
         <!-- 底部固定区域 -->
-        © Power by <a href="http://www.haodaquan.com" target="_blank">PPGo_Job V2</a>
+        © Power by PPGo_Job V2.0
     </div>
 </div>
 <script src="/static/layui/layui.js"></script>

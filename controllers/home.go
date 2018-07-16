@@ -26,6 +26,12 @@ func (self *HomeController) Index() {
 	self.TplName = "public/main.html"
 }
 
+func (self *HomeController) Help() {
+	self.Data["pageTitle"] = "Cron表达式说明"
+	//self.display()
+	self.TplName = "public/help.html"
+}
+
 func (self *HomeController) Start() {
 	groups_map := serverGroupLists(self.serverGroups, self.userId)
 	//计算总任务数量

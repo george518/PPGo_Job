@@ -23,6 +23,7 @@ type TaskController struct {
 
 func (self *TaskController) List() {
 	self.Data["pageTitle"] = "任务管理"
+	self.Data["taskGroup"] = taskGroupLists(self.taskGroups, self.userId)
 	self.display()
 }
 
@@ -106,6 +107,36 @@ func (self *TaskController) Detail() {
 			serverName = server.ServerName
 		}
 	}
+
+	//任务分组
+	groupName := "默认分组"
+	if task.GroupId > 0 {
+		group, err := models.TaskGroupGetById(task.GroupId)
+		if err == nil {
+			groupName = group.GroupName
+		}
+	}
+
+	self.Data["GroupName"] = groupName
+
+	//创建人和修改人
+	createName := "未知"
+	updateName := "未知"
+	if task.CreateId > 0 {
+		admin, err := models.AdminGetById(task.CreateId)
+		if err == nil {
+			createName = admin.RealName
+		}
+	}
+
+	if task.UpdateId > 0 {
+		admin, err := models.AdminGetById(task.UpdateId)
+		if err == nil {
+			updateName = admin.RealName
+		}
+	}
+	self.Data["CreateName"] = createName
+	self.Data["UpdateName"] = updateName
 	self.Data["serverName"] = serverName
 	self.display()
 }
@@ -412,6 +443,8 @@ func (self *TaskController) Table() {
 		limit = 30
 	}
 
+	groupId, _ := self.GetInt("group_id")
+
 	status, _ := self.GetInt("status")
 
 	taskName := strings.TrimSpace(self.GetString("taskName"))
@@ -450,6 +483,12 @@ func (self *TaskController) Table() {
 	if taskName != "" {
 		filters = append(filters, "task_name__icontains", taskName)
 	}
+
+	if groupId > 0 {
+		self.Ctx.SetCookie("group_id", strconv.Itoa(groupId)+"|job")
+		filters = append(filters, "group_id", groupId)
+	}
+
 	result, count := models.TaskGetList(page, self.pageSize, filters...)
 
 	list := make([]map[string]interface{}, len(result))

@@ -143,6 +143,35 @@ func (self *TaskLogController) Detail() {
 		}
 	}
 	self.Data["serverName"] = serverName
+
+	//任务分组
+	groupName := "默认分组"
+	if task.GroupId > 0 {
+		group, err := models.TaskGroupGetById(task.GroupId)
+		if err == nil {
+			groupName = group.GroupName
+		}
+	}
+	self.Data["GroupName"] = groupName
+
+	//创建人和修改人
+	createName := "未知"
+	updateName := "未知"
+	if task.CreateId > 0 {
+		admin, err := models.AdminGetById(task.CreateId)
+		if err == nil {
+			createName = admin.RealName
+		}
+	}
+
+	if task.UpdateId > 0 {
+		admin, err := models.AdminGetById(task.UpdateId)
+		if err == nil {
+			updateName = admin.RealName
+		}
+	}
+	self.Data["CreateName"] = createName
+	self.Data["UpdateName"] = updateName
 	self.Data["pageTitle"] = "日志详细" + "(#" + strconv.Itoa(id) + ")"
 	self.display()
 }

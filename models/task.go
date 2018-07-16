@@ -103,7 +103,11 @@ func TaskGetById(id int) (*Task, error) {
 	return task, nil
 }
 
-func TaskDel(id int) error {
-	_, err := orm.NewOrm().QueryTable(TableName("task")).Filter("id", id).Delete()
-	return err
+//修改为逻辑删除
+func TaskDel(id int) (int64, error) {
+	return orm.NewOrm().QueryTable(TableName("task")).Filter("id", id).Update(orm.Params{
+		"status": -1,
+	})
+	//_, err := orm.NewOrm().QueryTable(TableName("task")).Filter("id", id).Delete()
+	//return err
 }
