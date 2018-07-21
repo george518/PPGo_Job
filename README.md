@@ -24,7 +24,8 @@ V1.x版本是一个简单的定时任务管理系统，进入V1.0 ：https://git
 先看效果
 ----
 <br/>
-![github](https://github.com/george518/PPGo_Job/blob/master/static/imgs/1-index.png?raw=true "github")
+![github](https://raw.githubusercontent.com/george518/PPGo_Job/master/static/imgs/1-index.png "github")
+![github](https://github.com/george518/PP_blog/blob/master/static/public/images/weixin.png?raw=true "github")
 <br/><br/>
 ![github](https://github.com/george518/PPGo_Job/blob/master/static/imgs/2-task.png?raw=true "github")
 <br/><br/>
