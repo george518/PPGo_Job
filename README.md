@@ -6,7 +6,7 @@ PPGo_Job定时任务管理系统 V2.0
 V1.x版本是一个简单的定时任务管理系统，进入V1.0 ：https://github.com/george518/PPGo_Job/releases/tag/v1.2.1
 相对于V1.x版本，V2.0新增以下功能和特性：
 
-- 1、全新UI,基于LayUI2.3构建全新页面，后端模板手工搭建（地址：https://github.com/george518/PP_admin-template），让操作更加人性化。
+- 1、全新UI,基于LayUI2.3构建全新页面，后端模板手工搭建，让操作更加人性化。后台模板地址：https://github.com/george518/PP_admin-template
 - 2、新增权限管理功能，根据菜单权限、操作权限和数据权限进行划分，方便多用户多权限管理定时任务。
 - 3、新增服务器复制功能，让服务器资源添加更加方便。
 - 4、新增定时任务详情页面，将任务相关操作更加集中起来操作。
@@ -20,30 +20,14 @@ V1.x版本是一个简单的定时任务管理系统，进入V1.0 ：https://git
 ----
 ![github](https://github.com/george518/PP_blog/blob/master/static/public/images/weixin.png?raw=true "github")
 
-
 先看效果
 ----
 <br/>
-![github](https://raw.githubusercontent.com/george518/PPGo_Job/master/static/imgs/1-index.png "github")
-![github](https://github.com/george518/PP_blog/blob/master/static/public/images/weixin.png?raw=true "github")
+![github](https://github.com/george518/PPGo_Job/blob/master/static/imgs/1-index.png?raw=true "github")
 <br/><br/>
 ![github](https://github.com/george518/PPGo_Job/blob/master/static/imgs/2-task.png?raw=true "github")
 <br/><br/>
 ![github](https://github.com/george518/PPGo_Job/blob/master/static/imgs/3-task_detail.png?raw=true "github")
-<br/><br/>
-![github](https://github.com/george518/PPGo_Job/blob/master/static/imgs/4-task_audit.png?raw=true "github")
-<br/><br/>
-![github](https://github.com/george518/PPGo_Job/blob/master/static/imgs/5-task_group.png?raw=true "github")
-<br/><br/>
-![github](https://github.com/george518/PPGo_Job/blob/master/static/imgs/6-server_group.png?raw=true "github")
-<br/><br/>
-![github](https://github.com/george518/PPGo_Job/blob/master/static/imgs/7-server_add.png?raw=true "github")
-<br/><br/>
-![github](https://github.com/george518/PPGo_Job/blob/master/static/imgs/7-server.png?raw=true "github")
-<br/><br/>
-![github](https://github.com/george518/PPGo_Job/blob/master/static/imgs/8-ban.png?raw=true "github")
-<br/><br/>
-![github](https://github.com/george518/PPGo_Job/blob/master/static/imgs/9-ban_edit.png?raw=true "github")
 <br/><br/>
 ![github](https://github.com/george518/PPGo_Job/blob/master/static/imgs/10-auth.png?raw=true "github")
  <br/><br/>
@@ -51,10 +35,6 @@ V1.x版本是一个简单的定时任务管理系统，进入V1.0 ：https://git
   <br/><br/>
 ![github](https://github.com/george518/PPGo_Job/blob/master/static/imgs/12-role_add.png?raw=true "github")
  <br/><br/>
-![github](https://github.com/george518/PPGo_Job/blob/master/static/imgs/13-admin.png?raw=true "github")
-    <br/><br/>
-![github](https://github.com/george518/PPGo_Job/blob/master/static/imgs/14-user.png?raw=true "github")
-  <br/><br/>
 ![github](https://github.com/george518/PPGo_Job/blob/master/static/imgs/15-log.png?raw=true "github")
   <br/><br/>
 
@@ -89,7 +69,8 @@ windows
 
 - 暂不支持
 
-
+访问方式
+----
 前台访问：http://your_host:8080
 用户名：admin 密码：123456
 
