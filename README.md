@@ -28,7 +28,7 @@ V1.x版本是一个简单的定时任务管理系统，进入V1.0 ：https://git
 ![image](https://github.com/george518/PPGo_Job/blob/master/static/imgs/10-auth.png?raw=true "github")
 ![image](https://github.com/george518/PPGo_Job/blob/master/static/imgs/11-role.png?raw=true "github")
 ![image](https://github.com/george518/PPGo_Job/blob/master/static/imgs/12-role_add.png?raw=true "github")
-![image](https://github.com/george518/PPGo_Job/blob/master/static/imgs/15-log.png?raw=true "github")
+![image](https://github.com/george518/PPGo_Job/blob/master/static/imgs/15.log.png?raw=true "github")
 
 
 安装方法
@@ -99,6 +99,10 @@ jobs/job.go:19:2: cannot find package "golang.org/x/crypto/ssh" in any of:
 需要 git clone https://github.com/golang/crypto.git
 并拷贝到 $GOPATH/src/golang.org/x/ 下就OK
 
+联系我
+----
+qq群号:547564773
+欢迎交流，欢迎提交代码。
 
 
 
