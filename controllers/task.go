@@ -8,13 +8,14 @@
 package controllers
 
 import (
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/astaxie/beego"
 	"github.com/george518/PPGo_Job/jobs"
 	"github.com/george518/PPGo_Job/models"
 	"github.com/robfig/cron"
-	"strconv"
-	"strings"
-	"time"
 )
 
 type TaskController struct {
@@ -36,6 +37,7 @@ func (self *TaskController) Add() {
 	self.Data["pageTitle"] = "新增任务"
 	self.Data["taskGroup"] = taskGroupLists(self.taskGroups, self.userId)
 	self.Data["serverGroup"] = serverLists(self.serverGroups, self.userId)
+	self.Data["isAdmin"] = self.userId
 	self.display()
 }
 
@@ -56,6 +58,7 @@ func (self *TaskController) Edit() {
 	// 分组列表
 	self.Data["taskGroup"] = taskGroupLists(self.taskGroups, self.userId)
 	self.Data["serverGroup"] = serverLists(self.serverGroups, self.userId)
+	self.Data["isAdmin"] = self.userId
 	self.display()
 }
 
@@ -163,7 +166,9 @@ func (self *TaskController) AjaxSave() {
 		task.CreateTime = time.Now().Unix()
 		task.UpdateTime = time.Now().Unix()
 		task.Status = 2 //审核中
-
+		if self.userId == 1 {
+			task.Status = 0 //审核中,超级管理员不需要
+		}
 		if task.TaskName == "" || task.CronSpec == "" || task.Command == "" {
 			self.ajaxMsg("请填写完整信息", MSG_ERR)
 		}
@@ -190,8 +195,10 @@ func (self *TaskController) AjaxSave() {
 	task.Command = strings.TrimSpace(self.GetString("command"))
 	task.Timeout, _ = self.GetInt("timeout")
 	task.UpdateId = self.userId
-	task.Status = 2 //审核中
-
+	task.Status = 2 //审核中,超级管理员不需要
+	if self.userId == 1 {
+		task.Status = 0
+	}
 	msg, isBan := checkCommand(task.Command)
 	if !isBan {
 		self.ajaxMsg("含有禁止命令："+msg, MSG_ERR)
