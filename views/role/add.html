@@ -143,7 +143,7 @@ var $,form;
             var data = {'role_name':role_name,'detail':detail,'nodes_data':nodes_data,'server_group_ids':server_group_ids,'task_group_ids':task_group_ids}
             $.post('{{urlfor "RoleController.AjaxSave"}}', data, function (out) {
                 if (out.status == 0) {
-                    layer.alert('保存成功了', {icon: 1},function(index){
+                    layer.alert('保存成功了', {icon: 1,shade:0.3,time:1000},function(index){
                         window.history.go(-1)
                     });
                 } else {

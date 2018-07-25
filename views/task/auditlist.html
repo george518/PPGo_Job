@@ -42,7 +42,7 @@
         var element = layui.element;
         var error_info = "{{.flash.error}}";
         if(error_info){
-            layer.msg(error_info,{icon: 2,shade:0.3},function () {
+            layer.msg(error_info,{icon: 2,shade:0.3,time:1000},function () {
                 window.history.go(-1)
             })
             return;
@@ -90,7 +90,7 @@
                     $.post('/task/ajaxdel', {id:data.id}, function (out) {
 
                         if (out.status == 0) {
-                            layer.msg("操作成功",{icon: 1},function () {
+                            layer.msg("操作成功",{icon: 1,shade:0.3,time:1000},function () {
                                 $('#reload').click();
                             })
                         } else {
@@ -133,7 +133,7 @@
                 layer.load();
                 $.post('/task/ajax'+action, {"ids":ids}, function (out) {
                     if (out.status == 0) {
-                        layer.msg(msgok,{icon: 1},function () {
+                        layer.msg(msgok,{icon: 1,shade:0.3,time:1000},function () {
                             $('#reload').click();
                         })
                     } else {
@@ -141,11 +141,7 @@
                         return
                     }
                 }, "json");
-                setTimeout(function(){
-                    layer.closeAll('loading');
-                }, 2000);
-
-
+                layer.closeAll('loading');
                 layer.close(index);
             });
             return ;

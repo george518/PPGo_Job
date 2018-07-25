@@ -150,7 +150,7 @@
                     layer.load();
                     $.post('/task/ajaxrun', {id:id}, function (out) {
                         if (out.status == 0) {
-                            layer.msg("操作成功",{icon: 1},function () {
+                            layer.msg("操作成功",{icon: 1,shade:0.3,time:1000},function () {
                                 window.location.href="/tasklog/list?task_id="+id
                             })
                         } else {
@@ -166,7 +166,7 @@
             }else if (event==='audit' || event==='start' || event==='pause' || event==="nopass"){
                 $.post('/task/ajax'+event, {id:id}, function (out) {
                     if (out.status == 0) {
-                        layer.msg("操作成功",{icon: 1},function () {
+                        layer.msg("操作成功",{icon: 1,shade:0.3,time:1000},function () {
                             window.location.reload()
                         })
                     } else {

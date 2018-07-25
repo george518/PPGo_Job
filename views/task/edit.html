@@ -61,7 +61,7 @@
             <div class="layui-input-inline mw400">
                 <input type="text" name="cron_spec" id="cron_spec" lay-verify="required" autocomplete="off" placeholder="时间表达式" class="layui-input" value="{{.task.CronSpec}}">
             </div>
-            <div class="layui-form-mid layui-word-aux"><a href="/help" target="_blank"><i class="fa fa-question-circle" aria-hidden="true"></i></a></div>
+            <div class="layui-form-mid layui-word-aux"><a href="http://www.haodaquan.com/129" target="_blank"><i class="fa fa-question-circle" aria-hidden="true"></i></a></div>
         </div>
 
         <div class="layui-form-item">
@@ -96,7 +96,7 @@
         var error_info = "{{.flash.error}}";
         if(error_info){
             layer.msg(error_info,{icon: 2,shade:0.3},function () {
-                window.history.go(-1)
+                self.location=document.referrer;
             })
             return;
         }
@@ -108,16 +108,22 @@
         })
 
         form.on('submit(sub)', function(data){
+            var isAdmin = "{{.isAdmin}}";
             var msg = "编辑任务需要重新审核，是否确认需要编辑？";
+            var okmsg = "操作成功，可去【任务审核】中查看该任务";
+
+            if (isAdmin==1){
+                msg = "是否确认需要编辑？";
+                okmsg = "操作成功";
+            }
 
             layer.confirm(msg, {icon: 3, title:'提示'}, function(index){
                 layer.load();
                 var form_data = data.field;
                 $.post('{{urlfor "TaskController.AjaxSave"}}', form_data, function (out) {
                     if (out.status == 0) {
-                        layer.msg("操作成功，可去【任务审核】中查看该任务",{icon: 1},function () {
-                            //window.location.href="/task/list"
-                            window.history.go(-1)
+                        layer.msg(okmsg,{icon: 1,shade:0.3,time:1000},function () {
+                            self.location=document.referrer;
                         })
                     } else {
                         layer.msg(out.message)

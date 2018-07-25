@@ -96,7 +96,7 @@
             var form_data = $("form").serialize();
             $.post('{{urlfor "UserController.AjaxSave"}}', form_data, function (out) {
                 if (out.status == 0) {
-                    layer.msg("操作成功,请重新登录",{icon: 1},function () {
+                    layer.msg("操作成功,请重新登录",{icon: 1,shade:0.3,time:1000},function () {
                         top.location.href="/login_out"
                     })
                 } else {

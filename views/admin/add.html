@@ -68,7 +68,7 @@ var $;
 
         var error_info = "{{.flash.error}}";
         if(error_info){
-            layer.msg(error_info,{icon: 2,shade:0.3},function () {
+            layer.msg(error_info,{icon: 2,shade:0.3,time:1000},function () {
                 window.history.go(-1)
             })
             return;
@@ -91,7 +91,7 @@ var $;
             var form_data = $("form").serialize();
             $.post('{{urlfor "AdminController.AjaxSave"}}', form_data, function (out) {
                 if (out.status == 0) {
-                    layer.msg("操作成功",{icon: 1},function () {
+                    layer.msg("操作成功",{icon: 1,shade:0.3,time:1000},function () {
                         window.location.reload()
                     })
                 } else {

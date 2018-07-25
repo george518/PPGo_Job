@@ -62,14 +62,13 @@
             ,url: '/task/table'
             ,cols: [[
                 {checkbox: true, fixed: true},
-                {field:'id', title: 'ID', align:'center',sort: true, width:100}
+                {field:'id', title: 'ID', align:'center', width:50,sort: true}
                 ,{field:'task_name',width:300, title: '任务名称'}
                 ,{field:'description',title: '任务说明'}
-
                 ,{field:'next_time', width:170,title: '下次执行时间'}
-                ,{field:'pre_time',width:170, title: '上次执行时间'}
-                ,{field:'execute_times', width:70,title: '次数'}
-                ,{fixed: 'right', width:200, align:'center', title:'操作', toolbar: '#bar'}
+                ,{field:'pre_time', title: '上次执行时间'}
+                ,{field:'execute_times', title: '次数'}
+                ,{fixed: 'right', width:150, align:'center', title:'操作', toolbar: '#bar'}
             ]]
             ,id: 'listReload'
             ,page: true
@@ -107,7 +106,7 @@
                     layer.load();
                     $.post('/task/ajaxrun', {id:data.id}, function (out) {
                         if (out.status == 0) {
-                            layer.msg("操作成功",{icon: 1},function () {
+                            layer.msg("操作成功",{icon: 1,shade:0.3,time:1000},function () {
                                 window.location.href="/tasklog/list?task_id="+data.id
                             })
                         } else {
@@ -151,7 +150,7 @@
                 layer.load();
                 $.post('/task/ajax'+action, {"ids":ids}, function (out) {
                     if (out.status == 0) {
-                        layer.msg("操作成功",{icon: 1},function () {
+                        layer.msg("操作成功",{icon: 1,shade:0.3,time:1000},function () {
                             $('#reload').click();
                         })
                     } else {

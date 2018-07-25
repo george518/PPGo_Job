@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <title>{{.siteName}}</title>
+    <link rel="shortcut icon" href="/static/admin/images/favicon.ico">
     <link rel="stylesheet" href="/static/layui/css/layui.css">
     <link rel="stylesheet" href="/static/admin/css/main.css?t=10">
     <link rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css" media="all">
@@ -11,13 +12,13 @@
 <body class="layui-layout-body">
 <div class="layui-layout layui-layout-admin">
     <div class="layui-header">
-        <div class="layui-logo">{{.siteName}}<font style="font-size: 12px"> {{.version}}</font></div>
+        <div class="layui-logo">&nbsp;&nbsp;&nbsp;<img src="/static/admin/images/logo.png" width="20" height="20"/> &nbsp;{{.siteName}}<font style="font-size: 12px"> {{.version}}</font></div>
         <!-- 头部区域（可配合layui已有的水平导航） -->
         <ul class="layui-nav layui-layout-left">
 
         </ul>
         <ul class="layui-nav layui-layout-right pp-nav-item" >
-            {{/*<li class="layui-nav-item"><a href="http://ppgojob.haodaquan.com/index.html">使用手册</a></li>*/}}
+            <li class="layui-nav-item"><a href="http://www.haodaquan.com/127" target="_blank">文档说明</a></li>
             <li class="layui-nav-item pp-nav-item" >
                 <a href="javascript:;">
                     <img src="/static/admin/images/header.jpg" class="layui-nav-img"> {{.loginUserName}}
@@ -83,7 +84,7 @@
 
     <div class="layui-footer" style="border-top: 2px solid #e4e4e4">
         <!-- 底部固定区域 -->
-        © Power by PPGo_Job V2.0
+        © Power by <a href="http://www.haodaquan.com/" target="_blank">PPGo_Job V2.0 </a>
     </div>
 </div>
 <script src="/static/layui/layui.js"></script>
