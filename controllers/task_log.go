@@ -58,6 +58,7 @@ func (self *TaskLogController) Table() {
 	TextStatus := []string{
 		"<font color='red'><i class='fa fa-times-circle'></i> 错误</font>",
 		"<font color='green'><i class='fa fa-check-square'></i> 正常</font>",
+		"<font color='red'><i class='fa fa-question-circle'></i> 未知</font>",
 	}
 
 	Status, err := self.GetInt("status")
@@ -79,6 +80,9 @@ func (self *TaskLogController) Table() {
 		row["process_time"] = float64(v.ProcessTime) / 1000
 		row["ouput_size"] = libs.SizeFormat(float64(len(v.Output)))
 		index := v.Status + 1
+		if index > 1 {
+			index = 2
+		}
 		row["status"] = TextStatus[index]
 
 		list[k] = row
@@ -99,6 +103,7 @@ func (self *TaskLogController) Detail() {
 	LogTextStatus := []string{
 		"<font color='red'><i class='fa fa-times-circle'></i> 错误</font>",
 		"<font color='green'><i class='fa fa-check-square'></i> 正常</font>",
+		"<font color='red'><i class='fa fa-question-circle'></i> 未知</font>",
 	}
 	row := make(map[string]interface{})
 	row["id"] = tasklog.Id
@@ -110,6 +115,9 @@ func (self *TaskLogController) Detail() {
 	row["error"] = tasklog.Error
 
 	index := tasklog.Status + 1
+	if index > 1 {
+		index = 2
+	}
 	row["status"] = LogTextStatus[index]
 
 	self.Data["taskLog"] = row
