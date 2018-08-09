@@ -266,25 +266,13 @@ func (j *Job) Run() {
 		log.Status = models.TASK_ERROR
 		log.Error = err.Error() + ":" + cmdErr
 	}
-	fmt.Println()
-	fmt.Println()
-	fmt.Println(log.Status, j.task.IsNotify)
 
 	if log.Status < 0 && j.task.IsNotify == 1 {
-		fmt.Println()
-		fmt.Println()
-		fmt.Println(j.task.NotifyUserIds)
-
-		fmt.Println()
-
-		fmt.Println(j.task.NotifyUserIds != "0")
-		fmt.Println(j.task.NotifyUserIds != "")
 		if j.task.NotifyUserIds != "0" && j.task.NotifyUserIds != "" {
-			admin_info := AllAdminInfo(j.task.NotifyUserIds)
-			fmt.Println("ADMIN:", admin_info)
+			adminInfo := AllAdminInfo(j.task.NotifyUserIds)
 			phone := make([]string, 0)
 			toEmail := ""
-			for _, v := range admin_info {
+			for _, v := range adminInfo {
 				if v.Phone != "0" && v.Phone != "" {
 					phone = append(phone, v.Phone)
 				}
@@ -293,9 +281,6 @@ func (j *Job) Run() {
 				}
 			}
 			toEmail = strings.TrimRight(toEmail, ";")
-
-			fmt.Println("EMAIL:", toEmail)
-			fmt.Println("TYPE:", j.task.NotifyType)
 
 			TextStatus := []string{
 				"<font color='red'>超时</font>",
@@ -342,9 +327,18 @@ func (j *Job) Run() {
 					fmt.Println("发送邮件错误", toEmail)
 				}
 
-			} else if j.task.NotifyType == 1 {
+			} else if j.task.NotifyType == 1 && len(phone) > 0 {
 				//信息
-
+				TextStatus := []string{
+					" 超时",
+					" 错误",
+					" 正常",
+				}
+				param := make(map[string]string)
+				param["task_id"] = " " + strconv.Itoa(j.task.Id)
+				param["task_name"] = " " + j.task.TaskName
+				param["status"] = " " + TextStatus[status]
+				notify.SendSmsToChan(phone, param)
 			}
 
 		}

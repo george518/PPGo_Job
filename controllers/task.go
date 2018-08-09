@@ -166,8 +166,7 @@ func (self *TaskController) Detail() {
 	}
 
 	//是否出错通知
-	self.Data["adminInfo"] = []int{0}
-	fmt.Println(task.NotifyUserIds)
+	self.Data["adminInfo"] = []*AdminInfo{}
 	if task.NotifyUserIds != "0" && task.NotifyUserIds != "" {
 		self.Data["adminInfo"] = AllAdminInfo(task.NotifyUserIds)
 	}
