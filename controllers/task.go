@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/george518/PPGo_Job/jobs"
 	"github.com/george518/PPGo_Job/models"
@@ -38,6 +39,9 @@ func (self *TaskController) Add() {
 	self.Data["taskGroup"] = taskGroupLists(self.taskGroups, self.userId)
 	self.Data["serverGroup"] = serverLists(self.serverGroups, self.userId)
 	self.Data["isAdmin"] = self.userId
+	self.Data["adminInfo"] = AllAdminInfo("")
+
+	fmt.Println(self.Data["adminInfo"])
 	self.display()
 }
 
@@ -55,15 +59,28 @@ func (self *TaskController) Edit() {
 	}
 	self.Data["task"] = task
 
+	self.Data["adminInfo"] = AllAdminInfo("")
+
 	// 分组列表
 	self.Data["taskGroup"] = taskGroupLists(self.taskGroups, self.userId)
 	self.Data["serverGroup"] = serverLists(self.serverGroups, self.userId)
 	self.Data["isAdmin"] = self.userId
+	var notifyUserIds []int
+	if task.NotifyUserIds != "0" {
+		notifyUserIdsStr := strings.Split(task.NotifyUserIds, ",")
+		for _, v := range notifyUserIdsStr {
+			i, _ := strconv.Atoi(v)
+			notifyUserIds = append(notifyUserIds, i)
+		}
+	}
+
+	self.Data["notify_user_ids"] = notifyUserIds
 	self.display()
 }
 
 func (self *TaskController) Copy() {
 	self.Data["pageTitle"] = "复制任务"
+	self.Data["adminInfo"] = AllAdminInfo("")
 
 	id, _ := self.GetInt("id")
 	task, err := models.TaskGetById(id)
@@ -75,6 +92,15 @@ func (self *TaskController) Copy() {
 	// 分组列表
 	self.Data["taskGroup"] = taskGroupLists(self.taskGroups, self.userId)
 	self.Data["serverGroup"] = serverLists(self.serverGroups, self.userId)
+	var notifyUserIds []int
+	if task.NotifyUserIds != "0" {
+		notifyUserIdsStr := strings.Split(task.NotifyUserIds, ",")
+		for _, v := range notifyUserIdsStr {
+			i, _ := strconv.Atoi(v)
+			notifyUserIds = append(notifyUserIds, i)
+		}
+	}
+	self.Data["notify_user_ids"] = notifyUserIds
 	self.display()
 }
 
@@ -138,6 +164,13 @@ func (self *TaskController) Detail() {
 			updateName = admin.RealName
 		}
 	}
+
+	//是否出错通知
+	self.Data["adminInfo"] = []int{0}
+	fmt.Println(task.NotifyUserIds)
+	if task.NotifyUserIds != "0" && task.NotifyUserIds != "" {
+		self.Data["adminInfo"] = AllAdminInfo(task.NotifyUserIds)
+	}
 	self.Data["CreateName"] = createName
 	self.Data["UpdateName"] = updateName
 	self.Data["serverName"] = serverName
@@ -157,6 +190,9 @@ func (self *TaskController) AjaxSave() {
 		task.CronSpec = strings.TrimSpace(self.GetString("cron_spec"))
 		task.Command = strings.TrimSpace(self.GetString("command"))
 		task.Timeout, _ = self.GetInt("timeout")
+		task.IsNotify, _ = self.GetInt("is_notify")
+		task.NotifyType, _ = self.GetInt("notify_type")
+		task.NotifyUserIds = strings.TrimSpace(self.GetString("notify_user_ids"))
 
 		msg, isBan := checkCommand(task.Command)
 		if !isBan {
@@ -194,6 +230,9 @@ func (self *TaskController) AjaxSave() {
 	task.CronSpec = strings.TrimSpace(self.GetString("cron_spec"))
 	task.Command = strings.TrimSpace(self.GetString("command"))
 	task.Timeout, _ = self.GetInt("timeout")
+	task.IsNotify, _ = self.GetInt("is_notify")
+	task.NotifyType, _ = self.GetInt("notify_type")
+	task.NotifyUserIds = strings.TrimSpace(self.GetString("notify_user_ids"))
 	task.UpdateId = self.userId
 	task.Status = 2 //审核中,超级管理员不需要
 	if self.userId == 1 {

@@ -285,6 +285,42 @@ func serverListByGroupId(groupId int) []string {
 	return servers
 }
 
+type adminInfo struct {
+	Id       int
+	Email    string
+	Phone    string
+	RealName string
+}
+
+func AllAdminInfo(adminIds string) []*adminInfo {
+	Filters := make([]interface{}, 0)
+	Filters = append(Filters, "status", 1)
+	//Filters = append(Filters, "id__gt", 1)
+	var notifyUserIds []int
+	if adminIds != "0" && adminIds != "" {
+		notifyUserIdsStr := strings.Split(adminIds, ",")
+		for _, v := range notifyUserIdsStr {
+			i, _ := strconv.Atoi(v)
+			notifyUserIds = append(notifyUserIds, i)
+		}
+		Filters = append(Filters, "id__in", notifyUserIds)
+	}
+	Result, _ := models.AdminGetList(1, 1000, Filters...)
+
+	adminInfos := make([]*adminInfo, 0)
+	for _, v := range Result {
+		ai := adminInfo{
+			Id:       v.Id,
+			Email:    v.Email,
+			Phone:    v.Phone,
+			RealName: v.RealName,
+		}
+		adminInfos = append(adminInfos, &ai)
+	}
+
+	return adminInfos
+}
+
 type serverList struct {
 	GroupId   int
 	GroupName string

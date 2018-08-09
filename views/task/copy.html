@@ -1,3 +1,8 @@
+<style>
+    .notify{
+        display: none;
+    }
+</style>
 <div class="layui-layout layui-layout-admin" style="padding-left: 40px;margin-top: 20px;">
     <form class="layui-form" action="" method="post" >
         <div class="layui-form-item">
@@ -79,6 +84,36 @@
             </div>
             <div class="layui-form-mid layui-word-aux"></div>
         </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200">出错通知</label>
+            <div class="layui-input-inline ">
+                <input type="radio" name="is_notify" lay-verify="required" value="1" lay-filter="is_notify" title="是" {{if eq .task.IsNotify 1}}checked{{end}}>
+                <input type="radio" name="is_notify" lay-verify="required" value="0" lay-filter="is_notify" title="否" {{if eq .task.IsNotify 0}}checked{{end}}>
+            </div>
+            <div class="layui-form-mid layui-word-aux"></div>
+        </div>
+
+        <div class="layui-form-item notify">
+            <hr>
+            <label class="layui-form-label mw200">通知类型</label>
+            <div class="layui-input-inline ">
+                <input type="radio" name="notify_type" lay-verify="required" value="0" title="邮件" {{if eq .task.NotifyType 0}}checked{{end}}>
+                <input type="radio" name="notify_type" lay-verify="required" value="1" title="短信" {{if eq .task.NotifyType 1}}checked{{end}}>
+            </div>
+            <div class="layui-form-mid layui-word-aux"></div>
+        </div>
+
+        <div class="layui-form-item  notify">
+            <label class="layui-form-label mw200">通知用户</label>
+            <div class="layui-input-inline mw400 ">
+            {{range $k, $v := .adminInfo}}
+                <input type="checkbox" name="notify_user" lay-filter="notify_user" title="{{$v.RealName}}" value="{{$v.Id}}" lay-skin="primary" {{range $ks,$vs:=$.notify_user_ids}} {{if eq $v.Id $vs}}checked{{end}}{{end}}>
+            {{end}}
+                <input type="hidden" name="notify_user_ids" id="notify_user_ids" value="{{.task.NotifyUserIds}}">
+            </div>
+            <div class="layui-form-mid layui-word-aux"></div>
+        </div>
         <input type="hidden" name="id" id="id" value="0">
         <div class="layui-form-item">
             <label class="layui-form-label mw200"></label>
@@ -105,6 +140,32 @@
                 tips: [1, '#0FA6D8'] //还可配置颜色
             });
         })
+
+        if ($("input[name=is_notify]:checked").val()==1){
+            $(".notify").show();
+        }
+        form.on('radio(is_notify)', function(data){
+            if(data.value==1){
+                $(".notify").show()
+            }else{
+                $(".notify").hide()
+            }
+        });
+
+        var notify_user_ids = [];
+        form.on('checkbox(notify_user)', function(data){
+            if(data.elem.checked==true){
+                notify_user_ids.push(data.value)
+            }else{
+                $.each(notify_user_ids,function(index,item){
+                    // index是索引值（即下标）   item是每次遍历得到的值；
+                    if(item==data.value){
+                        notify_user_ids.splice(index,1);
+                    }
+                });
+            }
+            $("#notify_user_ids").val(notify_user_ids.join(","));
+        });
 
         form.on('submit(sub)', function(data){
             var form_data = data.field;

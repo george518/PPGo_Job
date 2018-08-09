@@ -1,3 +1,8 @@
+<style>
+    .notify{
+        display: none;
+    }
+</style>
 <div class="layui-layout layui-layout-admin" style="padding-left: 40px;margin-top: 20px;">
     <form class="layui-form" action="" method="post" >
         <div class="layui-form-item">
@@ -49,8 +54,8 @@
             <label class="layui-form-label mw200">是否单例</label>
             <div class="layui-input-inline ">
 
-                <input type="radio" name="concurrent" lay-verify="concurrent" value="0" title="是" checked>
-                <input type="radio" name="concurrent" lay-verify="concurrent" value="1" title="否" >
+                <input type="radio" name="concurrent" lay-verify="required" value="0" title="是" checked>
+                <input type="radio" name="concurrent" lay-verify="required" value="1" title="否" >
 
             </div>
             <div class="layui-form-mid layui-word-aux"><i class="fa fa-info-circle" aria-hidden="true" id="des"></i></div>
@@ -78,6 +83,38 @@
             </div>
             <div class="layui-form-mid layui-word-aux"></div>
         </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200">出错通知</label>
+            <div class="layui-input-inline ">
+                <input type="radio" name="is_notify" lay-verify="required" value="1" lay-filter="is_notify" title="是" >
+                <input type="radio" name="is_notify" lay-verify="required" value="0" lay-filter="is_notify" title="否" checked>
+            </div>
+            <div class="layui-form-mid layui-word-aux"></div>
+        </div>
+
+        <div class="layui-form-item notify">
+            <hr>
+            <label class="layui-form-label mw200">通知类型</label>
+            <div class="layui-input-inline ">
+                <input type="radio" name="notify_type" lay-verify="required" value="0" title="邮件" checked>
+                <input type="radio" name="notify_type" lay-verify="required" value="1" title="短信" >
+            </div>
+            <div class="layui-form-mid layui-word-aux"></div>
+        </div>
+
+        <div class="layui-form-item  notify">
+            <label class="layui-form-label mw200">通知用户</label>
+            <div class="layui-input-inline mw400 ">
+            {{range $k, $v := .adminInfo}}
+                <input type="checkbox" name="notify_user" lay-filter="notify_user" title="{{$v.RealName}}" value="{{$v.Id}}" lay-skin="primary">
+            {{end}}
+                <input type="hidden" name="notify_user_ids" id="notify_user_ids" value="">
+            </div>
+            <div class="layui-form-mid layui-word-aux"></div>
+        </div>
+
+
         <input type="hidden" name="id" id="id" value="0">
         <div class="layui-form-item">
             <label class="layui-form-label mw200"></label>
@@ -104,6 +141,30 @@
                 tips: [1, '#0FA6D8'] //还可配置颜色
             });
         })
+
+
+        var notify_user_ids = [];
+        form.on('checkbox(notify_user)', function(data){
+            if(data.elem.checked==true){
+                notify_user_ids.push(data.value)
+            }else{
+                $.each(notify_user_ids,function(index,item){
+                    // index是索引值（即下标）   item是每次遍历得到的值；
+                    if(item==data.value){
+                        notify_user_ids.splice(index,1);
+                    }
+                });
+            }
+            $("#notify_user_ids").val(notify_user_ids.join(","));
+        });
+        form.on('radio(is_notify)', function(data){
+            if(data.value==1){
+                $(".notify").show()
+            }else{
+                $(".notify").hide()
+            }
+        });
+
 
 
         form.on('submit(sub)', function(data){

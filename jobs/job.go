@@ -18,7 +18,10 @@ import (
 
 	"github.com/astaxie/beego"
 	"github.com/george518/PPGo_Job/models"
+	"github.com/george518/PPGo_Job/notify"
 	"golang.org/x/crypto/ssh"
+	"strconv"
+	"strings"
 )
 
 type Job struct {
@@ -187,7 +190,6 @@ func RemoteCommandJobByPassword(id int, name string, command string, servers *mo
 		var c bytes.Buffer
 		session.Stdout = &b
 		session.Stderr = &c
-
 		//session.Output(command)
 		if err := session.Run(command); err != nil {
 			return "", "", err, false
@@ -264,10 +266,131 @@ func (j *Job) Run() {
 		log.Status = models.TASK_ERROR
 		log.Error = err.Error() + ":" + cmdErr
 	}
+	fmt.Println()
+	fmt.Println()
+	fmt.Println(log.Status, j.task.IsNotify)
+
+	if log.Status < 0 && j.task.IsNotify == 1 {
+		fmt.Println()
+		fmt.Println()
+		fmt.Println(j.task.NotifyUserIds)
+
+		fmt.Println()
+
+		fmt.Println(j.task.NotifyUserIds != "0")
+		fmt.Println(j.task.NotifyUserIds != "")
+		if j.task.NotifyUserIds != "0" && j.task.NotifyUserIds != "" {
+			admin_info := AllAdminInfo(j.task.NotifyUserIds)
+			fmt.Println("ADMIN:", admin_info)
+			phone := make([]string, 0)
+			toEmail := ""
+			for _, v := range admin_info {
+				if v.Phone != "0" && v.Phone != "" {
+					phone = append(phone, v.Phone)
+				}
+				if v.Email != "0" && v.Email != "" {
+					toEmail += v.Email + ";"
+				}
+			}
+			toEmail = strings.TrimRight(toEmail, ";")
+
+			fmt.Println("EMAIL:", toEmail)
+			fmt.Println("TYPE:", j.task.NotifyType)
+
+			TextStatus := []string{
+				"<font color='red'>超时</font>",
+				"<font color='red'>错误</font>",
+				"<font color='green'>正常</font>",
+			}
+
+			status := log.Status + 2
+
+			if j.task.NotifyType == 0 && toEmail != "" {
+				//邮件
+				//SendToChan(to, subject, body, mailtype string) bool
+				subject := fmt.Sprintf("PPGo_Job定时任务异常：%s", j.task.TaskName)
+				body := fmt.Sprintf(
+					`Hello,定时任务出问题了：
+<p style="font-size:16px;">任务执行详情：</p>
+<p style="display:block; padding:10px; background:#efefef;border:1px solid #e4e4e4">
+任务 ID：%d<br/>
+任务名称：%s<br/>
+执行时间：%s<br/>
+执行耗时：%f秒<br/>
+执行状态：%s
+</p>
+<p style="font-size:16px;">任务执行输出</p>
+<p style="display:block; padding:10px; background:#efefef;border:1px solid #e4e4e4">
+%s
+</p>
+<br/>
+<br/>
+<p>-----------------------------------------------------------------<br />
+本邮件由PPGo_Job定时系统自动发出，请勿回复<br />
+如果要取消邮件通知，请登录到系统进行设置<br />
+</p>
+`, j.task.Id,
+					j.task.TaskName,
+					beego.Date(time.Unix(log.CreateTime, 0), "Y-m-d H:i:s"),
+					float64(log.ProcessTime)/1000,
+					TextStatus[status],
+					log.Error)
+				mailtype := "html"
+
+				ok := notify.SendToChan(toEmail, subject, body, mailtype)
+				if !ok {
+					fmt.Println("发送邮件错误", toEmail)
+				}
+
+			} else if j.task.NotifyType == 1 {
+				//信息
+
+			}
+
+		}
+	}
+
 	j.logId, _ = models.TaskLogAdd(log)
 
 	// 更新上次执行时间
 	j.task.PrevTime = t.Unix()
 	j.task.ExecuteTimes++
 	j.task.Update("PrevTime", "ExecuteTimes")
+}
+
+//冗余代码
+type adminInfo struct {
+	Id       int
+	Email    string
+	Phone    string
+	RealName string
+}
+
+func AllAdminInfo(adminIds string) []*adminInfo {
+	Filters := make([]interface{}, 0)
+	Filters = append(Filters, "status", 1)
+	//Filters = append(Filters, "id__gt", 1)
+	var notifyUserIds []int
+	if adminIds != "0" && adminIds != "" {
+		notifyUserIdsStr := strings.Split(adminIds, ",")
+		for _, v := range notifyUserIdsStr {
+			i, _ := strconv.Atoi(v)
+			notifyUserIds = append(notifyUserIds, i)
+		}
+		Filters = append(Filters, "id__in", notifyUserIds)
+	}
+	Result, _ := models.AdminGetList(1, 1000, Filters...)
+
+	adminInfos := make([]*adminInfo, 0)
+	for _, v := range Result {
+		ai := adminInfo{
+			Id:       v.Id,
+			Email:    v.Email,
+			Phone:    v.Phone,
+			RealName: v.RealName,
+		}
+		adminInfos = append(adminInfos, &ai)
+	}
+
+	return adminInfos
 }

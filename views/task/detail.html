@@ -91,6 +91,31 @@
             </tr>
 
             <tr>
+                <td>出错通知</td>
+                <td>{{if eq .task.IsNotify 0}}否{{end}} {{if eq .task.IsNotify 1}}否{{end}}</td>
+                <td></td>
+            </tr>
+
+            {{if eq .task.IsNotify 1}}
+            <tr>
+                <td>通知类型</td>
+                <td>{{if eq .task.NotifyType 1}}短信{{end}} {{if eq .task.NotifyType 0}}邮件{{end}}</td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td>通知用户</td>
+                <td>
+                {{range $k, $v := .adminInfo}}
+                    {{$v.RealName}} &nbsp;&nbsp;&nbsp;
+                {{end}}
+                </td>
+                <td></td>
+            </tr>
+
+            {{end}}
+
+            <tr>
                 <td>创建时间</td>
                 <td>{{.CreateTime}}</td>
                 <td></td>

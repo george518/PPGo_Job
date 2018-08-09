@@ -46,7 +46,6 @@ func (self *RoleController) Edit() {
 	row["id"] = role.Id
 	row["role_name"] = role.RoleName
 	row["detail"] = role.Detail
-	row["detail"] = role.Detail
 	row["task_group_ids"] = role.TaskGroupIds
 	row["server_group_ids"] = role.ServerGroupIds
 	self.Data["role"] = row

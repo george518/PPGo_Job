@@ -21,22 +21,25 @@ const (
 )
 
 type Task struct {
-	Id           int
-	GroupId      int
-	ServerId     int
-	TaskName     string
-	Description  string
-	CronSpec     string
-	Concurrent   int
-	Command      string
-	Timeout      int
-	ExecuteTimes int
-	PrevTime     int64
-	Status       int
-	CreateId     int
-	UpdateId     int
-	CreateTime   int64
-	UpdateTime   int64
+	Id            int
+	GroupId       int
+	ServerId      int
+	TaskName      string
+	Description   string
+	CronSpec      string
+	Concurrent    int
+	Command       string
+	Timeout       int
+	ExecuteTimes  int
+	PrevTime      int64
+	Status        int
+	IsNotify      int
+	NotifyType    int
+	NotifyUserIds string
+	CreateId      int
+	UpdateId      int
+	CreateTime    int64
+	UpdateTime    int64
 }
 
 func (t *Task) TableName() string {
