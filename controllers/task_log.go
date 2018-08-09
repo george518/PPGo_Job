@@ -56,16 +56,15 @@ func (self *TaskLogController) Table() {
 	}
 
 	TextStatus := []string{
+		"<font color='orange'><i class='fa fa-question-circle'></i> 超时</font>",
 		"<font color='red'><i class='fa fa-times-circle'></i> 错误</font>",
 		"<font color='green'><i class='fa fa-check-square'></i> 正常</font>",
-		"<font color='red'><i class='fa fa-question-circle'></i> 未知</font>",
 	}
 
 	Status, err := self.GetInt("status")
 
 	if err == nil && Status != 9 {
-		status := Status + 1
-		filters = append(filters, "status", status)
+		filters = append(filters, "status", Status)
 	}
 	filters = append(filters, "task_id", taskId)
 
@@ -78,9 +77,13 @@ func (self *TaskLogController) Table() {
 		row["task_id"] = v.TaskId
 		row["start_time"] = beego.Date(time.Unix(v.CreateTime, 0), "Y-m-d H:i:s")
 		row["process_time"] = float64(v.ProcessTime) / 1000
-		row["ouput_size"] = libs.SizeFormat(float64(len(v.Output)))
-		index := v.Status + 1
-		if index > 1 {
+		if v.Status == 0 {
+			row["output_size"] = libs.SizeFormat(float64(len(v.Output)))
+		} else {
+			row["output_size"] = libs.SizeFormat(float64(len(v.Error)))
+		}
+		index := v.Status + 2
+		if index > 2 {
 			index = 2
 		}
 		row["status"] = TextStatus[index]
@@ -101,21 +104,26 @@ func (self *TaskLogController) Detail() {
 		return
 	}
 	LogTextStatus := []string{
+		"<font color='orange'><i class='fa fa-question-circle'></i>超时</font>",
 		"<font color='red'><i class='fa fa-times-circle'></i> 错误</font>",
 		"<font color='green'><i class='fa fa-check-square'></i> 正常</font>",
-		"<font color='red'><i class='fa fa-question-circle'></i> 未知</font>",
 	}
 	row := make(map[string]interface{})
 	row["id"] = tasklog.Id
 	row["task_id"] = tasklog.TaskId
 	row["start_time"] = beego.Date(time.Unix(tasklog.CreateTime, 0), "Y-m-d H:i:s")
 	row["process_time"] = float64(tasklog.ProcessTime) / 1000
-	row["ouput_size"] = libs.SizeFormat(float64(len(tasklog.Output)))
-	row["ouput"] = tasklog.Output
+	if tasklog.Status == 0 {
+		row["output_size"] = libs.SizeFormat(float64(len(tasklog.Output)))
+	} else {
+		row["output_size"] = libs.SizeFormat(float64(len(tasklog.Error)))
+	}
+
+	row["output"] = tasklog.Output
 	row["error"] = tasklog.Error
 
-	index := tasklog.Status + 1
-	if index > 1 {
+	index := tasklog.Status + 2
+	if index > 2 {
 		index = 2
 	}
 	row["status"] = LogTextStatus[index]
@@ -177,6 +185,12 @@ func (self *TaskLogController) Detail() {
 		if err == nil {
 			updateName = admin.RealName
 		}
+	}
+
+	//是否出错通知
+	self.Data["adminInfo"] = []int{0}
+	if task.NotifyUserIds != "0" && task.NotifyUserIds != "" {
+		self.Data["adminInfo"] = AllAdminInfo(task.NotifyUserIds)
 	}
 	self.Data["CreateName"] = createName
 	self.Data["UpdateName"] = updateName

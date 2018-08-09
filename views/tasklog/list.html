@@ -9,8 +9,10 @@
                     <div class="layui-inline" style="width: 20%;text-align: left">
                         <select name="status" lay-filter="status">
                             <option value="9">全部</option>
-                            <option value="-1">正常</option>
-                            <option value="-2">错误</option>
+                            <option value="0">正常</option>
+                            <option value="-1">错误</option>
+                            <option value="-2">超时</option>
+
                         </select>
                     </div>
                     <button class="layui-btn" data-type="reload" id="reload">查询</button>
@@ -48,7 +50,7 @@
                 ,{field:'task_id', title: '任务ID', align:'center',sort: true, width:150}
                 ,{field:'start_time',title: '开始时间'}
                 ,{field:'process_time',width:100, title: '执行时间'}
-                ,{field:'ouput_size',title: '输出'}
+                ,{field:'output_size',title: '输出'}
                 ,{field:'status', width:170,title: '状态'}
                 ,{fixed: 'right', align:'center', title:'操作', toolbar: '#bar'}
             ]]
