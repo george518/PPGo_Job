@@ -35,7 +35,7 @@ func (self *HomeController) Help() {
 func (self *HomeController) Start() {
 	groups_map := serverGroupLists(self.serverGroups, self.userId)
 	//计算总任务数量
-	_, count := models.TaskGetList(1, 200)
+	_, count := models.TaskGetList(1, 300)
 	// 即将执行的任务
 	entries := jobs.GetEntries(30)
 	jobList := make([]map[string]interface{}, len(entries))
