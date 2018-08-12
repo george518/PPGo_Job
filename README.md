@@ -8,6 +8,10 @@ PPGo_Job是一款定时任务可视化的、多人多权限的管理系统，采
 
 码云地址：https://gitee.com/georgehao/PPGo_Job
 
+```
+文档地址：http://www.haodaquan.com/topics/1###
+```
+
 V1.x版本是一个简单的定时任务管理系统，进入V1.0 ：https://github.com/george518/PPGo_Job/releases/tag/v1.2.1
 相对于V1.x版本，V2.0新增以下功能和特性：
 
