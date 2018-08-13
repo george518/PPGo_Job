@@ -8,11 +8,13 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/george518/PPGo_Job/jobs"
 	"github.com/george518/PPGo_Job/libs"
 	"github.com/george518/PPGo_Job/models"
 	"runtime"
+	//"strconv"
 	"time"
 )
 
@@ -111,7 +113,13 @@ func (self *HomeController) Start() {
 	// this.Data["errLogs"] = errLogs
 	self.Data["jobs"] = jobList
 	self.Data["cpuNum"] = runtime.NumCPU()
-	self.display()
+
+	//系统运行信息
+
+	fmt.Println(models.StartTime)
+
+	info := libs.SystemInfo(models.StartTime)
+	self.Data["sysInfo"] = info
 
 	self.Data["pageTitle"] = "系统概况"
 	self.display()

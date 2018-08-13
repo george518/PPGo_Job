@@ -17,7 +17,10 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func Init() {
+var StartTime int64
+
+func Init(startTime int64) {
+	StartTime = startTime
 	dbhost := beego.AppConfig.String("db.host")
 	dbport := beego.AppConfig.String("db.port")
 	dbuser := beego.AppConfig.String("db.user")
