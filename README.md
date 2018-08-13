@@ -84,11 +84,17 @@ appname = PPGo_Job2
 httpport = 8080
 runmode = dev
 
+version= V2.2
+
 # 允许同时运行的任务数
 jobs.pool = 1000
 
 # 站点名称
 site.name = 定时任务管理器
+
+#通知方式 0=邮件，1=信息
+notify.type = 0
+
 
 # 数据库配置
 db.host = 127.0.0.1
@@ -98,6 +104,19 @@ db.port = 3306
 db.name = ppgo_job2
 db.prefix = pp_
 db.timezone = Asia/Shanghai
+
+# 邮件通知配置
+email.host = smtp.mxhichina.com
+email.port = 25
+email.from = ci@xxx.cn
+email.user = ci@xxx.cn
+email.password = "xxxxxx"
+email.pool = 10
+
+
+# 短信通知方式配置
+msg.url = http://chanxiyou.com/api/tools/send_sms
+msg.pool = 10
 ```
 
 编译安装-可能会遇到的问题
