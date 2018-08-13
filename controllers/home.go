@@ -8,7 +8,6 @@
 package controllers
 
 import (
-	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/george518/PPGo_Job/jobs"
 	"github.com/george518/PPGo_Job/libs"
@@ -115,9 +114,6 @@ func (self *HomeController) Start() {
 	self.Data["cpuNum"] = runtime.NumCPU()
 
 	//系统运行信息
-
-	fmt.Println(models.StartTime)
-
 	info := libs.SystemInfo(models.StartTime)
 	self.Data["sysInfo"] = info
 

@@ -30,13 +30,6 @@ func SystemInfo(startTime int64) map[string]interface{} {
 	} else {
 		afterLastGC = "0"
 	}
-	fmt.Println()
-	fmt.Println()
-	fmt.Println()
-	fmt.Println()
-	//fmt.Println(startTime)
-	//fmt.Println(now)
-	//fmt.Println(costTime)
 
 	return map[string]interface{}{
 		"服务运行时间":    fmt.Sprintf("%d天%d小时%d分%d秒", costTime/(3600*24), costTime%(3600*24)/3600, costTime%3600/60, costTime%(60)),
