@@ -1,7 +1,7 @@
 language: go
 go:
   - 1.9.x
-script: go test `go list ./... | grep -v vendor`
+script: go get github.com/george518/PPGo_Job
 
 notifications:
   on_success: never
