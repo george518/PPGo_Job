@@ -1,6 +1,8 @@
 PPGo_Job定时任务管理系统 V2.0
 ====
 
+[![](https://travis-ci.org/george518/PPGo_Job.svg?branch=master)](https://travis-ci.org/george518/PPGo_Job)
+
 ![](http://www.haodaquan.com/Uploads/article/2018-07-26/153262059813931.png)
 
 PPGo_Job是一款定时任务可视化的、多人多权限的管理系统，采用golang开发，安装方便，资源消耗少，支持大并发，可同时管理多台服务器上的定时任务。
