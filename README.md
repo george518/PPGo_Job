@@ -1,16 +1,19 @@
 PPGo_Job定时任务管理系统 V2.0
 ====
 
+![](http://www.haodaquan.com/Uploads/article/2018-07-26/153262059813931.png)
+
 PPGo_Job是一款定时任务可视化的、多人多权限的管理系统，采用golang开发，安装方便，资源消耗少，支持大并发，可同时管理多台服务器上的定时任务。
 
 前言：PPGo_Job V1.x版本开源一年多，好几个朋友的公司都在用，反响还不错，当然，也有好多朋友提了不少合理的意见和建议，所以这次干脆重构了一下，连UI也重新编码。目前V2.0版本
 已经用于生产环境。
 
 码云地址：https://gitee.com/georgehao/PPGo_Job
+Github地址:https://github.com/george518/PPGo_Job
 
-```
 文档地址：http://www.haodaquan.com/topics/1###
-```
+Wiki:https://github.com/george518/PPGo_Job/wiki
+
 
 V1.x版本是一个简单的定时任务管理系统，进入V1.0 ：https://github.com/george518/PPGo_Job/releases/tag/v1.2.1
 相对于V1.x版本，V2.0新增以下功能和特性：
