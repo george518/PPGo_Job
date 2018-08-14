@@ -1,0 +1,10 @@
+
+language: go
+go:
+- '1.9.2'
+sudo: false
+install:
+- go get -v github.com/george518/PPGo_Job
+script:true
+on_success: never
+on_failure: always
