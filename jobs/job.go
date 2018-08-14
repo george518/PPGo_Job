@@ -16,12 +16,14 @@ import (
 	"runtime/debug"
 	"time"
 
+	"runtime"
+	"strconv"
+	"strings"
+
 	"github.com/astaxie/beego"
 	"github.com/george518/PPGo_Job/models"
 	"github.com/george518/PPGo_Job/notify"
 	"golang.org/x/crypto/ssh"
-	"strconv"
-	"strings"
 )
 
 type Job struct {
@@ -72,7 +74,12 @@ func NewCommandJob(id int, name string, command string) *Job {
 		bufOut := new(bytes.Buffer)
 		bufErr := new(bytes.Buffer)
 		//cmd := exec.Command("/bin/bash", "-c", command)
-		cmd := exec.Command("sh", "-c", command)
+		var cmd *exec.Cmd
+		if runtime.GOOS == "windows" {
+			cmd = exec.Command("sh", "-c", command)
+		} else {
+			cmd = exec.Command("CMD", "/C", command)
+		}
 		cmd.Stdout = bufOut
 		cmd.Stderr = bufErr
 		cmd.Start()
