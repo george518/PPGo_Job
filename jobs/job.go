@@ -76,9 +76,9 @@ func NewCommandJob(id int, name string, command string) *Job {
 		//cmd := exec.Command("/bin/bash", "-c", command)
 		var cmd *exec.Cmd
 		if runtime.GOOS == "windows" {
-			cmd = exec.Command("sh", "-c", command)
-		} else {
 			cmd = exec.Command("CMD", "/C", command)
+		} else {
+			cmd = exec.Command("sh", "-c", command)
 		}
 		cmd.Stdout = bufOut
 		cmd.Stderr = bufErr
