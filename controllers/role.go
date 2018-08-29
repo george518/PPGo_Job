@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"fmt"
+
 	"github.com/astaxie/beego"
 	"github.com/george518/PPGo_Job/models"
 )
@@ -100,13 +101,18 @@ func (self *RoleController) AjaxSave() {
 		if id, err := models.RoleAdd(role); err != nil {
 			self.ajaxMsg(err.Error(), MSG_ERR)
 		} else {
-			ra := new(models.RoleAuth)
+			ras := make([]models.RoleAuth, 0)
 			authsSlice := strings.Split(auths, ",")
 			for _, v := range authsSlice {
+				//ra := new(models.RoleAuth)
+				ra := models.RoleAuth{}
 				aid, _ := strconv.Atoi(v)
 				ra.AuthId = aid
 				ra.RoleId = id
-				models.RoleAuthAdd(ra)
+				ras = append(ras, ra)
+			}
+			if len(ras) > 0 {
+				models.RoleAuthBatchAdd(&ras)
 			}
 		}
 		self.ajaxMsg("", MSG_OK)
@@ -120,15 +126,20 @@ func (self *RoleController) AjaxSave() {
 	} else {
 		// 删除该角色权限
 		models.RoleAuthDelete(role_id)
-		ra := new(models.RoleAuth)
+
+		ras := make([]models.RoleAuth, 0)
 		authsSlice := strings.Split(auths, ",")
 		for _, v := range authsSlice {
+			//ra := new(models.RoleAuth)
+			ra := models.RoleAuth{}
 			aid, _ := strconv.Atoi(v)
 			ra.AuthId = aid
 			ra.RoleId = int64(role_id)
-			models.RoleAuthAdd(ra)
+			ras = append(ras, ra)
 		}
-
+		if len(ras) > 0 {
+			models.RoleAuthBatchAdd(&ras)
+		}
 	}
 	self.ajaxMsg("", MSG_OK)
 }

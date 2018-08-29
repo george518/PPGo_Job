@@ -28,6 +28,10 @@ func RoleAuthAdd(ra *RoleAuth) (int64, error) {
 	return orm.NewOrm().Insert(ra)
 }
 
+func RoleAuthBatchAdd(ras *[]RoleAuth) (int64, error) {
+	return orm.NewOrm().InsertMulti(100, ras)
+}
+
 func RoleAuthGetById(id int) ([]*RoleAuth, error) {
 	list := make([]*RoleAuth, 0)
 	query := orm.NewOrm().QueryTable(TableName("uc_role_auth"))
