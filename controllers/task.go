@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"fmt"
+
 	"github.com/astaxie/beego"
 	"github.com/george518/PPGo_Job/jobs"
 	"github.com/george518/PPGo_Job/models"
@@ -26,6 +27,11 @@ type TaskController struct {
 func (self *TaskController) List() {
 	self.Data["pageTitle"] = "任务管理"
 	self.Data["taskGroup"] = taskGroupLists(self.taskGroups, self.userId)
+	self.Data["groupId"] = 0
+	arr := strings.Split(self.Ctx.GetCookie("groupid"), "|")
+	if len(arr) > 0 {
+		self.Data["groupId"], _ = strconv.Atoi(arr[0])
+	}
 	self.display()
 }
 
@@ -488,7 +494,16 @@ func (self *TaskController) Table() {
 		limit = 30
 	}
 
-	groupId, _ := self.GetInt("group_id")
+	groupId, _ := self.GetInt("group_id", 0)
+
+	if groupId > 0 {
+		self.Ctx.SetCookie("groupid", strconv.Itoa(groupId)+"|job")
+	} else {
+		arr := strings.Split(self.Ctx.GetCookie("groupid"), "|")
+		if len(arr) > 0 {
+			groupId, _ = strconv.Atoi(arr[0])
+		}
+	}
 
 	status, _ := self.GetInt("status")
 
@@ -514,28 +529,26 @@ func (self *TaskController) Table() {
 		filters = append(filters, "status__in", ids)
 	}
 
-	if self.userId != 1 {
-		groups := strings.Split(self.taskGroups, ",")
+	if groupId > 0 {
+		filters = append(filters, "group_id", groupId)
+	} else {
+		if self.userId != 1 {
+			groups := strings.Split(self.taskGroups, ",")
 
-		groupsIds := make([]int, 0)
-		for _, v := range groups {
-			id, _ := strconv.Atoi(v)
-			groupsIds = append(groupsIds, id)
+			groupsIds := make([]int, 0)
+			for _, v := range groups {
+				id, _ := strconv.Atoi(v)
+				groupsIds = append(groupsIds, id)
+			}
+			filters = append(filters, "group_id__in", groupsIds)
 		}
-		filters = append(filters, "group_id__in", groupsIds)
 	}
 
 	if taskName != "" {
 		filters = append(filters, "task_name__icontains", taskName)
 	}
 
-	if groupId > 0 {
-		self.Ctx.SetCookie("group_id", strconv.Itoa(groupId)+"|job")
-		filters = append(filters, "group_id", groupId)
-	}
-
 	result, count := models.TaskGetList(page, self.pageSize, filters...)
-
 	list := make([]map[string]interface{}, len(result))
 
 	for k, v := range result {

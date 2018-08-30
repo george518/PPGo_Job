@@ -18,7 +18,7 @@
                                 <select name="modules" lay-verify="required" lay-filter="select_group" id="group_id" lay-search="">
                                     <option value="">直接选择或搜索选择</option>
                                     {{range $k, $v := .taskGroup}}
-                                        <option value="{{$k}}">{{$v}}</option>
+                                        <option value="{{$k}}" {{if eq $k $.groupId}} selected {{end}}>{{$v}}</option>
                                     {{end}}
                                 </select>
                             </div>
