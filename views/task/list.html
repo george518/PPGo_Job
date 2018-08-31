@@ -16,7 +16,7 @@
                             {{/*<label class="layui-form-label">搜索选择框</label>*/}}
                             <div class="layui-input-inline" style="text-align: left">
                                 <select name="modules" lay-verify="required" lay-filter="select_group" id="group_id" lay-search="">
-                                    <option value="">直接选择或搜索选择</option>
+                                    <option value="0">全部</option>
                                     {{range $k, $v := .taskGroup}}
                                         <option value="{{$k}}" {{if eq $k $.groupId}} selected {{end}}>{{$v}}</option>
                                     {{end}}
@@ -88,10 +88,8 @@
         };
 
         form.on('select(select_group)', function(data){
-            // console.log(data.elem); //得到select原始DOM对象
-            // console.log(data.value); //得到被选中的值
-            // console.log(data.othis); //得到美化后的DOM对象
             $("#reload").click()
+            form.render('select'); //刷新select选择框渲染
         });
 
         //监听工具条

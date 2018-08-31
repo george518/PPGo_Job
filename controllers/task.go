@@ -494,15 +494,20 @@ func (self *TaskController) Table() {
 		limit = 30
 	}
 
-	groupId, _ := self.GetInt("group_id", 0)
+	groupId, _ := self.GetInt("group_id", -1)
 
-	if groupId > 0 {
-		self.Ctx.SetCookie("groupid", strconv.Itoa(groupId)+"|job")
-	} else {
+	//0-全部，-1如果存在，n,如果不存在，0
+
+	if groupId == -1 {
+		groupId = 0
 		arr := strings.Split(self.Ctx.GetCookie("groupid"), "|")
 		if len(arr) > 0 {
 			groupId, _ = strconv.Atoi(arr[0])
 		}
+	}
+
+	if groupId > 0 {
+		self.Ctx.SetCookie("groupid", strconv.Itoa(groupId)+"|job")
 	}
 
 	status, _ := self.GetInt("status")
@@ -528,10 +533,8 @@ func (self *TaskController) Table() {
 		ids := []int{0, 1}
 		filters = append(filters, "status__in", ids)
 	}
-
-	if groupId > 0 {
-		filters = append(filters, "group_id", groupId)
-	} else {
+	//搜索全部
+	if groupId == 0 {
 		if self.userId != 1 {
 			groups := strings.Split(self.taskGroups, ",")
 
@@ -542,8 +545,9 @@ func (self *TaskController) Table() {
 			}
 			filters = append(filters, "group_id__in", groupsIds)
 		}
+	} else if groupId > 0 {
+		filters = append(filters, "group_id", groupId)
 	}
-
 	if taskName != "" {
 		filters = append(filters, "task_name__icontains", taskName)
 	}
