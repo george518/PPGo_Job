@@ -108,8 +108,10 @@
         //监听工具条
         table.on('tool(table_filter)', function(obj){
             var data = obj.data;
+            var task_id = data.task_id;
             if(obj.event === 'detail'){
-                window.location.href="/tasklog/detail?id="+data.id
+                // window.location.href="/tasklog/detail?id="+data.id
+                window.parent.openTab("/tasklog/detail?id="+data.id,task_id+' 日志详情',"admin_log_detail-"+data.id,'');
             } else{
                 layer.msg('操作不存在')
             }
