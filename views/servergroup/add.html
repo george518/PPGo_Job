@@ -1,9 +1,5 @@
 <div class="layui-layout layui-layout-admin" style="padding-left: 40px;margin-top: 20px;">
-<div style="margin: 10px 0px">
-        <blockquote class="layui-elem-quote">
-            说明：新建资源分组
-        </blockquote>
-    </div>
+
 <form class="layui-form" action="" method="post" >
     <div class="layui-form-item">
         <label class="layui-form-label">分组名称</label>
@@ -15,7 +11,7 @@
 
     <div class="layui-form-item">
         <label class="layui-form-label">分组说明</label>
-        <div class="layui-input-inline" style="min-width: 400px;">
+        <div class="layui-input-inline" style="min-width: 300px;">
             <textarea name="description" id="description" placeholder="请输入内容" class="layui-textarea"></textarea>
         </div>
 
@@ -36,8 +32,9 @@ var $;
         var $ = layui.jquery;
         var error_info = "{{.flash.error}}";
         if(error_info){
-            layer.msg(error_info,{icon: 2,shade:0.3},function () {
-                window.history.go(-1)
+            layer.msg(error_info,{icon: 2,shade:0.5},function () {
+                window.parent.layer.closeAll();
+                window.parent.location.reload();
             })
             return;
         }
@@ -45,8 +42,9 @@ var $;
             var form_data = $("form").serialize();
             $.post('{{urlfor "ServerGroupController.AjaxSave"}}', form_data, function (out) {
                 if (out.status == 0) {
-                    layer.msg("操作成功",{icon: 1,shade:0.3,time:1000},function () {
-                        window.history.go(-1)
+                    layer.msg("操作成功",{icon: 1,shade:0.5,time:1000},function () {
+                        window.parent.layer.closeAll();
+                        window.parent.location.reload();
                     })
                 } else {
                     layer.msg(out.message)

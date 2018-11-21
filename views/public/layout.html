@@ -12,17 +12,21 @@
     <link rel="stylesheet" href="/static/admin/css/app.css?t=2">
     <link rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css" media="all">
 </head>
+
+<style>
+    .modal-hide{
+        display: none;
+    }
+</style>
 <body>
 <!-- 公共头部  start-->
-<div class="nav-title">
+<div class="nav-title {{if .hideTop}} modal-hide {{end}}">
     <div class="tl fl">
-        <a onclick="javascript:history.go(-1);" style="font-size: 14px;"><i class="fa fa-arrow-left" aria-hidden="true"></i></a>
+        <i class="fa fa-clock-o fa-spin" style="font-size: 18px;" aria-hidden="true"></i>
     {{.pageTitle}}
     </div>
     <div class="tr fr">
-        <button class="layui-btn layui-btn-radius layui-btn-primary layui-btn-xs" onclick="javascript:history.go(-1);"><i class="fa fa-arrow-left" aria-hidden="true"></i></button>
         <button class="layui-btn layui-btn-radius layui-btn-primary layui-btn-xs" onclick="javascript:window.location.reload();"><i class="fa fa-refresh" aria-hidden="true"></i></button>
-
     </div>
 </div>
 <!-- 公共头部 end-->
@@ -30,16 +34,16 @@
 {{.LayoutContent}}
 
 
-<script>
+{{/*<script>*/}}
 
-    layui.use(['table','form','element'], function(){
-        var table = layui.table;
-        var form = layui.form;
-        var element = layui.element;
+    {{/*layui.use(['table','form','element'], function(){*/}}
+        {{/*var table = layui.table;*/}}
+        {{/*var form = layui.form;*/}}
+        {{/*var element = layui.element;*/}}
 
-    });
+    {{/*});*/}}
 
-</script>
+{{/*</script>*/}}
 
 
 </body>

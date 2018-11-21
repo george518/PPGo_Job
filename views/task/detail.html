@@ -157,26 +157,31 @@
             })
             return;
         }
+
+
+        var task_name = "{{.task.TaskName}}";
         $('.layui-btn-container button').on('click',function () {
             var event = $(this).attr('lay-filter');
+
             if (event==='edit'){
                 var status =" {{.task.Status}}";
                 if(status==1){
                     layer.msg("运行状态无法编辑任务，请先暂停任务");
                     return;
                 }
-                window.location.href="/task/edit?id="+id
+                window.parent.openTab("/task/edit?id="+id,task_name+' 编辑',"admin_task_edit-"+id,'fa-edit');
             }else if(event==='log'){
-                window.location.href="/tasklog/list?task_id="+id;
+                window.parent.openTab("/tasklog/list?task_id="+id,task_name+'日志',"admin_log-"+id,'');
             }else if(event==='copy'){
-                window.location.href="/task/copy?id="+id;
+                window.parent.openTab("/task/copy?id="+id,task_name+' 复制',"admin_task_copy-"+id,'fa-copy');
             }else if (event==='run'){
                 layer.confirm("测试执行任务，注意不要超时，请确认执行", {icon: 3, title:'提示'}, function(index){
                     layer.load();
                     $.post('/task/ajaxrun', {id:id}, function (out) {
                         if (out.status == 0) {
                             layer.msg("操作成功",{icon: 1,shade:0.3,time:1000},function () {
-                                window.location.href="/tasklog/list?task_id="+id
+                                window.parent.openTab("/tasklog/list?task_id="+id,task_name+' 日志',"admin_task_log-"+id,'');
+
                             })
                         } else {
                             layer.msg(out.message)

@@ -28,10 +28,10 @@ func (self *TaskController) List() {
 	self.Data["pageTitle"] = "任务管理"
 	self.Data["taskGroup"] = taskGroupLists(self.taskGroups, self.userId)
 	self.Data["groupId"] = 0
-	arr := strings.Split(self.Ctx.GetCookie("groupid"), "|")
-	if len(arr) > 0 {
-		self.Data["groupId"], _ = strconv.Atoi(arr[0])
-	}
+	//arr := strings.Split(self.Ctx.GetCookie("groupid"), "|")
+	//if len(arr) > 0 {
+	//	self.Data["groupId"], _ = strconv.Atoi(arr[0])
+	//}
 	self.display()
 }
 
@@ -498,21 +498,22 @@ func (self *TaskController) Table() {
 
 	//0-全部，-1如果存在，n,如果不存在，0
 
-	if groupId == -1 {
-		groupId = 0
-		arr := strings.Split(self.Ctx.GetCookie("groupid"), "|")
-		if len(arr) > 0 {
-			groupId, _ = strconv.Atoi(arr[0])
-		}
-	}
+	//if groupId == -1 {
+	//	groupId = 0
+	//	arr := strings.Split(self.Ctx.GetCookie("groupid"), "|")
+	//	if len(arr) > 0 {
+	//		groupId, _ = strconv.Atoi(arr[0])
+	//	}
+	//}
 
-	if groupId > 0 {
-		self.Ctx.SetCookie("groupid", strconv.Itoa(groupId)+"|job")
-	}
+	//if groupId > 0 {
+	//	self.Ctx.SetCookie("groupid", strconv.Itoa(groupId)+"|job")
+	//}
 
 	status, _ := self.GetInt("status")
 
-	taskName := strings.TrimSpace(self.GetString("taskName"))
+	taskName := strings.TrimSpace(self.GetString("task_name"))
+
 	StatusText := []string{
 		"<font color='red'><i class='fa fa-minus-square'></i></font>",
 		"<font color='green'><i class='fa fa-check-square'></i></font>",
@@ -551,6 +552,8 @@ func (self *TaskController) Table() {
 	if taskName != "" {
 		filters = append(filters, "task_name__icontains", taskName)
 	}
+
+	//fmt.Println(filters, "----------", taskName)
 
 	result, count := models.TaskGetList(page, self.pageSize, filters...)
 	list := make([]map[string]interface{}, len(result))

@@ -52,7 +52,7 @@
                     {{range $i, $e := $.SideMenu2}}
                     {{if eq $e.Pid $elem.Id}}
                         <dd>
-                            <a data-url="{{$e.AuthUrl}}" data-icon="&#xe715;" data-title="{{$e.AuthName}}"  class="pointer" data-id="{{$e.Id}}">
+                            <a data-url="{{$e.AuthUrl}}" data-icon="{{$e.Icon}}" data-title="{{$e.AuthName}}"  class="pointer" data-id="{{$e.Id}}">
                                 <i class="fa {{$e.Icon}}"></i>  &nbsp;&nbsp;<span>{{$e.AuthName}}</span>
                             </a>
                         </dd>
@@ -91,12 +91,58 @@
 <script>
     //JavaScript代码区域
     var $;
+    var element;
+    var width,height;
+
+    function delHtmlTag(str){
+        return str.replace(/<[^>]+>/g,"");//去掉所有的html标记
+    }
+
+    function getDelimiterLastString(str,delimiter) {
+        arr = str.split(delimiter);
+        if (arr.length>1){
+            return arr[arr.length-1];
+        }
+        return str;
+    }
+
+    function openTab(url,title,id,icon){
+
+        if (!url || !title || !id) {
+            return;
+        }
+
+        if (!icon) {
+            icon = " fa-clock-o ";
+        }
+        //判断是否存在
+        var is_exist = 0;
+        $(".layui-tab-title").find("li").each(function(){
+            var nav_id = $(this).attr("lay-id");
+            if (nav_id==id) {
+                is_exist = 1
+            }
+        })
+
+        if (is_exist==1) {
+            element.tabChange("main_tab", id);
+        }else{
+            var content = '<iframe src="'+url+'" scrolling="yes" width="'+width+'" height="'+height+'" frameborder="0"></iframe>';
+            title = '<i class="fa '+icon+' back_space1"></i>'+title;
+            element.tabAdd('main_tab', {
+                title: title
+                ,content: content //支持传入html
+                ,id: id
+            });
+
+            element.tabChange("main_tab", id);
+        }
+    }
+
     layui.use(['element','jquery','layer'], function(){
-        var element = layui.element;
+        element = layui.element;
         $ = layui.jquery;
         var layer = layui.layer;
-
-        var width,height;
 
         //frame大小适应开始
         resizeFrame();
@@ -143,6 +189,7 @@
             var title = elem.attr('data-title');
             var id = elem.attr('data-id');
             var icon = elem.attr('data-icon');
+
             if (!url || !title || !id) {
                 return;
             }

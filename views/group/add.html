@@ -1,9 +1,5 @@
 <div class="layui-layout layui-layout-admin" style="padding-left: 40px;margin-top: 20px;">
-<div style="margin: 10px 0px">
-        <blockquote class="layui-elem-quote">
-            说明：新建任务分组
-        </blockquote>
-    </div>
+
 <form class="layui-form" action="" method="post" >
     <div class="layui-form-item">
         <label class="layui-form-label">分组名称</label>
@@ -15,7 +11,7 @@
 
     <div class="layui-form-item">
         <label class="layui-form-label">分组说明</label>
-        <div class="layui-input-inline" style="min-width: 400px;">
+        <div class="layui-input-inline" style="min-width: 300px;">
             <textarea name="description" id="description" placeholder="请输入内容" class="layui-textarea"></textarea>
         </div>
 
@@ -30,14 +26,14 @@
 </form>
 </div>
 <script>
-var $;
     layui.use(['form','element','layer','jquery'],function(){
         var form = layui.form; //只有执行了这一步，部分表单元素才会自动修饰成功
         var $ = layui.jquery;
         var error_info = "{{.flash.error}}";
         if(error_info){
-            layer.msg(error_info,{icon: 2,shade:0.3},function () {
-                window.history.go(-1)
+            layer.msg(error_info,{icon: 2},function () {
+                window.parent.layer.closeAll();
+                window.parent.location.reload();
             })
             return;
         }
@@ -45,8 +41,9 @@ var $;
             var form_data = $("form").serialize();
             $.post('{{urlfor "GroupController.AjaxSave"}}', form_data, function (out) {
                 if (out.status == 0) {
-                    layer.msg("操作成功",{icon: 1,shade:0.3,time:1000},function () {
-                        window.history.go(-1)
+                    layer.msg("操作成功",{icon: 1,shade:0.5,time:1000},function () {
+                        window.parent.layer.closeAll();
+                        window.parent.location.reload();
                     })
                 } else {
                     layer.msg(out.message)
@@ -54,9 +51,9 @@ var $;
             }, "json");
             return false;
         });
-      
-      //但是，如果你的HTML是动态生成的，自动渲染就会失效
-      //因此你需要在相应的地方，执行下述方法来手动渲染，跟这类似的还有 element.init();
-      form.render();
-}); 
+
+        //但是，如果你的HTML是动态生成的，自动渲染就会失效
+        //因此你需要在相应的地方，执行下述方法来手动渲染，跟这类似的还有 element.init();
+        form.render();
+    });
 </script>

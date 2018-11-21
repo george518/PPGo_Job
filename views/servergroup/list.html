@@ -1,7 +1,7 @@
 <div class="layui-layout layui-layout-admin" style="padding-left: 20px;">
     <div class="layui-row" style="margin-top: 20px;">
         <div class="layui-col-xs6">
-            <a class="layui-btn" data-type="tabAdd" href="/servergroup/add">新增</a>
+            <button class="layui-btn" data-type="tabAdd" id="add">新增</button>
         </div>
         <div class="layui-col-xs6 search_text">
             <form class="layui-form" action="" onsubmit="javascript:return false;">
@@ -67,11 +67,24 @@
             }
         };
 
+        $("#add").on("click",function() {
+            layer.open({
+                title:'添加资源分组',
+                type: 2,
+                area: ['560px', '300px'],
+                content: ["/servergroup/add",'no'],
+            });
+        })
         //监听工具条
         table.on('tool(table_filter)', function(obj){
             var data = obj.data;
             if(obj.event === 'edit'){
-                window.location.href="/servergroup/edit?id="+data.id
+                layer.open({
+                    title:'编辑资源分组',
+                    type: 2,
+                    area: ['560px', '300px'],
+                    content: ["/servergroup/edit?id="+data.id,'no'],
+                });
             } else if(obj.event === 'del'){
 
                 layer.confirm('真的删除【'+data.group_name+'】分组么', function(index){

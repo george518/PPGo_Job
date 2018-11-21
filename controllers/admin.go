@@ -30,7 +30,6 @@ func (self *AdminController) List() {
 
 func (self *AdminController) Add() {
 	self.Data["pageTitle"] = "新增管理员"
-
 	// 角色
 	filters := make([]interface{}, 0)
 	filters = append(filters, "status", 1)

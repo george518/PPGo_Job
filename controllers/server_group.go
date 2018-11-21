@@ -13,9 +13,10 @@ import (
 
 	"fmt"
 
+	"strconv"
+
 	"github.com/astaxie/beego"
 	"github.com/george518/PPGo_Job/models"
-	"strconv"
 )
 
 type ServerGroupController struct {
@@ -29,10 +30,12 @@ func (self *ServerGroupController) List() {
 
 func (self *ServerGroupController) Add() {
 	self.Data["pageTitle"] = "新增分组"
+	self.Data["hideTop"] = true
 	self.display()
 }
 func (self *ServerGroupController) Edit() {
 	self.Data["pageTitle"] = "编辑分组"
+	self.Data["hideTop"] = true
 
 	id, _ := self.GetInt("id", 0)
 	group, _ := models.TaskGroupGetById(id)

@@ -1,7 +1,7 @@
 <div class="layui-layout layui-layout-admin" style="padding-left: 20px;">
     <div class="layui-row" style="margin-top: 20px;">
         <div class="layui-col-xs6">
-            <a class="layui-btn" data-type="tabAdd" href="/admin/add">新增</a>  
+            <button class="layui-btn" data-type="tabAdd" id="add">新增</button>
         </div>
         <div class="layui-col-xs6 search_text">
             <form class="layui-form" action="" onsubmit="javascript:return false;">
@@ -70,11 +70,17 @@
             }
         };
 
+        $("#add").on("click",function() {
+            window.parent.openTab("/admin/add",'新增用户',"admin_user_add-0",'fa-plus');
+        })
+
         //监听工具条
         table.on('tool(table_filter)', function(obj){
             var data = obj.data;
+            var real_name = data.real_name;
             if(obj.event === 'edit'){
-                window.location.href="/admin/edit?id="+data.id
+                // window.location.href="/admin/edit?id="+data.id
+                window.parent.openTab("/admin/edit?id="+data.id,real_name+' 用户编辑',"admin_user_edit-"+data.id,'fa-edit');
             } else if(obj.event === 'status'){
 
                 acts = "禁用";

@@ -171,8 +171,9 @@
             var form_data = data.field;
             $.post('{{urlfor "TaskController.AjaxSave"}}', form_data, function (out) {
                 if (out.status == 0) {
-                    layer.msg("操作成功",{icon: 1,shade:0.3,time:1000},function () {
-                        self.location=document.referrer;
+                    layer.msg("复制成功!，请到列表中查看",{icon: 1,shade:0.3,time:1000},function () {
+                        //self.location=document.referrer;
+                        window.location.reload();
                     })
                 } else {
                     layer.msg(out.message)

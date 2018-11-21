@@ -2,33 +2,29 @@
     <div class="layui-row" style="margin-top: 20px;">
         <div class="layui-col-xs6">
             <div class="layui-btn-group">
-                <a class="layui-btn" data-type="tabAdd" href="/task/add">新增</a>
+                <button class="layui-btn" data-type="tabAdd" id="add">新增</button>
                 <button class="layui-btn batch" data-type="batchstart" >启动</button>
                 <button class="layui-btn layui-btn-danger batch" data-type="batchpause" >暂停</button>cron
             </div>
         </div>
-        <div class="layui-col-xs6 search_text">
+        <div class="layui-col-xs6 search_text" style="text-align: right;">
+
             <form class="layui-form" action="" onsubmit="javascript:return false;">
                 <div class="demoTable">
-
                     <div class="layui-inline" style="width: 40%">
-
-                            {{/*<label class="layui-form-label">搜索选择框</label>*/}}
-                            <div class="layui-input-inline" style="text-align: left">
-                                <select name="modules" lay-verify="required" lay-filter="select_group" id="group_id" lay-search="">
-                                    <option value="0">全部</option>
-                                    {{range $k, $v := .taskGroup}}
-                                        <option value="{{$k}}" {{if eq $k $.groupId}} selected {{end}}>{{$v}}</option>
-                                    {{end}}
-                                </select>
-                            </div>
-
-                        {{/*<input class="layui-input" name="taskName" id="taskName" autocomplete="off" placeholder="任务名称" >*/}}
+                        <input class="layui-input" name="task_name" id="task_name" autocomplete="off"  placeholder="任务名称" >
                     </div>
-                    <button class="layui-btn" data-type="reload" id="reload" style="display: none">查询</button>
+                    <div class="layui-inline pp-search" style="width: 20%;text-align: left;">
+                        <select name="modules" lay-verify="required" lay-filter="select_group" id="group_id" lay-search="">
+                            <option value="0">全部</option>
+                            {{range $k, $v := .taskGroup}}
+                                <option value="{{$k}}" {{if eq $k $.groupId}} selected {{end}}>{{$v}}</option>
+                            {{end}}
+                        </select>
+                    </div>
+                    <button class="layui-btn" data-type="reload" id="reload"><i class="fa fa-search"></i>查询</button>
                 </div>
             </form>
-            
         </div>
     </div>
 
@@ -82,32 +78,39 @@
                 table.reload('listReload', {
                     where: {
                         group_id: $('#group_id').val(),
+                        task_name:$('#task_name').val(),
                     }
                 });
             }
         };
 
-        form.on('select(select_group)', function(data){
-            $("#reload").click()
-            form.render('select'); //刷新select选择框渲染
-        });
+        $("#add").on("click",function() {
+            window.parent.openTab("/task/add",'新增任务',"admin_task_add-0",'fa-plus');
+        })
+
+        // form.on('select(select_group)', function(data){
+        //     $("#reload").click()
+        //     form.render('select'); //刷新select选择框渲染
+        // });
 
         //监听工具条
         table.on('tool(table_filter)', function(obj){
             var data = obj.data;
+            var task_name = window.parent.delHtmlTag(data.task_name)
+            task_name = window.parent.getDelimiterLastString(task_name,"-")
             if(obj.event === 'edit'){
-                window.location.href="/task/edit?id="+data.id
+                window.parent.openTab("/task/edit?id="+data.id,task_name+' 编辑',"admin_task_edit-"+data.id,'fa-edit');
             } else if(obj.event === 'log'){
-                window.location.href="/tasklog/list?task_id="+data.id;
+                window.parent.openTab("/tasklog/list?task_id="+data.id,task_name+'日志',"admin_log-"+data.id,'');
             }else if (obj.event==='detail'){
-                window.location.href='/task/detail?id='+data.id;
+                window.parent.openTab('/task/detail?id='+data.id,task_name+'详情',"admin_task_detail-"+data.id,'fa-folder-open-o');
             }else if (obj.event==='run'){
                 layer.confirm("测试执行任务，注意不要超时，请确认执行", {icon: 3, title:'提示'}, function(index){
                     layer.load();
                     $.post('/task/ajaxrun', {id:data.id}, function (out) {
                         if (out.status == 0) {
                             layer.msg("操作成功",{icon: 1,shade:0.3,time:1000},function () {
-                                window.location.href="/tasklog/list?task_id="+data.id
+                                window.parent.openTab("/tasklog/list?task_id="+data.id,task_name+'运行日志',"admin_task_log-"+data.id,'');
                             })
                         } else {
                             layer.msg(out.message)

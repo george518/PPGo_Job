@@ -144,7 +144,8 @@
             $.post('{{urlfor "ServerController.AjaxSave"}}', form_data, function (out) {
                 if (out.status == 0) {
                     layer.msg("操作成功",{icon: 1,shade:0.3,time:1000},function () {
-                        window.history.go(-1)
+                        // window.history.go(-1)
+                        window.location.reload()
                     })
                 } else {
                     layer.msg(out.message)

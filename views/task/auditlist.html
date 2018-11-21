@@ -78,12 +78,15 @@
         //监听工具条
         table.on('tool(table_filter)', function(obj){
             var data = obj.data;
+            var task_name = window.parent.delHtmlTag(data.task_name)
+            task_name = window.parent.getDelimiterLastString(task_name,"-")
             if(obj.event === 'edit'){
                 window.location.href="/task/edit?id="+data.id
             } else if(obj.event === 'log'){
                 window.location.href="/tasklog/list?task_id="+data.id;
             }else if (obj.event==='detail'){
-                window.location.href='/task/detail?id='+data.id;
+                // window.location.href='/task/detail?id='+data.id;
+                window.parent.openTab('/task/detail?id='+data.id,task_name+'详情',"admin_task_audit_detail-"+data.id,'fa-folder-open-o');
             }else if (obj.event==='del'){
                 layer.confirm("确认要删除这条任务吗？", {icon: 3, title:'提示'}, function(index){
                     layer.load();
