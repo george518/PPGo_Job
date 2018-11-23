@@ -17,7 +17,7 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/george518/PPGo_Job/jobs"
 	"github.com/george518/PPGo_Job/models"
-	"github.com/robfig/cron"
+	"github.com/george518/PPGo_Job/crons"
 )
 
 type TaskController struct {
@@ -246,6 +246,10 @@ func (self *TaskController) AjaxSave() {
 	msg, isBan := checkCommand(task.Command)
 	if !isBan {
 		self.ajaxMsg("含有禁止命令："+msg, MSG_ERR)
+	}
+	
+	if _, err := cron.Parse(task.CronSpec); err != nil {
+		self.ajaxMsg("cron表达式无效", MSG_ERR)
 	}
 
 	if err := task.Update(); err != nil {
