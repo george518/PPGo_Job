@@ -43,8 +43,7 @@ func RoleAuthGetById(id int) ([]*RoleAuth, error) {
 }
 
 func RoleAuthDelete(id int) (int64, error) {
-	query := orm.NewOrm().QueryTable(TableName("uc_role_auth"))
-	return query.Filter("role_id", id).Delete()
+	return orm.NewOrm().Delete(&RoleAuth{RoleId: int64(id)})
 }
 
 //获取多个
