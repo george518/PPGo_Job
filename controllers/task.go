@@ -15,9 +15,9 @@ import (
 	"fmt"
 
 	"github.com/astaxie/beego"
+	"github.com/george518/PPGo_Job/crons"
 	"github.com/george518/PPGo_Job/jobs"
 	"github.com/george518/PPGo_Job/models"
-	"github.com/george518/PPGo_Job/crons"
 )
 
 type TaskController struct {
@@ -247,7 +247,7 @@ func (self *TaskController) AjaxSave() {
 	if !isBan {
 		self.ajaxMsg("含有禁止命令："+msg, MSG_ERR)
 	}
-	
+
 	if _, err := cron.Parse(task.CronSpec); err != nil {
 		self.ajaxMsg("cron表达式无效", MSG_ERR)
 	}
@@ -498,7 +498,7 @@ func (self *TaskController) Table() {
 		limit = 30
 	}
 
-	groupId, _ := self.GetInt("group_id", -1)
+	groupId, _ := self.GetInt("group_id", 0)
 
 	//0-全部，-1如果存在，n,如果不存在，0
 
@@ -515,7 +515,6 @@ func (self *TaskController) Table() {
 	//}
 
 	status, _ := self.GetInt("status")
-
 	taskName := strings.TrimSpace(self.GetString("task_name"))
 
 	StatusText := []string{
@@ -542,7 +541,6 @@ func (self *TaskController) Table() {
 	if groupId == 0 {
 		if self.userId != 1 {
 			groups := strings.Split(self.taskGroups, ",")
-
 			groupsIds := make([]int, 0)
 			for _, v := range groups {
 				id, _ := strconv.Atoi(v)
@@ -556,8 +554,6 @@ func (self *TaskController) Table() {
 	if taskName != "" {
 		filters = append(filters, "task_name__icontains", taskName)
 	}
-
-	//fmt.Println(filters, "----------", taskName)
 
 	result, count := models.TaskGetList(page, self.pageSize, filters...)
 	list := make([]map[string]interface{}, len(result))
