@@ -1,0 +1,33 @@
+version: '2'
+services:
+  web:
+    build:
+      context: .
+      dockerfile: .docker/web/Dockerfile
+    # ports from container exposed to the docker machine and the guest machine
+    ports:
+      # 80 on the host, 8080 on the guest. Websever listens on 8080
+      - "8080:8080" # http
+      # - "443:443" # https
+    # file with environment declarations for the container
+    env_file:
+      - .docker/web/.env
+    # Link to containers in another service
+    depends_on:
+      - db
+    command: ["./wait-for-it.sh", "db:3306", "--", "./PPGo_Job"]
+    # sync workspace folder with /go
+  db:
+    image: mysql:5.7
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_USER: gotest
+      MYSQL_PASSWORD: gotest
+      MYSQL_ROOT_PASSWORD: gotest
+      MYSQL_DATABASE: local_gotest
+    # sync folders. MySQL data is stored outside container so that rebuilding doesn't clear db.
+    # folder is at workspace root.
+    volumes:
+      - .docker/_local_mysql_data:/var/lib/mysql
+      - .docker/db:/docker-entrypoint-initdb.d
