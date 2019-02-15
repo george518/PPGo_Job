@@ -352,16 +352,21 @@ func (j *Job) Run() {
 				notify.SendSmsToChan(phone, param)
 			} else if j.task.NotifyType == 2 && len(dingtalk) > 0 {
 
+				TextStatus := []string{
+					" 超时",
+					" 错误",
+					" 正常",
+				}
 				content := fmt.Sprintf(
-					`定时任务异常：%s：\n
-							任务执行详情：\n
-							任务 ID：%d\n
-							任务名称：%s\n
-							执行时间：%s\n
-							执行耗时：%f秒\n
-							执行状态：%s\n
-							任务执行输出\n
-							%s`,
+					`定时任务异常：%s：
+任务执行详情：
+任务 ID：%d
+任务名称：%s
+执行时间：%s
+执行耗时：%f秒
+执行状态：%s
+任务执行输出
+%s`,
 					j.task.TaskName,
 					j.task.Id,
 					j.task.TaskName,
