@@ -15,10 +15,6 @@ import (
 	"time"
 )
 
-const (
-	VERSION = "2.2.0"
-)
-
 func init() {
 	//初始化数据模型
 	var StartTime = time.Now().Unix()
