@@ -23,7 +23,7 @@ type AjaxReturn struct {
 }
 
 type Sms struct {
-	Mobiles []string
+	Mobiles map[string]string
 	Param   map[string]string
 }
 
@@ -53,7 +53,7 @@ func init() {
 
 }
 
-func SendSmsToChan(mobiles []string, param map[string]string) bool {
+func SendSmsToChan(mobiles map[string]string, param map[string]string) bool {
 	sms := &Sms{
 		Mobiles: mobiles,
 		Param:   param,

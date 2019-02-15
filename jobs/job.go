@@ -277,18 +277,18 @@ func (j *Job) Run() {
 	if log.Status < 0 && j.task.IsNotify == 1 {
 		if j.task.NotifyUserIds != "0" && j.task.NotifyUserIds != "" {
 			adminInfo := AllAdminInfo(j.task.NotifyUserIds)
-			phone := make([]string, 0)
+			phone := make(map[string]string, 0)
+			dingtalk := make(map[string]string, 0)
 			toEmail := ""
-			dingtalk := make([]string, 0)
 			for _, v := range adminInfo {
 				if v.Phone != "0" && v.Phone != "" {
-					phone = append(phone, v.Phone)
+					phone[v.Phone] = v.Phone
 				}
 				if v.Email != "0" && v.Email != "" {
 					toEmail += v.Email + ";"
 				}
 				if v.Dingtalk != "0" && v.Dingtalk != "" {
-					dingtalk = append(dingtalk, v.Dingtalk)
+					dingtalk[v.Dingtalk] = v.Dingtalk
 				}
 			}
 			toEmail = strings.TrimRight(toEmail, ";")

@@ -27,7 +27,7 @@ type Text struct {
 }
 
 type Dingtalk struct {
-	Dingtalks []string
+	Dingtalks map[string]string
 	Content   string
 }
 
@@ -57,7 +57,7 @@ func init() {
 
 }
 
-func SendDingtalkToChan(dingtalks []string, content string) bool {
+func SendDingtalkToChan(dingtalks map[string]string, content string) bool {
 	dingTalk := &Dingtalk{
 		Dingtalks: dingtalks,
 		Content:   content,
