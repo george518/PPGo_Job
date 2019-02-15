@@ -13,6 +13,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"io"
 )
 
 type AjaxReturn struct {
@@ -54,5 +55,24 @@ func HttpGet(url string, param map[string]string) error {
 	if ajaxData.Status != 200 {
 		return errors.Errorf("msg %s", ajaxData.Message)
 	}
+	return nil
+}
+
+func HttpPost(url string, contentType string, body io.Reader) error {
+
+	resp, err := http.Post(url, contentType, body)
+
+	if err != nil {
+		return err
+	}
+
+	defer resp.Body.Close()
+
+	_, resErr := ioutil.ReadAll(resp.Body)
+
+	if resErr != nil {
+		return resErr
+	}
+
 	return nil
 }

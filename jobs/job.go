@@ -279,12 +279,16 @@ func (j *Job) Run() {
 			adminInfo := AllAdminInfo(j.task.NotifyUserIds)
 			phone := make([]string, 0)
 			toEmail := ""
+			dingtalk := make([]string, 0)
 			for _, v := range adminInfo {
 				if v.Phone != "0" && v.Phone != "" {
 					phone = append(phone, v.Phone)
 				}
 				if v.Email != "0" && v.Email != "" {
 					toEmail += v.Email + ";"
+				}
+				if v.Dingtalk != "0" && v.Dingtalk != "" {
+					dingtalk = append(dingtalk, v.Dingtalk)
 				}
 			}
 			toEmail = strings.TrimRight(toEmail, ";")
@@ -346,6 +350,27 @@ func (j *Job) Run() {
 				param["task_name"] = " " + j.task.TaskName
 				param["status"] = " " + TextStatus[status]
 				notify.SendSmsToChan(phone, param)
+			} else if j.task.NotifyType == 2 && len(dingtalk) > 0 {
+
+				content := fmt.Sprintf(
+					`定时任务异常：%s：\n
+							任务执行详情：\n
+							任务 ID：%d\n
+							任务名称：%s\n
+							执行时间：%s\n
+							执行耗时：%f秒\n
+							执行状态：%s\n
+							任务执行输出\n
+							%s`,
+					j.task.TaskName,
+					j.task.Id,
+					j.task.TaskName,
+					beego.Date(time.Unix(log.CreateTime, 0), "Y-m-d H:i:s"),
+					float64(log.ProcessTime)/1000,
+					TextStatus[status],
+					log.Error)
+
+				notify.SendDingtalkToChan(dingtalk, content)
 			}
 
 		}
@@ -364,6 +389,7 @@ type adminInfo struct {
 	Id       int
 	Email    string
 	Phone    string
+	Dingtalk string
 	RealName string
 }
 
@@ -388,6 +414,7 @@ func AllAdminInfo(adminIds string) []*adminInfo {
 			Id:       v.Id,
 			Email:    v.Email,
 			Phone:    v.Phone,
+			Dingtalk: v.Dingtalk,
 			RealName: v.RealName,
 		}
 		adminInfos = append(adminInfos, &ai)

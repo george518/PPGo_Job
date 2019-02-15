@@ -100,6 +100,7 @@
             <div class="layui-input-inline ">
                 <input type="radio" name="notify_type" lay-verify="required" value="0" title="邮件" {{if eq .task.NotifyType 0}}checked{{end}}>
                 <input type="radio" name="notify_type" lay-verify="required" value="1" title="短信" {{if eq .task.NotifyType 1}}checked{{end}}>
+                <input type="radio" name="notify_type" lay-verify="required" value="2" title="钉钉" {{if eq .task.NotifyType 2}}checked{{end}}>
             </div>
             <div class="layui-form-mid layui-word-aux"></div>
         </div>

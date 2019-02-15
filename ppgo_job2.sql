@@ -321,4 +321,12 @@ BEGIN;
 INSERT INTO `pp_user` VALUES ('1', 'admin', 'haodaquan@shoplinq.cn', 'abfcf6dcedfb4b5b1505d41a8b4c77e8', 'aYk4Q1P83v', '1528124357', '[', '0');
 COMMIT;
 
+BEGIN;
+ALTER TABLE `pp_task` CHANGE `notify_type` `notify_type` TINYINT(1) UNSIGNED NOT NULL DEFAULT '0' COMMENT '0-邮件通知，1-信息通知，2-钉钉通知，';
+COMMIT;
+
+BEGIN;
+ALTER TABLE `pp_uc_admin` ADD `dingtalk` VARCHAR(64) NULL COMMENT '钉钉' AFTER `email`;
+COMMIT;
+
 SET FOREIGN_KEY_CHECKS = 1;
