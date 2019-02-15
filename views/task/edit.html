@@ -96,7 +96,7 @@
         <div class="layui-form-item notify">
             <hr>
             <label class="layui-form-label mw200">通知类型</label>
-            <div class="layui-input-inline ">
+            <div class="layui-input-inline mw400">
                 <input type="radio" name="notify_type" lay-verify="required" value="0" title="邮件" {{if eq .task.NotifyType 0}}checked{{end}}>
                 <input type="radio" name="notify_type" lay-verify="required" value="1" title="短信" {{if eq .task.NotifyType 1}}checked{{end}}>
                 <input type="radio" name="notify_type" lay-verify="required" value="2" title="钉钉" {{if eq .task.NotifyType 2}}checked{{end}}>
