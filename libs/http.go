@@ -27,7 +27,11 @@ func HttpGet(url string, param map[string]string) (string, error) {
 	paramStr = strings.TrimRight(paramStr, "&")
 
 	if paramStr != "" {
-		url += "?" + paramStr
+		if strings.Contains(url, "?") {
+			url += "&" + paramStr
+		} else {
+			url += "?" + paramStr
+		}
 	}
 
 	resp, err := http.Get(url)
