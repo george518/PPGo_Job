@@ -12,7 +12,15 @@ import (
 	"github.com/george518/PPGo_Job/libs"
 	"log"
 	"time"
+	"encoding/json"
+	"github.com/pkg/errors"
 )
+
+type AjaxReturn struct {
+	Status  int         `json:"status"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data"`
+}
 
 type Sms struct {
 	Mobiles []string
@@ -36,7 +44,7 @@ func init() {
 				if !ok {
 					return
 				}
-				if err := m.SendSms(); err != nil {
+				if _, err := m.SendSms(); err != nil {
 					beego.Error("SendSms:", err.Error())
 				}
 			}
@@ -59,13 +67,30 @@ func SendSmsToChan(mobiles []string, param map[string]string) bool {
 	}
 }
 
-func (s *Sms) SendSms() error {
+func (s *Sms) SendSms() (string, error) {
+
 	for _, v := range s.Mobiles {
 		s.Param["mobile"] = v
-		err := libs.HttpGet(SmsUrl, s.Param)
+		res, err := libs.HttpGet(SmsUrl, s.Param)
+
 		if err != nil {
 			log.Println(err)
+			return "", err
 		}
+
+		ajaxData := AjaxReturn{}
+		jsonErr := json.Unmarshal([]byte(res), &ajaxData)
+
+		if jsonErr != nil {
+			return "", jsonErr
+		}
+
+		if ajaxData.Status != 200 {
+			return "", errors.Errorf("msg %s", ajaxData.Message)
+		}
+
+		return res, nil
+
 	}
-	return nil
+	return "", nil
 }

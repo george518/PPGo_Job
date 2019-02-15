@@ -353,21 +353,19 @@ func (j *Job) Run() {
 			} else if j.task.NotifyType == 2 && len(dingtalk) > 0 {
 
 				TextStatus := []string{
-					" 超时",
-					" 错误",
-					" 正常",
+					"超时",
+					"错误",
+					"正常",
 				}
 				content := fmt.Sprintf(
-					`定时任务异常：%s：
-任务执行详情：
+					`任务执行异常详情：
 任务 ID：%d
 任务名称：%s
 执行时间：%s
 执行耗时：%f秒
 执行状态：%s
-任务执行输出
+任务执行输出：
 %s`,
-					j.task.TaskName,
 					j.task.Id,
 					j.task.TaskName,
 					beego.Date(time.Unix(log.CreateTime, 0), "Y-m-d H:i:s"),

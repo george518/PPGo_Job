@@ -17,6 +17,15 @@ import (
 	"bytes"
 )
 
+type Msg struct {
+	MsgType string `json:"msgtype"`
+	Text    *Text  `json:"text"`
+}
+
+type Text struct {
+	Content string `json:"content"`
+}
+
 type Dingtalk struct {
 	Dingtalks []string
 	Content   string
@@ -39,7 +48,7 @@ func init() {
 				if !ok {
 					return
 				}
-				if err := m.SendDingtalk(); err != nil {
+				if _, err := m.SendDingtalk(); err != nil {
 					beego.Error("SendDingtalk:", err.Error())
 				}
 			}
@@ -62,16 +71,7 @@ func SendDingtalkToChan(dingtalks []string, content string) bool {
 	}
 }
 
-type Msg struct {
-	MsgType string `json:"msgtype"`
-	Text    *Text  `json:"text"`
-}
-
-type Text struct {
-	Content string `json:"content"`
-}
-
-func (s *Dingtalk) SendDingtalk() error {
+func (s *Dingtalk) SendDingtalk() (string, error) {
 
 	for _, v := range s.Dingtalks {
 
@@ -83,13 +83,16 @@ func (s *Dingtalk) SendDingtalk() error {
 		msgJson, err := json.Marshal(msg)
 		if err != nil {
 			log.Println(err)
+			return "", err
 		}
 
 		url := fmt.Sprintf(DingtalkUrl, v)
-		resErr := libs.HttpPost(url, "application/json;charset=utf-8", bytes.NewBuffer(msgJson))
-		if resErr != nil {
+		res, err := libs.HttpPost(url, "application/json;charset=utf-8", bytes.NewBuffer(msgJson))
+		if err != nil {
 			log.Println(err)
+			return "", err
 		}
+		return res, err
 	}
-	return nil
+	return "", nil
 }
