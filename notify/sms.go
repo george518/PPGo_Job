@@ -44,7 +44,7 @@ func init() {
 				if !ok {
 					return
 				}
-				if _, err := m.SendSms(); err != nil {
+				if err := m.SendSms(); err != nil {
 					beego.Error("SendSms:", err.Error())
 				}
 			}
@@ -67,7 +67,7 @@ func SendSmsToChan(mobiles []string, param map[string]string) bool {
 	}
 }
 
-func (s *Sms) SendSms() (string, error) {
+func (s *Sms) SendSms() error {
 
 	for _, v := range s.Mobiles {
 		s.Param["mobile"] = v
@@ -75,22 +75,22 @@ func (s *Sms) SendSms() (string, error) {
 
 		if err != nil {
 			log.Println(err)
-			return "", err
+			return err
 		}
 
 		ajaxData := AjaxReturn{}
 		jsonErr := json.Unmarshal([]byte(res), &ajaxData)
 
 		if jsonErr != nil {
-			return "", jsonErr
+			return jsonErr
 		}
 
 		if ajaxData.Status != 200 {
-			return "", errors.Errorf("msg %s", ajaxData.Message)
+			return errors.Errorf("msg %s", ajaxData.Message)
 		}
 
-		return res, nil
+		return nil
 
 	}
-	return "", nil
+	return nil
 }

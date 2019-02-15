@@ -48,7 +48,7 @@ func init() {
 				if !ok {
 					return
 				}
-				if _, err := m.SendDingtalk(); err != nil {
+				if err := m.SendDingtalk(); err != nil {
 					beego.Error("SendDingtalk:", err.Error())
 				}
 			}
@@ -71,7 +71,7 @@ func SendDingtalkToChan(dingtalks []string, content string) bool {
 	}
 }
 
-func (s *Dingtalk) SendDingtalk() (string, error) {
+func (s *Dingtalk) SendDingtalk() error {
 
 	for _, v := range s.Dingtalks {
 
@@ -80,19 +80,19 @@ func (s *Dingtalk) SendDingtalk() (string, error) {
 		text.Content = s.Content
 		msg.Text = text
 
-		msgJson, err := json.Marshal(msg)
+		body, err := json.Marshal(msg)
 		if err != nil {
 			log.Println(err)
-			return "", err
+			return err
 		}
 
 		url := fmt.Sprintf(DingtalkUrl, v)
-		res, err := libs.HttpPost(url, "application/json;charset=utf-8", bytes.NewBuffer(msgJson))
-		if err != nil {
-			log.Println(err)
-			return "", err
+		_, resErr := libs.HttpPost(url, "application/json;charset=utf-8", bytes.NewBuffer(body))
+		if resErr != nil {
+			log.Println(resErr)
+			return resErr
 		}
-		return res, err
+		return nil
 	}
-	return "", nil
+	return nil
 }
