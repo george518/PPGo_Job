@@ -195,6 +195,15 @@ func (self *TaskController) Detail() {
 	self.Data["CreateName"] = createName
 	self.Data["UpdateName"] = updateName
 	self.Data["serverName"] = serverName
+
+	self.Data["NotifyTplName"] = "未知"
+	if task.IsNotify == 1 {
+		notifyTpl, err := models.NotifyTplGetById(task.NotifyTplId)
+		if err == nil {
+			self.Data["NotifyTplName"] = notifyTpl.TplName
+		}
+	}
+
 	self.display()
 }
 
