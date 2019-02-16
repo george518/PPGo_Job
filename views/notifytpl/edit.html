@@ -17,6 +17,7 @@
                 <input type="radio" name="tpl_type" lay-filter="tpl_type" lay-verify="type" value="0" title="邮箱" {{if eq .notifyTpl.tpl_type 0}}checked{{end}}>
                 <input type="radio" name="tpl_type" lay-filter="tpl_type" lay-verify="type" value="1" title="短信" {{if eq .notifyTpl.tpl_type 1}}checked{{end}}>
                 <input type="radio" name="tpl_type" lay-filter="tpl_type" lay-verify="type" value="2" title="钉钉" {{if eq .notifyTpl.tpl_type 2}}checked{{end}}>
+                <input type="radio" name="tpl_type" lay-filter="tpl_type" lay-verify="type" value="3" title="微信" {{if eq .notifyTpl.tpl_type 3}}checked{{end}}>
             </div>
             <div class="layui-form-mid layui-word-aux"></div>
         </div>
@@ -41,10 +42,10 @@
 
   {{"任务 ID {{TaskId}}"}}
   {{"任务名称 {{TaskName}}"}}
-  {{"执行时间 {{CreateTime}}"}}
+  {{"执行时间 {{ExecuteTime}}"}}
   {{"执行耗时 {{ProcessTime}}"}}
-  {{"执行状态 {{Status}}"}}
-  {{"任务输出 {{TaskOut}}"}}
+  {{"执行状态 {{ExecuteStatus}}"}}
+  {{"任务输出 {{TaskOutput}}"}}
 
                 </pre>
             </div>

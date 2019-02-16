@@ -30,6 +30,7 @@ func (self *UserController) Edit() {
 	row["phone"] = Admin.Phone
 	row["email"] = Admin.Email
 	row["dingtalk"] = Admin.Dingtalk
+	row["wechat"] = Admin.Wechat
 	self.Data["admin"] = row
 	self.display()
 }
@@ -46,6 +47,7 @@ func (self *UserController) AjaxSave() {
 	Admin.Phone = strings.TrimSpace(self.GetString("phone"))
 	Admin.Email = strings.TrimSpace(self.GetString("email"))
 	Admin.Dingtalk = strings.TrimSpace(self.GetString("dingtalk"))
+	Admin.Wechat = strings.TrimSpace(self.GetString("wechat"))
 
 	resetPwd := self.GetString("reset_pwd")
 	if resetPwd == "1" {

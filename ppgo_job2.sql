@@ -16,30 +16,6 @@ SET NAMES utf8;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ----------------------------
---  Table structure for `default`
--- ----------------------------
-DROP TABLE IF EXISTS `default`;
-CREATE TABLE `default` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `user_name` varchar(20) NOT NULL DEFAULT '' COMMENT '用户名',
-  `email` varchar(50) NOT NULL DEFAULT '' COMMENT '邮箱',
-  `password` char(32) NOT NULL DEFAULT '' COMMENT '密码',
-  `salt` char(10) NOT NULL DEFAULT '' COMMENT '密码盐',
-  `last_login` int(11) NOT NULL DEFAULT '0' COMMENT '最后登录时间',
-  `last_ip` char(15) NOT NULL DEFAULT '' COMMENT '最后登录IP',
-  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '状态，0正常 -1禁用',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_user_name` (`user_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
-
--- ----------------------------
---  Records of `default`
--- ----------------------------
-BEGIN;
-INSERT INTO `default` VALUES ('1', 'admin', 'admin@example.com', '7fef6171469e80d32c0559f88b377245', '', '0', '', '0');
-COMMIT;
-
--- ----------------------------
 --  Table structure for `pp_task`
 -- ----------------------------
 DROP TABLE IF EXISTS `pp_task`;
@@ -297,34 +273,6 @@ BEGIN;
 INSERT INTO `pp_uc_role_auth` VALUES ('1', '1'), ('1', '15'), ('1', '16'), ('1', '30'), ('1', '31'), ('1', '36'), ('1', '37'), ('1', '39'), ('1', '41'), ('1', '46'), ('1', '47'), ('1', '48'), ('1', '49'), ('1', '54'), ('1', '55'), ('1', '56'), ('2', '0'), ('2', '17'), ('2', '18'), ('2', '19'), ('2', '20'), ('2', '21'), ('2', '22'), ('2', '23'), ('2', '24'), ('2', '25'), ('2', '26'), ('2', '27'), ('2', '28'), ('2', '29'), ('2', '32'), ('2', '33'), ('2', '34'), ('2', '35'), ('2', '38'), ('2', '40'), ('2', '42'), ('2', '43'), ('2', '44'), ('2', '45'), ('2', '50'), ('2', '51'), ('2', '52'), ('2', '53');
 COMMIT;
 
--- ----------------------------
---  Table structure for `pp_user`
--- ----------------------------
-DROP TABLE IF EXISTS `pp_user`;
-CREATE TABLE `pp_user` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `user_name` varchar(20) NOT NULL DEFAULT '' COMMENT '用户名',
-  `email` varchar(50) NOT NULL DEFAULT '' COMMENT '邮箱',
-  `password` char(32) NOT NULL DEFAULT '' COMMENT '密码',
-  `salt` char(10) NOT NULL DEFAULT '' COMMENT '密码盐',
-  `last_login` int(11) NOT NULL DEFAULT '0' COMMENT '最后登录时间',
-  `last_ip` char(15) NOT NULL DEFAULT '' COMMENT '最后登录IP',
-  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '状态，0正常 -1禁用',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_user_name` (`user_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
-
--- ----------------------------
---  Records of `pp_user`
--- ----------------------------
-BEGIN;
-INSERT INTO `pp_user` VALUES ('1', 'admin', 'haodaquan@shoplinq.cn', 'abfcf6dcedfb4b5b1505d41a8b4c77e8', 'aYk4Q1P83v', '1528124357', '[', '0');
-COMMIT;
-
-BEGIN;
-ALTER TABLE `pp_task` CHANGE `notify_type` `notify_type` TINYINT(1) UNSIGNED NOT NULL DEFAULT '0' COMMENT '0-邮件通知，1-信息通知，2-钉钉通知，';
-COMMIT;
-
 BEGIN;
 ALTER TABLE `pp_uc_admin` ADD `dingtalk` VARCHAR(64) NULL COMMENT '钉钉' AFTER `email`;
 COMMIT;
@@ -349,7 +297,7 @@ CREATE TABLE `pp_notify_tpl` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '模板id',
   `type` enum('system','default') CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT 'default',
   `tpl_name` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '模板名称',
-  `tpl_type` tinyint(1) NOT NULL COMMENT '模板类型 0:邮件;1:信息;2:钉钉;',
+  `tpl_type` tinyint(1) NOT NULL COMMENT '模板类型 0:邮件;1:信息;2:钉钉;3:微信;',
   `title` varchar(64) DEFAULT NULL COMMENT '标题',
   `content` text CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '模板内容',
   `status` tinyint(1) NOT NULL DEFAULT '1' COMMENT '状态 0:禁用;1:启用;',
@@ -358,15 +306,24 @@ CREATE TABLE `pp_notify_tpl` (
   `update_time` int(11) NOT NULL DEFAULT '0' COMMENT '最后一次编辑时间',
   `update_id` int(11) NOT NULL DEFAULT '0' COMMENT '最后一次编辑者ID',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COMMENT='通知模板';
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COMMENT='通知模板';
 
 --
 -- 转存表中的数据 `pp_notify_tpl`
 --
 BEGIN;
-INSERT INTO `pp_notify_tpl` VALUES(1, 'system', '默认邮箱通知模板', 0, '定时任务异常：{{TaskName}}', 'Hello,定时任务出问题了：\r\n<p style=\"font-size:16px;\">任务执行详情：</p>\r\n<p style=\"display:block; padding:10px; background:#efefef;border:1px solid #e4e4e4\">\r\n任务 ID：{{TaskId}}<br/>\r\n任务名称：{{TaskName}}<br/>\r\n执行时间：{{CreateTime}}<br/>\r\n执行耗时：{{ProcessTime}}秒<br/>\r\n执行状态：{{Status}}\r\n</p>\r\n<p style=\"font-size:16px;\">任务执行输出</p>\r\n<p style=\"display:block; padding:10px; background:#efefef;border:1px solid #e4e4e4\">\r\n{{TaskOut}}\r\n</p>', 1, 1550255030, 1, 1550338305, 1);
-INSERT INTO `pp_notify_tpl` VALUES(2, 'system', '默认短信通知模板', 1, '', '{\r\n    \"task_id\": \"{{TaskId}}\",\r\n    \"task_name\": \"{{TaskName}}\",\r\n    \"status\": \"{{Status}}\"\r\n}', 1, 1550255030, 1, 1550338215, 1);
-INSERT INTO `pp_notify_tpl` VALUES(3, 'system', '默认钉钉通知模板', 2, '', '任务执行异常详情：\r\n任务 ID：{{TaskId}}\r\n任务名称：{{TaskName}}\r\n执行时间：{{CreateTime}}\r\n执行耗时：{{ProcessTime}}秒\r\n执行状态：{{Status}}\r\n任务执行输出：\r\n{{TaskOut}}', 1, 1550255030, 1, 1550338191, 1);
+INSERT INTO `pp_notify_tpl` VALUES(1, 'system', '默认邮箱通知模板', 0, '定时任务异常：{{TaskName}}', 'Hello,定时任务出问题了：\r\n<p style=\"font-size:16px;\">任务执行详情：</p>\r\n<p style=\"display:block; padding:10px; background:#efefef;border:1px solid #e4e4e4\">\r\n任务 ID：{{TaskId}}<br/>\r\n任务名称：{{TaskName}}<br/>\r\n执行时间：{{ExecuteTime}}<br/>\r\n执行耗时：{{ProcessTime}}秒<br/>\r\n执行状态：{{ExecuteStatus}}\r\n</p>\r\n<p style=\"font-size:16px;\">任务执行输出</p>\r\n<p style=\"display:block; padding:10px; background:#efefef;border:1px solid #e4e4e4\">\r\n{{TaskOutput}}\r\n</p>', 1, 1550255030, 1, 1550338305, 1);
+INSERT INTO `pp_notify_tpl` VALUES(2, 'system', '默认短信通知模板', 1, '', '{\r\n    \"task_id\": \"{{TaskId}}\",\r\n    \"task_name\": \"{{TaskName}}\",\r\n    \"execute_status\": \"{{ExecuteStatus}}\"\r\n}', 1, 1550255030, 1, 1550338215, 1);
+INSERT INTO `pp_notify_tpl` VALUES(3, 'system', '默认钉钉通知模板', 2, '', '任务执行异常详情：\r\n任务 ID：{{TaskId}}\r\n任务名称：{{TaskName}}\r\n执行时间：{{ExecuteTime}}\r\n执行耗时：{{ProcessTime}}秒\r\n执行状态：{{ExecuteStatus}}\r\n任务执行输出：\r\n{{TaskOutput}}', 1, 1550255030, 1, 1550338880, 1);
+INSERT INTO `pp_notify_tpl` VALUES(4, 'system', '默认微信通知模板', 3, '', '{\r\n    \"task_id\": \"{{TaskId}}\",\r\n    \"task_name\": \"{{TaskName}}\",\r\n    \"execute_status\": \"{{ExecuteStatus}}\"\r\n}', 1, 1550347183, 1, 1550347201, 1);
+COMMIT;
+
+BEGIN;
+ALTER TABLE `pp_task` CHANGE `notify_type` `notify_type` TINYINT(1) UNSIGNED NOT NULL DEFAULT '0' COMMENT '0-邮件通知，1-信息通知，2-钉钉通知，3-微信通知，';
+COMMIT;
+
+BEGIN;
+ALTER TABLE `pp_uc_admin` ADD `wechat` VARCHAR(64) NULL COMMENT '微信' AFTER `dingtalk`;
 COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;

@@ -94,9 +94,8 @@ jobs.pool = 1000
 # 站点名称
 site.name = 定时任务管理器
 
-#通知方式 0=邮件，1=信息
+#通知方式 0=邮件，1=信息，2=钉钉，3=微信
 notify.type = 0
-
 
 # 数据库配置
 db.host = 127.0.0.1
@@ -115,10 +114,17 @@ email.user = ci@xxx.cn
 email.password = "xxxxxx"
 email.pool = 10
 
-
 # 短信通知方式配置
 msg.url = http://chanxiyou.com/api/tools/send_sms
 msg.pool = 10
+
+# 钉钉通知配置
+dingtalk.url = "https://oapi.dingtalk.com/robot/send?access_token=%s"
+dingtalk.pool = 10
+
+# 微信通知方式配置
+wechat.url = http://xx.com/api/tools/send_wechat
+wechat.pool = 10
 ```
 
 编译安装-可能会遇到的问题
@@ -128,6 +134,8 @@ jobs/job.go:19:2: cannot find package "golang.org/x/crypto/ssh" in any of:
 
 需要 git clone https://github.com/golang/crypto.git
 并拷贝到 $GOPATH/src/golang.org/x/ 下就OK
+或
+git clone https://github.com/golang/crypto.git $GOPATH/src/golang.org/x/crypto
 
 # Docker
 本地编译好的2进制文件放在根目录下执行下面的命令即可拥有

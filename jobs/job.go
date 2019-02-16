@@ -280,6 +280,7 @@ func (j *Job) Run() {
 			adminInfo := AllAdminInfo(j.task.NotifyUserIds)
 			phone := make(map[string]string, 0)
 			dingtalk := make(map[string]string, 0)
+			wechat := make(map[string]string, 0)
 			toEmail := ""
 			for _, v := range adminInfo {
 				if v.Phone != "0" && v.Phone != "" {
@@ -290,6 +291,9 @@ func (j *Job) Run() {
 				}
 				if v.Dingtalk != "0" && v.Dingtalk != "" {
 					dingtalk[v.Dingtalk] = v.Dingtalk
+				}
+				if v.Wechat != "0" && v.Wechat != "" {
+					wechat[v.Wechat] = v.Wechat
 				}
 			}
 			toEmail = strings.TrimRight(toEmail, ";")
@@ -302,8 +306,8 @@ func (j *Job) Run() {
 
 			status := log.Status + 2
 
-			var title = ""
-			var content = ""
+			title, content := "", ""
+
 			notifyTpl, err := models.NotifyTplGetById(j.task.NotifyTplId)
 			if err != nil {
 				notifyTpl, err := models.NotifyTplGetByTplType(j.task.NotifyType, models.NotifyTplTypeSystem)
@@ -319,30 +323,28 @@ func (j *Job) Run() {
 			if title != "" {
 				title = strings.Replace(title, "{{TaskId}}", strconv.Itoa(j.task.Id), -1)
 				title = strings.Replace(title, "{{TaskName}}", j.task.TaskName, -1)
-				title = strings.Replace(title, "{{CreateTime}}", beego.Date(time.Unix(log.CreateTime, 0), "Y-m-d H:i:s"), -1)
+				title = strings.Replace(title, "{{ExecuteTime}}", beego.Date(time.Unix(log.CreateTime, 0), "Y-m-d H:i:s"), -1)
 				title = strings.Replace(title, "{{ProcessTime}}", strconv.FormatFloat(float64(log.ProcessTime)/1000, 'f', 6, 64), -1)
-				title = strings.Replace(title, "{{Status}}", TextStatus[status], -1)
-				title = strings.Replace(title, "{{TaskOut}}", log.Error, -1)
+				title = strings.Replace(title, "{{ExecuteStatus}}", TextStatus[status], -1)
+				title = strings.Replace(title, "{{TaskOutput}}", log.Error, -1)
 			}
 
 			if content != "" {
 				content = strings.Replace(content, "{{TaskId}}", strconv.Itoa(j.task.Id), -1)
 				content = strings.Replace(content, "{{TaskName}}", j.task.TaskName, -1)
-				content = strings.Replace(content, "{{CreateTime}}", beego.Date(time.Unix(log.CreateTime, 0), "Y-m-d H:i:s"), -1)
+				content = strings.Replace(content, "{{ExecuteTime}}", beego.Date(time.Unix(log.CreateTime, 0), "Y-m-d H:i:s"), -1)
 				content = strings.Replace(content, "{{ProcessTime}}", strconv.FormatFloat(float64(log.ProcessTime)/1000, 'f', 6, 64), -1)
-				content = strings.Replace(content, "{{Status}}", TextStatus[status], -1)
-				content = strings.Replace(content, "{{TaskOut}}", log.Error, -1)
+				content = strings.Replace(content, "{{ExecuteStatus}}", TextStatus[status], -1)
+				content = strings.Replace(content, "{{TaskOutput}}", log.Error, -1)
 			}
 
 			if j.task.NotifyType == 0 && toEmail != "" {
 				//邮件
 				mailtype := "html"
-
 				ok := notify.SendToChan(toEmail, title, content, mailtype)
 				if !ok {
 					fmt.Println("发送邮件错误", toEmail)
 				}
-
 			} else if j.task.NotifyType == 1 && len(phone) > 0 {
 				//信息
 				param := make(map[string]string)
@@ -352,12 +354,30 @@ func (j *Job) Run() {
 					return
 				}
 
-				notify.SendSmsToChan(phone, param)
+				ok := notify.SendSmsToChan(phone, param)
+				if !ok {
+					fmt.Println("发送信息错误", phone)
+				}
 			} else if j.task.NotifyType == 2 && len(dingtalk) > 0 {
 				//钉钉
-				notify.SendDingtalkToChan(dingtalk, content)
-			}
+				ok := notify.SendDingtalkToChan(dingtalk, content)
+				if !ok {
+					fmt.Println("发送钉钉错误", dingtalk)
+				}
+			} else if j.task.NotifyType == 3 && len(wechat) > 0 {
+				//信息
+				param := make(map[string]string)
+				err := json.Unmarshal([]byte(content), &param)
+				if err != nil {
+					fmt.Println("发送微信错误", err)
+					return
+				}
 
+				ok := notify.SendWechatToChan(phone, param)
+				if !ok {
+					fmt.Println("发送微信错误", phone)
+				}
+			}
 		}
 	}
 
@@ -375,6 +395,7 @@ type adminInfo struct {
 	Email    string
 	Phone    string
 	Dingtalk string
+	Wechat   string
 	RealName string
 }
 
@@ -400,6 +421,7 @@ func AllAdminInfo(adminIds string) []*adminInfo {
 			Email:    v.Email,
 			Phone:    v.Phone,
 			Dingtalk: v.Dingtalk,
+			Wechat:   v.Wechat,
 			RealName: v.RealName,
 		}
 		adminInfos = append(adminInfos, &ai)

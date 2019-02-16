@@ -16,7 +16,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-type AjaxReturn struct {
+type SmsAjaxReturn struct {
 	Status  int         `json:"status"`
 	Message string      `json:"message"`
 	Data    interface{} `json:"data"`
@@ -78,7 +78,7 @@ func (s *Sms) SendSms() error {
 			return err
 		}
 
-		ajaxData := AjaxReturn{}
+		ajaxData := SmsAjaxReturn{}
 		jsonErr := json.Unmarshal([]byte(res), &ajaxData)
 
 		if jsonErr != nil {

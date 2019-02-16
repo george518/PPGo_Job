@@ -41,6 +41,13 @@
         </div>
 
         <div class="layui-form-item">
+            <label class="layui-form-label">微信帐号</label>
+            <div class="layui-input-inline">
+                <input type="text" name="wechat" id="wechat" autocomplete="off" placeholder="微信帐号" class="layui-input" value="{{.admin.wechat}}">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
             <label class="layui-form-label">是否修改</label>
             <div class="layui-input-inline">
                 <input type="radio" name="reset_pwd" lay-verify="reset_pwd" value="1" title="是">
