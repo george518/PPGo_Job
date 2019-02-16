@@ -344,7 +344,7 @@ COMMIT;
 --
 -- 表的结构 `pp_notify_tpl`
 --
-DROP TABLE IF EXISTS `pp_uc_role_auth`;
+DROP TABLE IF EXISTS `pp_notify_tpl`;
 CREATE TABLE `pp_notify_tpl` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '模板id',
   `type` enum('system','default') CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT 'default',
