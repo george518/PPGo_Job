@@ -1,14 +1,15 @@
 <style>
-    .notify{
+    .notify {
         display: none;
     }
 </style>
 <div class="layui-layout layui-layout-admin" style="padding-left: 40px;margin-top: 20px;">
-    <form class="layui-form" action="" method="post" >
+    <form class="layui-form" action="" method="post">
         <div class="layui-form-item">
             <label class="layui-form-label mw200">任务名称</label>
             <div class="layui-input-inline mw400">
-                <input type="text" name="task_name" id="task_name" lay-verify="required" autocomplete="off" placeholder="任务名称" class="layui-input" value="">
+                <input type="text" name="task_name" id="task_name" lay-verify="required" autocomplete="off"
+                       placeholder="任务名称" class="layui-input" value="">
             </div>
             <div class="layui-form-mid layui-word-aux"></div>
         </div>
@@ -31,13 +32,13 @@
                 <div class="layui-input-inline">
                     <select name="server_id">
                         <option value="0">本地服务器</option>
-                        {{range $k, $v := .serverGroup}}
-                            <optgroup label="{{$v.GroupName}}">
-                                {{range $kk, $vv := $v.Servers}}
-                                    <option value="{{$kk}}">{{$vv}}</option>
-                                {{end}}
-                            </optgroup>
+                    {{range $k, $v := .serverGroup}}
+                        <optgroup label="{{$v.GroupName}}">
+                        {{range $kk, $vv := $v.Servers}}
+                            <option value="{{$kk}}">{{$vv}}</option>
                         {{end}}
+                        </optgroup>
+                    {{end}}
                     </select>
                 </div>
             </div>
@@ -46,7 +47,8 @@
         <div class="layui-form-item">
             <label class="layui-form-label mw200">任务说明</label>
             <div class="layui-input-inline mw400">
-                <textarea name="description" id="description" rows="2" placeholder="请输入内容" class="layui-textarea"></textarea>
+                <textarea name="description" id="description" rows="2" placeholder="请输入内容"
+                          class="layui-textarea"></textarea>
             </div>
         </div>
 
@@ -55,18 +57,22 @@
             <div class="layui-input-inline ">
 
                 <input type="radio" name="concurrent" lay-verify="required" value="0" title="是" checked>
-                <input type="radio" name="concurrent" lay-verify="required" value="1" title="否" >
+                <input type="radio" name="concurrent" lay-verify="required" value="1" title="否">
 
             </div>
-            <div class="layui-form-mid layui-word-aux"><i class="fa fa-info-circle" aria-hidden="true" id="des"></i></div>
+            <div class="layui-form-mid layui-word-aux"><i class="fa fa-info-circle" aria-hidden="true" id="des"></i>
+            </div>
         </div>
 
         <div class="layui-form-item">
             <label class="layui-form-label mw200">时间表达式</label>
             <div class="layui-input-inline mw400">
-                <input type="text" name="cron_spec" id="cron_spec" lay-verify="required" autocomplete="off" placeholder="时间表达式" class="layui-input" value="">
+                <input type="text" name="cron_spec" id="cron_spec" lay-verify="required" autocomplete="off"
+                       placeholder="时间表达式" class="layui-input" value="">
             </div>
-            <div class="layui-form-mid layui-word-aux"><a href="/help" target="_blank"><i class="fa fa-question-circle" aria-hidden="true"></i></a></div>
+            <div class="layui-form-mid layui-word-aux"><a href="/help" target="_blank"><i class="fa fa-question-circle"
+                                                                                          aria-hidden="true"></i></a>
+            </div>
         </div>
 
         <div class="layui-form-item">
@@ -79,7 +85,8 @@
         <div class="layui-form-item">
             <label class="layui-form-label mw200">超时设置</label>
             <div class="layui-input-inline">
-                <input type="text" name="timeout" id="timeout" lay-verify="required" autocomplete="off" placeholder="单位：秒，默认一天" class="layui-input" value="">
+                <input type="text" name="timeout" id="timeout" lay-verify="required" autocomplete="off"
+                       placeholder="单位：秒，默认一天" class="layui-input" value="">
             </div>
             <div class="layui-form-mid layui-word-aux"></div>
         </div>
@@ -87,19 +94,29 @@
         <div class="layui-form-item">
             <label class="layui-form-label mw200">出错通知</label>
             <div class="layui-input-inline ">
-                <input type="radio" name="is_notify" lay-verify="required" value="1" lay-filter="is_notify" title="是" >
-                <input type="radio" name="is_notify" lay-verify="required" value="0" lay-filter="is_notify" title="否" checked>
+                <input type="radio" name="is_notify" lay-verify="required" value="1" lay-filter="is_notify" title="是">
+                <input type="radio" name="is_notify" lay-verify="required" value="0" lay-filter="is_notify" title="否"
+                       checked>
             </div>
             <div class="layui-form-mid layui-word-aux"></div>
         </div>
 
         <div class="layui-form-item notify">
-            <hr>
             <label class="layui-form-label mw200">通知类型</label>
             <div class="layui-input-inline mw400">
-                <input type="radio" name="notify_type" lay-verify="required" value="0" title="邮件" checked>
-                <input type="radio" name="notify_type" lay-verify="required" value="1" title="短信" >
-                <input type="radio" name="notify_type" lay-verify="required" value="2" title="钉钉" >
+                <input type="radio" name="notify_type" value="0" lay-filter="notify_type" title="邮件">
+                <input type="radio" name="notify_type" value="1" lay-filter="notify_type" title="短信">
+                <input type="radio" name="notify_type" value="2" lay-filter="notify_type" title="钉钉">
+            </div>
+            <div class="layui-form-mid layui-word-aux"></div>
+        </div>
+
+        <div class="layui-form-item notify">
+            <label class="layui-form-label mw200">通知模板</label>
+            <div class="layui-input-inline">
+                <select name="notify_tpl_id" lay-filter="notify_tpl_id">
+                    <option value="0" selected>请选择</option>
+                </select>
             </div>
             <div class="layui-form-mid layui-word-aux"></div>
         </div>
@@ -108,13 +125,13 @@
             <label class="layui-form-label mw200">通知用户</label>
             <div class="layui-input-inline mw400 ">
             {{range $k, $v := .adminInfo}}
-                <input type="checkbox" name="notify_user" lay-filter="notify_user" title="{{$v.RealName}}" value="{{$v.Id}}" lay-skin="primary">
+                <input type="checkbox" name="notify_user" lay-filter="notify_user" title="{{$v.RealName}}"
+                       value="{{$v.Id}}" lay-skin="primary">
             {{end}}
                 <input type="hidden" name="notify_user_ids" id="notify_user_ids" value="">
             </div>
             <div class="layui-form-mid layui-word-aux"></div>
         </div>
-
 
         <input type="hidden" name="id" id="id" value="0">
         <div class="layui-form-item">
@@ -127,17 +144,17 @@
     </form>
 </div>
 <script>
-    layui.use(['form','element','layer','jquery'],function(){
+    layui.use(['form', 'element', 'layer', 'jquery'], function () {
         var form = layui.form; //只有执行了这一步，部分表单元素才会自动修饰成功
         var $ = layui.jquery;
         var error_info = "{{.flash.error}}";
-        if(error_info){
-            layer.msg(error_info,{icon: 2,shade:0.3},function () {
+        if (error_info) {
+            layer.msg(error_info, {icon: 2, shade: 0.3}, function () {
                 window.history.go(-1)
             })
             return;
         }
-        $("#des").on('click',function () {
+        $("#des").on('click', function () {
             layer.tips('设为“是”的话，如果该任务在上一个时间点还没执行完，则略过不执行', '#des', {
                 tips: [1, '#0FA6D8'] //还可配置颜色
             });
@@ -145,34 +162,32 @@
 
 
         var notify_user_ids = [];
-        form.on('checkbox(notify_user)', function(data){
-            if(data.elem.checked==true){
+        form.on('checkbox(notify_user)', function (data) {
+            if (data.elem.checked == true) {
                 notify_user_ids.push(data.value)
-            }else{
-                $.each(notify_user_ids,function(index,item){
+            } else {
+                $.each(notify_user_ids, function (index, item) {
                     // index是索引值（即下标）   item是每次遍历得到的值；
-                    if(item==data.value){
-                        notify_user_ids.splice(index,1);
+                    if (item == data.value) {
+                        notify_user_ids.splice(index, 1);
                     }
                 });
             }
             $("#notify_user_ids").val(notify_user_ids.join(","));
         });
-        form.on('radio(is_notify)', function(data){
-            if(data.value==1){
+        form.on('radio(is_notify)', function (data) {
+            if (data.value == 1) {
                 $(".notify").show()
-            }else{
+            } else {
                 $(".notify").hide()
             }
         });
 
-
-
-        form.on('submit(sub)', function(data){
+        form.on('submit(sub)', function (data) {
             var form_data = data.field;
             $.post('{{urlfor "TaskController.AjaxSave"}}', form_data, function (out) {
                 if (out.status == 0) {
-                    layer.msg("操作成功",{icon: 1,shade:0.3,time:1000},function () {
+                    layer.msg("操作成功", {icon: 1, shade: 0.3, time: 1000}, function () {
                         // window.history.go(-1)
                         window.location.reload();
                     })
@@ -182,6 +197,22 @@
                 }
             }, "json");
             return false;
+        });
+
+        form.on('radio(notify_type)', function (data) {
+            $.post('{{urlfor "TaskController.AjaxNotifyType"}}', {notify_type: data.value}, function (out) {
+                if (out.code == 0) {
+                    $('select[name="notify_tpl_id"]').empty();
+                    $('<option value="0" selected>请选择</option>').appendTo('select[name="notify_tpl_id"]');
+                    for (var i = 0; i < out.data.length; i++) {
+                        $('<option value="' + out.data[i].id + '">' + out.data[i].tpl_name + '</option>').appendTo('select[name="notify_tpl_id"]');
+                    }
+
+                    form.render();
+                } else {
+                    layer.msg(out.message)
+                }
+            }, "json");
         });
 
         //但是，如果你的HTML是动态生成的，自动渲染就会失效

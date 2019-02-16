@@ -146,6 +146,15 @@ func (self *TaskLogController) Detail() {
 	self.Data["CreateTime"] = beego.Date(time.Unix(task.CreateTime, 0), "Y-m-d H:i:s")
 	self.Data["UpdateTime"] = beego.Date(time.Unix(task.UpdateTime, 0), "Y-m-d H:i:s")
 	self.Data["task"] = task
+
+	self.Data["NotifyTplName"] = "未知"
+	if task.IsNotify == 1 {
+		notifyTpl, err := models.NotifyTplGetById(task.NotifyTplId)
+		if err == nil {
+			self.Data["NotifyTplName"] = notifyTpl.TplName
+		}
+	}
+
 	// 分组列表
 	self.Data["taskGroup"] = taskGroupLists(self.taskGroups, self.userId)
 

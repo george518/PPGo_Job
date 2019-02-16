@@ -28,4 +28,5 @@ func init() {
 	beego.AutoRouter(&controllers.AdminController{})
 	beego.AutoRouter(&controllers.UserController{})
 
+	beego.AutoRouter(&controllers.NotifyTplController{})
 }

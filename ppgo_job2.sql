@@ -329,4 +329,44 @@ BEGIN;
 ALTER TABLE `pp_uc_admin` ADD `dingtalk` VARCHAR(64) NULL COMMENT '钉钉' AFTER `email`;
 COMMIT;
 
+BEGIN;
+ALTER TABLE `pp_task` ADD `notify_tpl_id` INT NOT NULL DEFAULT '0' COMMENT '通知模板id' AFTER `notify_type`;
+COMMIT;
+
+BEGIN;
+INSERT INTO `pp_uc_auth` VALUES(61, 17, '通知模板', '/notifytpl/list', 5, 'fa-file-o', 1, 1, 0, 1, 1, 0, 1550237874);
+INSERT INTO `pp_uc_auth` VALUES(62, 61, '新增', '/notifytpl/add', 1, '', 0, 1, 0, 1, 1, 0, 1550237919);
+INSERT INTO `pp_uc_auth` VALUES(63, 61, '编辑', '/notifytpl/edit', 2, '', 0, 1, 1, 1, 1, 1550237957, 1550237957);
+INSERT INTO `pp_uc_auth` VALUES(64, 61, '删除', '/notifytpl/ajaxdel', 3, '', 0, 1, 1, 1, 1, 1550237987, 1550237987);
+INSERT INTO `pp_uc_auth` VALUES(65, 31, '通知类型', '/task/ajaxnotifytype', 10, '', 0, 1, 1, 1, 1, 1550258380, 1550258380);
+COMMIT;
+
+--
+-- 表的结构 `pp_notify_tpl`
+--
+DROP TABLE IF EXISTS `pp_uc_role_auth`;
+CREATE TABLE `pp_notify_tpl` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '模板id',
+  `type` enum('system','default') CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT 'default',
+  `tpl_name` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '模板名称',
+  `tpl_type` tinyint(1) NOT NULL COMMENT '模板类型 0:邮件;1:信息;2:钉钉;',
+  `title` varchar(64) DEFAULT NULL COMMENT '标题',
+  `content` text CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '模板内容',
+  `status` tinyint(1) NOT NULL DEFAULT '1' COMMENT '状态 0:禁用;1:启用;',
+  `create_time` int(11) NOT NULL DEFAULT '0' COMMENT '创建时间',
+  `create_id` int(11) NOT NULL DEFAULT '0' COMMENT '创建者ID',
+  `update_time` int(11) NOT NULL DEFAULT '0' COMMENT '最后一次编辑时间',
+  `update_id` int(11) NOT NULL DEFAULT '0' COMMENT '最后一次编辑者ID',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COMMENT='通知模板';
+
+--
+-- 转存表中的数据 `pp_notify_tpl`
+--
+BEGIN;
+INSERT INTO `pp_notify_tpl` VALUES(1, 'system', '系统邮箱通知模板', 0, '定时任务异常：{TaskName}', 'Hello,定时任务出问题了：\r\n<p style=\"font-size:16px;\">任务执行详情：</p>\r\n<p style=\"display:block; padding:10px; background:#efefef;border:1px solid #e4e4e4\">\r\n任务 ID：{TaskId}<br/>\r\n任务名称：{TaskName}<br/>\r\n执行时间：{CreateTime}<br/>\r\n执行耗时：{ProcessTime}秒<br/>\r\n执行状态：{Status}\r\n</p>\r\n<p style=\"font-size:16px;\">任务执行输出</p>\r\n<p style=\"display:block; padding:10px; background:#efefef;border:1px solid #e4e4e4\">\r\n{TaskOut}\r\n</p>\r\n<br/>\r\n<br/>\r\n<p>-----------------------------------------------------------------<br />\r\n本邮件由定时系统自动发出，请勿回复<br />\r\n如果要取消邮件通知，请登录到系统进行设置<br />\r\n</p>', 1, 1550255030, 1, 1550256410, 1);
+INSERT INTO `pp_notify_tpl` VALUES(2, 'system', '系统短信通知模板', 1, '', '{\r\n    \"task_id\": \"{TaskId}\",\r\n    \"task_name\": \"{TaskName}\",\r\n    \"status\": \"{Status}\"\r\n}', 1, 1550255030, 1, 1550269363, 1);
+INSERT INTO `pp_notify_tpl` VALUES(3, 'system', '系统钉钉通知模板', 2, '', '任务执行异常详情：\r\n任务 ID：{TaskId}\r\n任务名称：{TaskName}\r\n执行时间：{CreateTime}\r\n执行耗时：{ProcessTime}秒\r\n执行状态：{Status}\r\n任务执行输出：\r\n{TaskOut}', 1, 1550255030, 1, 1550269952, 1);
+COMMIT;
+
 SET FOREIGN_KEY_CHECKS = 1;

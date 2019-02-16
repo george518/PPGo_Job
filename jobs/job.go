@@ -24,6 +24,7 @@ import (
 	"github.com/george518/PPGo_Job/models"
 	"github.com/george518/PPGo_Job/notify"
 	"golang.org/x/crypto/ssh"
+	"encoding/json"
 )
 
 type Job struct {
@@ -294,85 +295,59 @@ func (j *Job) Run() {
 			toEmail = strings.TrimRight(toEmail, ";")
 
 			TextStatus := []string{
-				"<font color='red'>超时</font>",
-				"<font color='red'>错误</font>",
-				"<font color='green'>正常</font>",
+				"超时",
+				"错误",
+				"正常",
 			}
 
 			status := log.Status + 2
 
+			var title = ""
+			var content = ""
+			notifyTpl, err := models.NotifyTplGetById(j.task.NotifyTplId)
+			if err == nil {
+				title = notifyTpl.Title
+				content = notifyTpl.Content
+			}
+
+			if title != "" {
+				title = strings.Replace(title, "{TaskId}", strconv.Itoa(j.task.Id), -1)
+				title = strings.Replace(title, "{TaskName}", j.task.TaskName, -1)
+				title = strings.Replace(title, "{CreateTime}", beego.Date(time.Unix(log.CreateTime, 0), "Y-m-d H:i:s"), -1)
+				title = strings.Replace(title, "{ProcessTime}", strconv.FormatFloat(float64(log.ProcessTime)/1000, 'f', 6, 64), -1)
+				title = strings.Replace(title, "{Status}", TextStatus[status], -1)
+				title = strings.Replace(title, "{TaskOut}", log.Error, -1)
+			}
+
+			if content != "" {
+				content = strings.Replace(content, "{TaskId}", strconv.Itoa(j.task.Id), -1)
+				content = strings.Replace(content, "{TaskName}", j.task.TaskName, -1)
+				content = strings.Replace(content, "{CreateTime}", beego.Date(time.Unix(log.CreateTime, 0), "Y-m-d H:i:s"), -1)
+				content = strings.Replace(content, "{ProcessTime}", strconv.FormatFloat(float64(log.ProcessTime)/1000, 'f', 6, 64), -1)
+				content = strings.Replace(content, "{Status}", TextStatus[status], -1)
+				content = strings.Replace(content, "{TaskOut}", log.Error, -1)
+			}
+
 			if j.task.NotifyType == 0 && toEmail != "" {
 				//邮件
-				//SendToChan(to, subject, body, mailtype string) bool
-				subject := fmt.Sprintf("PPGo_Job定时任务异常：%s", j.task.TaskName)
-				body := fmt.Sprintf(
-					`Hello,定时任务出问题了：
-<p style="font-size:16px;">任务执行详情：</p>
-<p style="display:block; padding:10px; background:#efefef;border:1px solid #e4e4e4">
-任务 ID：%d<br/>
-任务名称：%s<br/>
-执行时间：%s<br/>
-执行耗时：%f秒<br/>
-执行状态：%s
-</p>
-<p style="font-size:16px;">任务执行输出</p>
-<p style="display:block; padding:10px; background:#efefef;border:1px solid #e4e4e4">
-%s
-</p>
-<br/>
-<br/>
-<p>-----------------------------------------------------------------<br />
-本邮件由PPGo_Job定时系统自动发出，请勿回复<br />
-如果要取消邮件通知，请登录到系统进行设置<br />
-</p>
-`, j.task.Id,
-					j.task.TaskName,
-					beego.Date(time.Unix(log.CreateTime, 0), "Y-m-d H:i:s"),
-					float64(log.ProcessTime)/1000,
-					TextStatus[status],
-					log.Error)
 				mailtype := "html"
 
-				ok := notify.SendToChan(toEmail, subject, body, mailtype)
+				ok := notify.SendToChan(toEmail, title, content, mailtype)
 				if !ok {
 					fmt.Println("发送邮件错误", toEmail)
 				}
 
 			} else if j.task.NotifyType == 1 && len(phone) > 0 {
 				//信息
-				TextStatus := []string{
-					" 超时",
-					" 错误",
-					" 正常",
-				}
 				param := make(map[string]string)
-				param["task_id"] = " " + strconv.Itoa(j.task.Id)
-				param["task_name"] = " " + j.task.TaskName
-				param["status"] = " " + TextStatus[status]
+				err := json.Unmarshal([]byte(content), &param)
+				if err != nil {
+					fmt.Println("发送信息错误", err)
+				}
+
 				notify.SendSmsToChan(phone, param)
 			} else if j.task.NotifyType == 2 && len(dingtalk) > 0 {
-
-				TextStatus := []string{
-					"超时",
-					"错误",
-					"正常",
-				}
-				content := fmt.Sprintf(
-					`任务执行异常详情：
-任务 ID：%d
-任务名称：%s
-执行时间：%s
-执行耗时：%f秒
-执行状态：%s
-任务执行输出：
-%s`,
-					j.task.Id,
-					j.task.TaskName,
-					beego.Date(time.Unix(log.CreateTime, 0), "Y-m-d H:i:s"),
-					float64(log.ProcessTime)/1000,
-					TextStatus[status],
-					log.Error)
-
+				//钉钉
 				notify.SendDingtalkToChan(dingtalk, content)
 			}
 
