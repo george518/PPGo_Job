@@ -317,21 +317,21 @@ func (j *Job) Run() {
 			}
 
 			if title != "" {
-				title = strings.Replace(title, "{TaskId}", strconv.Itoa(j.task.Id), -1)
-				title = strings.Replace(title, "{TaskName}", j.task.TaskName, -1)
-				title = strings.Replace(title, "{CreateTime}", beego.Date(time.Unix(log.CreateTime, 0), "Y-m-d H:i:s"), -1)
-				title = strings.Replace(title, "{ProcessTime}", strconv.FormatFloat(float64(log.ProcessTime)/1000, 'f', 6, 64), -1)
-				title = strings.Replace(title, "{Status}", TextStatus[status], -1)
-				title = strings.Replace(title, "{TaskOut}", log.Error, -1)
+				title = strings.Replace(title, "{{TaskId}}", strconv.Itoa(j.task.Id), -1)
+				title = strings.Replace(title, "{{TaskName}}", j.task.TaskName, -1)
+				title = strings.Replace(title, "{{CreateTime}}", beego.Date(time.Unix(log.CreateTime, 0), "Y-m-d H:i:s"), -1)
+				title = strings.Replace(title, "{{ProcessTime}}", strconv.FormatFloat(float64(log.ProcessTime)/1000, 'f', 6, 64), -1)
+				title = strings.Replace(title, "{{Status}}", TextStatus[status], -1)
+				title = strings.Replace(title, "{{TaskOut}}", log.Error, -1)
 			}
 
 			if content != "" {
-				content = strings.Replace(content, "{TaskId}", strconv.Itoa(j.task.Id), -1)
-				content = strings.Replace(content, "{TaskName}", j.task.TaskName, -1)
-				content = strings.Replace(content, "{CreateTime}", beego.Date(time.Unix(log.CreateTime, 0), "Y-m-d H:i:s"), -1)
-				content = strings.Replace(content, "{ProcessTime}", strconv.FormatFloat(float64(log.ProcessTime)/1000, 'f', 6, 64), -1)
-				content = strings.Replace(content, "{Status}", TextStatus[status], -1)
-				content = strings.Replace(content, "{TaskOut}", log.Error, -1)
+				content = strings.Replace(content, "{{TaskId}}", strconv.Itoa(j.task.Id), -1)
+				content = strings.Replace(content, "{{TaskName}}", j.task.TaskName, -1)
+				content = strings.Replace(content, "{{CreateTime}}", beego.Date(time.Unix(log.CreateTime, 0), "Y-m-d H:i:s"), -1)
+				content = strings.Replace(content, "{{ProcessTime}}", strconv.FormatFloat(float64(log.ProcessTime)/1000, 'f', 6, 64), -1)
+				content = strings.Replace(content, "{{Status}}", TextStatus[status], -1)
+				content = strings.Replace(content, "{{TaskOut}}", log.Error, -1)
 			}
 
 			if j.task.NotifyType == 0 && toEmail != "" {

@@ -364,9 +364,9 @@ CREATE TABLE `pp_notify_tpl` (
 -- 转存表中的数据 `pp_notify_tpl`
 --
 BEGIN;
-INSERT INTO `pp_notify_tpl` VALUES(1, 'system', '默认邮箱通知模板', 0, '定时任务异常：{TaskName}', 'Hello,定时任务出问题了：\r\n<p style=\"font-size:16px;\">任务执行详情：</p>\r\n<p style=\"display:block; padding:10px; background:#efefef;border:1px solid #e4e4e4\">\r\n任务 ID：{TaskId}<br/>\r\n任务名称：{TaskName}<br/>\r\n执行时间：{CreateTime}<br/>\r\n执行耗时：{ProcessTime}秒<br/>\r\n执行状态：{Status}\r\n</p>\r\n<p style=\"font-size:16px;\">任务执行输出</p>\r\n<p style=\"display:block; padding:10px; background:#efefef;border:1px solid #e4e4e4\">\r\n{TaskOut}\r\n</p>\r\n<br/>\r\n<br/>\r\n<p>-----------------------------------------------------------------<br />\r\n本邮件由定时系统自动发出，请勿回复<br />\r\n如果要取消邮件通知，请登录到系统进行设置<br />\r\n</p>', 1, 1550255030, 1, 1550256410, 1);
-INSERT INTO `pp_notify_tpl` VALUES(2, 'system', '默认短信通知模板', 1, '', '{\r\n    \"task_id\": \"{TaskId}\",\r\n    \"task_name\": \"{TaskName}\",\r\n    \"status\": \"{Status}\"\r\n}', 1, 1550255030, 1, 1550269363, 1);
-INSERT INTO `pp_notify_tpl` VALUES(3, 'system', '默认钉钉通知模板', 2, '', '任务执行异常详情：\r\n任务 ID：{TaskId}\r\n任务名称：{TaskName}\r\n执行时间：{CreateTime}\r\n执行耗时：{ProcessTime}秒\r\n执行状态：{Status}\r\n任务执行输出：\r\n{TaskOut}', 1, 1550255030, 1, 1550269952, 1);
+INSERT INTO `pp_notify_tpl` VALUES(1, 'system', '默认邮箱通知模板', 0, '定时任务异常：{{TaskName}}', 'Hello,定时任务出问题了：\r\n<p style=\"font-size:16px;\">任务执行详情：</p>\r\n<p style=\"display:block; padding:10px; background:#efefef;border:1px solid #e4e4e4\">\r\n任务 ID：{{TaskId}}<br/>\r\n任务名称：{{TaskName}}<br/>\r\n执行时间：{{CreateTime}}<br/>\r\n执行耗时：{{ProcessTime}}秒<br/>\r\n执行状态：{{Status}}\r\n</p>\r\n<p style=\"font-size:16px;\">任务执行输出</p>\r\n<p style=\"display:block; padding:10px; background:#efefef;border:1px solid #e4e4e4\">\r\n{{TaskOut}}\r\n</p>', 1, 1550255030, 1, 1550338305, 1);
+INSERT INTO `pp_notify_tpl` VALUES(2, 'system', '默认短信通知模板', 1, '', '{\r\n    \"task_id\": \"{{TaskId}}\",\r\n    \"task_name\": \"{{TaskName}}\",\r\n    \"status\": \"{{Status}}\"\r\n}', 1, 1550255030, 1, 1550338215, 1);
+INSERT INTO `pp_notify_tpl` VALUES(3, 'system', '默认钉钉通知模板', 2, '', '任务执行异常详情：\r\n任务 ID：{{TaskId}}\r\n任务名称：{{TaskName}}\r\n执行时间：{{CreateTime}}\r\n执行耗时：{{ProcessTime}}秒\r\n执行状态：{{Status}}\r\n任务执行输出：\r\n{{TaskOut}}', 1, 1550255030, 1, 1550338191, 1);
 COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;
