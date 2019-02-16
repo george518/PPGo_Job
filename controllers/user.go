@@ -76,5 +76,5 @@ func (self *UserController) AjaxSave() {
 	if err := Admin.Update(); err != nil {
 		self.ajaxMsg(err.Error(), MSG_ERR)
 	}
-	self.ajaxMsg("", MSG_OK)
+	self.ajaxMsg("修改成功", MSG_OK)
 }
