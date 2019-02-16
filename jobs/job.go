@@ -349,6 +349,7 @@ func (j *Job) Run() {
 				err := json.Unmarshal([]byte(content), &param)
 				if err != nil {
 					fmt.Println("发送信息错误", err)
+					return
 				}
 
 				notify.SendSmsToChan(phone, param)

@@ -14,14 +14,14 @@
         <div class="layui-form-item">
             <label class="layui-form-label mw200">模板类型</label>
             <div class="layui-input-inline mw400">
-                <input type="radio" name="tpl_type" lay-verify="type" value="0" title="邮箱" checked>
-                <input type="radio" name="tpl_type" lay-verify="type" value="1" title="短信" >
-                <input type="radio" name="tpl_type" lay-verify="type" value="2" title="钉钉" >
+                <input type="radio" name="tpl_type" lay-filter="tpl_type" lay-verify="type" value="0" title="邮箱" checked>
+                <input type="radio" name="tpl_type" lay-filter="tpl_type" lay-verify="type" value="1" title="短信" >
+                <input type="radio" name="tpl_type" lay-filter="tpl_type" lay-verify="type" value="2" title="钉钉" >
             </div>
             <div class="layui-form-mid layui-word-aux"></div>
         </div>
 
-        <div class="layui-form-item">
+        <div class="layui-form-item J_title">
             <label class="layui-form-label mw200">模板标题</label>
             <div class="layui-input-inline mw400">
                 <input type="text" name="title" id="title" autocomplete="off"
@@ -94,6 +94,15 @@
                 }
             }, "json");
             return false;
+        });
+
+        form.on('radio(tpl_type)', function (data) {
+            if (data.value == 0){
+                $(".J_title").show()
+            } else {
+                $(".J_title").hide()
+                $("#title").val("")
+            }
         });
 
         //但是，如果你的HTML是动态生成的，自动渲染就会失效

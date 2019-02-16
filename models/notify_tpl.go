@@ -69,13 +69,13 @@ func NotifyTplAdd(obj *NotifyTpl) (int64, error) {
 }
 
 func NotifyTplGetByTplType(tpl_type int, typestr string) (NotifyTpl, error) {
-	var list NotifyTpl
-	err := orm.NewOrm().QueryTable(TableName("notify_tpl")).Filter("type", typestr).Filter("tpl_type", tpl_type).Filter("status", 1).Limit(1).One(&list)
+	var obj NotifyTpl
+	err := orm.NewOrm().QueryTable(TableName("notify_tpl")).Filter("type", typestr).Filter("tpl_type", tpl_type).Filter("status", 1).Limit(1).One(&obj)
 	if err != nil {
-		return list, err
+		return obj, err
 	}
 
-	return list, nil
+	return obj, nil
 }
 
 func NotifyTplGetById(id int) (*NotifyTpl, error) {
