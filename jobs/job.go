@@ -306,7 +306,7 @@ func (j *Job) Run() {
 			var content = ""
 			notifyTpl, err := models.NotifyTplGetById(j.task.NotifyTplId)
 			if err != nil {
-				notifyTpl, err := models.NotifyTplGetByTplType(j.task.NotifyType, "system")
+				notifyTpl, err := models.NotifyTplGetByTplType(j.task.NotifyType, models.NotifyTplTypeSystem)
 				if err == nil {
 					title = notifyTpl.Title
 					content = notifyTpl.Content

@@ -56,7 +56,7 @@ func (self *NotifyTplController) AjaxSave() {
 		notifyTpl.Content = strings.TrimSpace(self.GetString("content"))
 		notifyTpl.CreateId = self.userId
 		notifyTpl.CreateTime = time.Now().Unix()
-		notifyTpl.Type = "default"
+		notifyTpl.Type = models.NotifyTplTypeDefault
 		notifyTpl.Status, _ = self.GetInt("status")
 
 		if notifyTpl.TplType == 1 {
@@ -93,7 +93,7 @@ func (self *NotifyTplController) AjaxSave() {
 		}
 	}
 
-	if notifyTpl.Type == "system" {
+	if notifyTpl.Type == models.NotifyTplTypeSystem {
 		self.ajaxMsg("系统模板禁止更新", MSG_ERR)
 	}
 
@@ -107,7 +107,7 @@ func (self *NotifyTplController) AjaxDel() {
 	id, _ := self.GetInt("id")
 	notifyTpl, _ := models.NotifyTplGetById(id)
 
-	if notifyTpl.Type == "system" {
+	if notifyTpl.Type == models.NotifyTplTypeSystem {
 		self.ajaxMsg("系统模板禁止删除", MSG_ERR)
 	}
 

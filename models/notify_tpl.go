@@ -13,6 +13,11 @@ import (
 	"time"
 )
 
+const (
+	NotifyTplTypeSystem  = "system"
+	NotifyTplTypeDefault = "default"
+)
+
 type NotifyTpl struct {
 	Id         int
 	Type       string
