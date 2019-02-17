@@ -134,7 +134,9 @@ jobs/job.go:19:2: cannot find package "golang.org/x/crypto/ssh" in any of:
 
 需要 git clone https://github.com/golang/crypto.git
 并拷贝到 $GOPATH/src/golang.org/x/ 下就OK
+
 或
+
 git clone https://github.com/golang/crypto.git $GOPATH/src/golang.org/x/crypto
 
 # Docker
