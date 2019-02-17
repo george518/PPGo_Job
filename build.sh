@@ -22,6 +22,7 @@ fi
 go build -o PPGo_Job
 
 cp -r -p PPGo_Job build/PPGo_Job
+cp -r -p ppgo_job2.sql build/ppgo_job2.sql
 cp -r -p run.sh build/run.sh
 cp -r -p conf build/conf
 cp -r -p static build/static
