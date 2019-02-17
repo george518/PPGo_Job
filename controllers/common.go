@@ -13,6 +13,7 @@ import (
 	"github.com/george518/PPGo_Job/models"
 	"strconv"
 	"strings"
+	"github.com/axgle/mahonia"
 )
 
 const (
@@ -347,4 +348,12 @@ func serverLists(authStr string, adminId int) (sls []serverList) {
 		sls = append(sls, sl)
 	}
 	return sls
+}
+
+func gbkAsUtf8(str string) string {
+	srcDecoder := mahonia.NewDecoder("gbk")
+	desDecoder := mahonia.NewDecoder("utf-8")
+	resStr := srcDecoder.ConvertString(str)
+	_, resBytes, _ := desDecoder.Translate([]byte(resStr), true)
+	return string(resBytes)
 }

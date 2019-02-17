@@ -16,6 +16,7 @@ import (
 type TaskServer struct {
 	Id            int
 	GroupId       int
+	ConnectionType int
 	ServerName    string
 	ServerAccount string
 	ServerOuterIp string

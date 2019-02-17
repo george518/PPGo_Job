@@ -1,8 +1,8 @@
 /*
 * @Author: haodaquan
 * @Date:   2017-06-21 12:56:08
-* @Last Modified by:   haodaquan
-* @Last Modified time: 2017-06-21 13:05:57
+* @Last Modified by:   Bee
+* @Last Modified time: 2019-02-17 22:10:15
  */
 
 package jobs
@@ -25,6 +25,9 @@ import (
 	"github.com/george518/PPGo_Job/notify"
 	"golang.org/x/crypto/ssh"
 	"encoding/json"
+	"github.com/axgle/mahonia"
+	"github.com/morganhein/go-telnet"
+	"github.com/pkg/errors"
 )
 
 type Job struct {
@@ -51,19 +54,30 @@ func NewJobFromTask(task *models.Task) (*Job, error) {
 	}
 
 	server, _ := models.TaskServerGetById(task.ServerId)
-	if server.Type == 0 {
-		//密码验证登录服务器
-		job := RemoteCommandJobByPassword(task.Id, task.TaskName, task.Command, server)
+	if server.ConnectionType == 0 {
+		if server.Type == 0 {
+			//密码验证登录服务器
+			job := RemoteCommandJobByPassword(task.Id, task.TaskName, task.Command, server)
+			job.task = task
+			job.Concurrent = task.Concurrent == 1
+			return job, nil
+		}
+
+		job := RemoteCommandJob(task.Id, task.TaskName, task.Command, server)
 		job.task = task
 		job.Concurrent = task.Concurrent == 1
 		return job, nil
+	} else if server.ConnectionType == 1 {
+		if server.Type == 0 {
+			//密码验证登录服务器
+			job := RemoteCommandJobByTelnetPassword(task.Id, task.TaskName, task.Command, server)
+			job.task = task
+			job.Concurrent = task.Concurrent == 1
+			return job, nil
+		}
 	}
 
-	job := RemoteCommandJob(task.Id, task.TaskName, task.Command, server)
-	job.task = task
-	job.Concurrent = task.Concurrent == 1
-	return job, nil
-
+	return nil, fmt.Errorf("未知ConnectionType")
 }
 
 func NewCommandJob(id int, name string, command string) *Job {
@@ -204,6 +218,77 @@ func RemoteCommandJobByPassword(id int, name string, command string, servers *mo
 		}
 		isTimeout := false
 		return b.String(), c.String(), err, isTimeout
+	}
+
+	return job
+}
+
+func RemoteCommandJobByTelnetPassword(id int, name string, command string, servers *models.TaskServer) *Job {
+
+	job := &Job{
+		id:   id,
+		name: name,
+	}
+	job.runFunc = func(timeout time.Duration) (string, string, error, bool) {
+
+		addr := fmt.Sprintf("%s:%d", servers.ServerIp, servers.Port)
+		conn, err := gote.Dial("tcp", addr)
+
+		defer conn.Close()
+
+		if err != nil {
+			return "", "", err, false
+		}
+
+		buf := make([]byte, 4096)
+		_, err = conn.Read(buf)
+		if err != nil {
+			return "", "", err, false
+		}
+
+		_, err = conn.Write([]byte(servers.ServerAccount + "\r\n"))
+		if err != nil {
+			return "", "", err, false
+		}
+
+		_, err = conn.Read(buf)
+		if err != nil {
+			return "", "", err, false
+		}
+
+		_, err = conn.Write([]byte(servers.Password + "\r\n"))
+		if err != nil {
+			return "", "", err, false
+		}
+
+		_, err = conn.Read(buf)
+		if err != nil {
+			return "", "", err, false
+		}
+
+		loginStr := gbkAsUtf8(string(buf[:]))
+		if !strings.Contains(loginStr, ">") {
+			return "", "", errors.Errorf("Login failed!"), false
+		}
+
+		commandArr := strings.Split(command, "\n")
+
+		out := ""
+		for _, c := range commandArr {
+			_, err = conn.Write([]byte(c + "\r\n"))
+			if err != nil {
+				return "", "", err, false
+			}
+
+			_, err = conn.Read(buf)
+			if err != nil {
+				return "", "", err, false
+			}
+
+			out = out + gbkAsUtf8(string(buf[:]))
+		}
+
+		return out, "", nil, false
 	}
 
 	return job
@@ -428,4 +513,12 @@ func AllAdminInfo(adminIds string) []*adminInfo {
 	}
 
 	return adminInfos
+}
+
+func gbkAsUtf8(str string) string {
+	srcDecoder := mahonia.NewDecoder("gbk")
+	desDecoder := mahonia.NewDecoder("utf-8")
+	resStr := srcDecoder.ConvertString(str)
+	_, resBytes, _ := desDecoder.Translate([]byte(resStr), true)
+	return string(resBytes)
 }

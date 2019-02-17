@@ -326,4 +326,8 @@ BEGIN;
 ALTER TABLE `pp_uc_admin` ADD `wechat` VARCHAR(64) NULL COMMENT '微信' AFTER `dingtalk`;
 COMMIT;
 
+BEGIN;
+ALTER TABLE `pp_task_server` ADD `connection_type` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '连接类型 0:SSH;1:Telnet;' AFTER `group_id`;
+COMMIT;
+
 SET FOREIGN_KEY_CHECKS = 1;

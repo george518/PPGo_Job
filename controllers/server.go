@@ -2,8 +2,8 @@
 ** @Description: controllers
 ** @Author: haodaquan
 ** @Date:   2018-06-09 16:11
-** @Last Modified by:   haodaquan
-** @Last Modified time: 2018-06-09 16:11
+** @Last Modified by:   Bee
+** @Last Modified time: 2019-02-17 22:15:15
 *************************************************************/
 package controllers
 
@@ -16,6 +16,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"github.com/morganhein/go-telnet"
+	"github.com/pkg/errors"
 )
 
 type ServerController struct {
@@ -72,6 +74,7 @@ func (self *ServerController) GetServerByGroupId() {
 	for k, v := range result {
 		row := make(map[string]interface{})
 		row["id"] = v.Id
+		row["connection_type"] = v.ConnectionType
 		row["server_name"] = v.ServerName
 		row["detail"] = v.Detail
 		if serverGroup[v.GroupId] == "" {
@@ -94,6 +97,7 @@ func (self *ServerController) Edit() {
 	server, _ := models.TaskServerGetById(id)
 	row := make(map[string]interface{})
 	row["id"] = server.Id
+	row["connection_type"] = server.ConnectionType
 	row["server_name"] = server.ServerName
 	row["group_id"] = server.GroupId
 	row["server_ip"] = server.ServerIp
@@ -113,6 +117,7 @@ func (self *ServerController) Edit() {
 func (self *ServerController) AjaxTestServer() {
 
 	server := new(models.TaskServer)
+	server.ConnectionType, _ = self.GetInt("connection_type")
 	server.ServerName = strings.TrimSpace(self.GetString("server_name"))
 	server.ServerAccount = strings.TrimSpace(self.GetString("server_account"))
 	server.ServerOuterIp = strings.TrimSpace(self.GetString("server_outer_ip"))
@@ -126,21 +131,83 @@ func (self *ServerController) AjaxTestServer() {
 	server.GroupId, _ = self.GetInt("group_id")
 
 	var err error
-	if server.Type == 0 {
-		//密码登录
-		err = RemoteCommandByPassword(server)
+
+	if server.ConnectionType == 0 {
+		if server.Type == 0 {
+			//密码登录
+			err = RemoteCommandByPassword(server)
+		}
+
+		if server.Type == 1 {
+			//密钥登录
+			err = RemoteCommandByKey(server)
+		}
+
+		if err != nil {
+			self.ajaxMsg(err.Error(), MSG_ERR)
+		}
+		self.ajaxMsg("Success", MSG_OK)
+	} else if server.ConnectionType == 1 {
+		if server.Type == 0 {
+			//密码登录
+			err = RemoteCommandByTelnetPassword(server)
+		} else {
+			self.ajaxMsg("Telnet方式暂不支持密钥登陆！", MSG_ERR)
+		}
+
+		if err != nil {
+			self.ajaxMsg(err.Error(), MSG_ERR)
+		}
+		self.ajaxMsg("Success", MSG_OK)
 	}
 
-	if server.Type == 1 {
-		//密钥登录
-		err = RemoteCommandByKey(server)
-	}
+	self.ajaxMsg("未知连接方式", MSG_ERR)
+}
+
+func RemoteCommandByTelnetPassword(servers *models.TaskServer) error {
+
+	addr := fmt.Sprintf("%s:%d", servers.ServerIp, servers.Port)
+	conn, err := gote.Dial("tcp", addr)
+
+	defer conn.Close()
 
 	if err != nil {
-		self.ajaxMsg(err.Error(), MSG_ERR)
+		return err
 	}
-	self.ajaxMsg("Success", MSG_OK)
 
+	buf := make([]byte, 4096)
+	_, err = conn.Read(buf)
+	if err != nil {
+		return err
+	}
+
+	_, err = conn.Write([]byte(servers.ServerAccount + "\r\n"))
+	if err != nil {
+		return err
+	}
+
+	_, err = conn.Read(buf)
+	if err != nil {
+		return err
+	}
+
+	_, err = conn.Write([]byte(servers.Password + "\r\n"))
+	if err != nil {
+		return err
+	}
+
+	_, err = conn.Read(buf)
+	if err != nil {
+		return err
+	}
+
+	str := gbkAsUtf8(string(buf[:]))
+
+	if strings.Contains(str, ">") {
+		return nil
+	}
+
+	return errors.Errorf("连接失败!")
 }
 
 func RemoteCommandByPassword(servers *models.TaskServer) error {
@@ -208,6 +275,7 @@ func (self *ServerController) Copy() {
 	server, _ := models.TaskServerGetById(id)
 	row := make(map[string]interface{})
 	row["id"] = server.Id
+	row["connection_type"] = server.ConnectionType
 	row["server_name"] = server.ServerName
 	row["group_id"] = server.GroupId
 	row["server_ip"] = server.ServerIp
@@ -228,6 +296,7 @@ func (self *ServerController) AjaxSave() {
 	server_id, _ := self.GetInt("id")
 	if server_id == 0 {
 		server := new(models.TaskServer)
+		server.ConnectionType, _ = self.GetInt("connection_type")
 		server.ServerName = strings.TrimSpace(self.GetString("server_name"))
 		server.ServerAccount = strings.TrimSpace(self.GetString("server_account"))
 		server.ServerOuterIp = strings.TrimSpace(self.GetString("server_outer_ip"))
@@ -256,6 +325,7 @@ func (self *ServerController) AjaxSave() {
 	server.Id = server_id
 	server.UpdateTime = time.Now().Unix()
 
+	server.ConnectionType, _ = self.GetInt("connection_type")
 	server.ServerName = strings.TrimSpace(self.GetString("server_name"))
 	server.ServerAccount = strings.TrimSpace(self.GetString("server_account"))
 	server.ServerOuterIp = strings.TrimSpace(self.GetString("server_outer_ip"))
@@ -310,6 +380,11 @@ func (self *ServerController) Table() {
 		"密钥",
 	}
 
+	connectionType := [2]string{
+		"SSH",
+		"Telnet",
+	}
+
 	serverGroup := serverGroupLists(self.serverGroups, self.userId)
 
 	self.pageSize = limit
@@ -334,6 +409,7 @@ func (self *ServerController) Table() {
 	for k, v := range result {
 		row := make(map[string]interface{})
 		row["id"] = v.Id
+		row["connection_type"] = connectionType[v.ConnectionType]
 		row["server_name"] = v.ServerName
 		row["detail"] = v.Detail
 		if serverGroup[v.GroupId] == "" {

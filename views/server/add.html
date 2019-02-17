@@ -17,6 +17,16 @@
             </div>
             <div class="layui-form-mid layui-word-aux"></div>
         </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200">连接类型</label>
+            <div class="layui-input-inline mw400">
+                <input type="radio" name="connection_type" lay-verify="type" value="0" title="SSH" checked>
+                <input type="radio" name="connection_type" lay-verify="type" value="1" title="Telnet" >
+            </div>
+            <div class="layui-form-mid layui-word-aux"></div>
+        </div>
+
         <div class="layui-form-item">
             <label class="layui-form-label mw200">服务器名称</label>
             <div class="layui-input-inline mw400">
@@ -52,7 +62,7 @@
         <div class="layui-form-item">
             <label class="layui-form-label  mw200">端口号</label>
             <div class="layui-input-inline mw400">
-                <input type="text" name="port" id="port" lay-verify="required" autocomplete="off" placeholder="22" class="layui-input" value="">
+                <input type="text" name="port" id="port" lay-verify="required" autocomplete="off" placeholder="22/23" class="layui-input" value="">
             </div>
             <div class="layui-form-mid layui-word-aux"></div>
         </div>
@@ -160,11 +170,9 @@
             layer.load();
             var form_data = $("form").serialize();
             $.post('{{urlfor "ServerController.AjaxTestServer"}}', form_data, function (out) {
+                layer.closeAll('loading');
                 layer.msg(out.message)
             }, "json");
-            setTimeout(function(){
-                layer.closeAll('loading');
-            }, 2000);
             return false;
         });
 
