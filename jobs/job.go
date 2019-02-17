@@ -233,12 +233,11 @@ func RemoteCommandJobByTelnetPassword(id int, name string, command string, serve
 
 		addr := fmt.Sprintf("%s:%d", servers.ServerIp, servers.Port)
 		conn, err := gote.DialTimeout("tcp", addr, timeout)
-
-		defer conn.Close()
-
 		if err != nil {
 			return "", "", err, false
 		}
+
+		defer conn.Close()
 
 		buf := make([]byte, 4096)
 		_, err = conn.Read(buf)

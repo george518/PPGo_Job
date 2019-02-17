@@ -168,12 +168,11 @@ func RemoteCommandByTelnetPassword(servers *models.TaskServer) error {
 
 	addr := fmt.Sprintf("%s:%d", servers.ServerIp, servers.Port)
 	conn, err := gote.DialTimeout("tcp", addr, time.Second*10)
-
-	defer conn.Close()
-
 	if err != nil {
 		return err
 	}
+
+	defer conn.Close()
 
 	buf := make([]byte, 4096)
 	_, err = conn.Read(buf)
