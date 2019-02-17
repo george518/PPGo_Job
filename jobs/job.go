@@ -26,8 +26,8 @@ import (
 	"golang.org/x/crypto/ssh"
 	"encoding/json"
 	"github.com/axgle/mahonia"
-	"github.com/morganhein/go-telnet"
 	"github.com/pkg/errors"
+	"github.com/linxiaozhi/go-telnet"
 )
 
 type Job struct {
@@ -232,7 +232,7 @@ func RemoteCommandJobByTelnetPassword(id int, name string, command string, serve
 	job.runFunc = func(timeout time.Duration) (string, string, error, bool) {
 
 		addr := fmt.Sprintf("%s:%d", servers.ServerIp, servers.Port)
-		conn, err := gote.Dial("tcp", addr)
+		conn, err := gote.DialTimeout("tcp", addr, timeout)
 
 		defer conn.Close()
 

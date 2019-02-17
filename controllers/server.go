@@ -16,7 +16,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"github.com/morganhein/go-telnet"
+	"github.com/linxiaozhi/go-telnet"
 	"github.com/pkg/errors"
 )
 
@@ -167,7 +167,7 @@ func (self *ServerController) AjaxTestServer() {
 func RemoteCommandByTelnetPassword(servers *models.TaskServer) error {
 
 	addr := fmt.Sprintf("%s:%d", servers.ServerIp, servers.Port)
-	conn, err := gote.Dial("tcp", addr)
+	conn, err := gote.DialTimeout("tcp", addr, time.Second*10)
 
 	defer conn.Close()
 
