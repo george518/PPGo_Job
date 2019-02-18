@@ -100,7 +100,7 @@ func NewCommandJob(id int, name string, command string) *Job {
 		cmd.Start()
 		err, isTimeout := runCmdWithTimeout(cmd, timeout)
 
-		return bufOut.String(), bufErr.String(), err, isTimeout
+		return gbkAsUtf8(bufOut.String()), gbkAsUtf8(bufErr.String()), err, isTimeout
 	}
 	return job
 }
@@ -280,11 +280,13 @@ func RemoteCommandJobByTelnetPassword(id int, name string, command string, serve
 			}
 
 			_, err = conn.Read(buf)
-			if err != nil {
-				return "", "", err, false
-			}
 
 			out = out + gbkAsUtf8(string(buf[:]))
+			if err != nil ||
+				strings.Contains(out, "'"+c+"' is not recognized as an internal or external command") ||
+				strings.Contains(out, "'"+c+"' 不是内部或外部命令，也不是可运行的程序") {
+				return "", "", fmt.Errorf(gbkAsUtf8(string(buf[:]))), false
+			}
 		}
 
 		return out, "", nil, false

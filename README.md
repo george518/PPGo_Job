@@ -33,13 +33,13 @@ V1.x版本是一个简单的定时任务管理系统，进入V1.0 ：https://git
 
 先看效果
 ----
-![image](https://github.com/george518/PPGo_Job/blob/master/static/imgs/1-index.png?raw=true "github")
-![image](https://github.com/george518/PPGo_Job/blob/master/static/imgs/2-task.png?raw=true "github")
-![image](https://github.com/george518/PPGo_Job/blob/master/static/imgs/3-task_detail.png?raw=true "github")
-![image](https://github.com/george518/PPGo_Job/blob/master/static/imgs/10-auth.png?raw=true "github")
-![image](https://github.com/george518/PPGo_Job/blob/master/static/imgs/11-role.png?raw=true "github")
-![image](https://github.com/george518/PPGo_Job/blob/master/static/imgs/12-role_add.png?raw=true "github")
-![image](https://github.com/george518/PPGo_Job/blob/master/static/imgs/15.log.png?raw=true "github")
+![image](https://github.com/linxiaozhi/PPGo_Job/blob/master/assets/screenshot/1-index.png?raw=true "github")
+![image](https://github.com/linxiaozhi/PPGo_Job/blob/master/assets/screenshot/2-task.png?raw=true "github")
+![image](https://github.com/linxiaozhi/PPGo_Job/blob/master/assets/screenshot/3-task_detail.png?raw=true "github")
+![image](https://github.com/linxiaozhi/PPGo_Job/blob/master/assets/screenshot/10-auth.png?raw=true "github")
+![image](https://github.com/linxiaozhi/PPGo_Job/blob/master/assets/screenshot/11-role.png?raw=true "github")
+![image](https://github.com/linxiaozhi/PPGo_Job/blob/master/assets/screenshot/12-role_add.png?raw=true "github")
+![image](https://github.com/linxiaozhi/PPGo_Job/blob/master/assets/screenshot/15.log.png?raw=true "github")
 
 
 安装方法
