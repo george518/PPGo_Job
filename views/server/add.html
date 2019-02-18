@@ -71,8 +71,8 @@
         <div class="layui-form-item">
             <label class="layui-form-label mw200">验证登录类型</label>
             <div class="layui-input-inline mw400">
-                <input type="radio" name="type" lay-verify="type" value="0" title="密码" checked>
-                <input type="radio" name="type" lay-verify="type" value="1" title="密钥" >
+                <input type="radio" name="type" lay-verify="type" lay-filter="type" value="0" title="密码" checked>
+                <input type="radio" name="type" lay-verify="type" lay-filter="type" value="1" title="密钥" >
             </div>
             <div class="layui-form-mid layui-word-aux"></div>
         </div>
@@ -133,7 +133,7 @@
             })
             return;
         }
-        form.on('radio', function(data){
+        form.on('radio(type)', function(data){
             if(data.value==1){
                 $(".key").show();
                 $(".password").hide();

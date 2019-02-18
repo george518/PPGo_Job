@@ -272,20 +272,20 @@ func RemoteCommandJobByTelnetPassword(id int, name string, command string, serve
 
 		commandArr := strings.Split(command, "\n")
 
-		out := ""
+		out, n := "", 0
 		for _, c := range commandArr {
 			_, err = conn.Write([]byte(c + "\r\n"))
 			if err != nil {
 				return "", "", err, false
 			}
 
-			_, err = conn.Read(buf)
+			n, err = conn.Read(buf)
 
-			out = out + gbkAsUtf8(string(buf[:]))
+			out = out + gbkAsUtf8(string(buf[0:n]))
 			if err != nil ||
 				strings.Contains(out, "'"+c+"' is not recognized as an internal or external command") ||
 				strings.Contains(out, "'"+c+"' 不是内部或外部命令，也不是可运行的程序") {
-				return "", "", fmt.Errorf(gbkAsUtf8(string(buf[:]))), false
+				return out, "", fmt.Errorf(gbkAsUtf8(string(buf[0:n]))), false
 			}
 		}
 
