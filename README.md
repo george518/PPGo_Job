@@ -74,8 +74,8 @@ windows
 - 进入 https://github.com/george518/PPGo_Job/releases
 - 下载 ppgo_job-linux-2.1.0.zip 并解压
 - 进入文件夹，设置好数据库(创建数据库，导入ppgo_job2.sql)和配置文件(conf/app.conf)
-- 运行 go build
-- 运行 run.bat
+- 运行 go build -ldflags "-H windowsgui"
+- 运行 PPGo_Job.exe
 
 ----
 前台访问：http://your_host:8080
