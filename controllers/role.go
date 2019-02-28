@@ -12,8 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"fmt"
-
 	"github.com/astaxie/beego"
 	"github.com/george518/PPGo_Job/models"
 )
@@ -89,7 +87,6 @@ func (self *RoleController) AjaxSave() {
 	role.UpdateTime = time.Now().Unix()
 	role.Status = 1
 
-	fmt.Println("=========", role)
 	auths := strings.TrimSpace(self.GetString("nodes_data"))
 	role_id, _ := self.GetInt("id")
 	if role_id == 0 {
