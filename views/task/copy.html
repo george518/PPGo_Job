@@ -67,7 +67,7 @@
             <div class="layui-input-inline mw400">
                 <input type="text" name="cron_spec" id="cron_spec" lay-verify="required" autocomplete="off" placeholder="时间表达式" class="layui-input" value="{{.task.CronSpec}}">
             </div>
-            <div class="layui-form-mid layui-word-aux"><a href="http://www.haodaquan.com/129" target="_blank"><i class="fa fa-question-circle" aria-hidden="true"></i></a></div>
+            <div class="layui-form-mid layui-word-aux"><a href="/help" target="_blank"><i class="fa fa-question-circle" aria-hidden="true"></i></a></div>
         </div>
 
         <div class="layui-form-item">
@@ -97,9 +97,11 @@
         <div class="layui-form-item notify">
             <hr>
             <label class="layui-form-label mw200">通知类型</label>
-            <div class="layui-input-inline ">
+            <div class="layui-input-inline mw400">
                 <input type="radio" name="notify_type" lay-verify="required" value="0" title="邮件" {{if eq .task.NotifyType 0}}checked{{end}}>
                 <input type="radio" name="notify_type" lay-verify="required" value="1" title="短信" {{if eq .task.NotifyType 1}}checked{{end}}>
+                <input type="radio" name="notify_type" lay-verify="required" value="2" title="钉钉" {{if eq .task.NotifyType 2}}checked{{end}}>
+                <input type="radio" name="notify_type" lay-verify="required" value="3" title="微信" {{if eq .task.NotifyType 3}}checked{{end}}>
             </div>
             <div class="layui-form-mid layui-word-aux"></div>
         </div>

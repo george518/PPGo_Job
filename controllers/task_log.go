@@ -195,6 +195,15 @@ func (self *TaskLogController) Detail() {
 	self.Data["CreateName"] = createName
 	self.Data["UpdateName"] = updateName
 	self.Data["pageTitle"] = "日志详细" + "(#" + strconv.Itoa(id) + ")"
+
+	self.Data["NotifyTplName"] = "未知"
+	if task.IsNotify == 1 {
+		notifyTpl, err := models.NotifyTplGetById(task.NotifyTplId)
+		if err == nil {
+			self.Data["NotifyTplName"] = notifyTpl.TplName
+		}
+	}
+
 	self.display()
 }
 

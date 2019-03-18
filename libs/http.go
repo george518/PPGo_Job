@@ -2,29 +2,23 @@
 ** @Description: libs
 ** @Author: george hao
 ** @Date:   2018-08-09 13:29
-** @Last Modified by:  george hao
-** @Last Modified time: 2018-08-09 13:29
+** @Last Modified by:  Bee
+** @Last Modified time: 2019-02-15 13:50
 *************************************************************/
 package libs
 
 import (
-	"encoding/json"
 	"github.com/pkg/errors"
 	"io/ioutil"
-	"net/http"
 	"strings"
+	"net/http"
+	"io"
 )
 
-type AjaxReturn struct {
-	Status  int         `json:"status"`
-	Message string      `json:"message"`
-	Data    interface{} `json:"data"`
-}
-
-func HttpGet(url string, param map[string]string) error {
+func HttpGet(url string, param map[string]string) (string, error) {
 
 	if url == "" {
-		return errors.Errorf("url %s is not exists", url)
+		return "", errors.Errorf("url %s is not exists", url)
 	}
 	paramStr := ""
 	for k, v := range param {
@@ -33,13 +27,17 @@ func HttpGet(url string, param map[string]string) error {
 	paramStr = strings.TrimRight(paramStr, "&")
 
 	if paramStr != "" {
-		url += "?" + paramStr
+		if strings.Contains(url, "?") {
+			url += "&" + paramStr
+		} else {
+			url += "?" + paramStr
+		}
 	}
 
 	resp, err := http.Get(url)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	defer resp.Body.Close()
@@ -47,12 +45,27 @@ func HttpGet(url string, param map[string]string) error {
 	body, err := ioutil.ReadAll(resp.Body)
 
 	if err != nil {
-		return err
+		return "", err
 	}
-	ajaxData := AjaxReturn{}
-	json.Unmarshal(body, &ajaxData)
-	if ajaxData.Status != 200 {
-		return errors.Errorf("msg %s", ajaxData.Message)
+
+	return string(body), nil
+}
+
+func HttpPost(url string, contentType string, body io.Reader) (string, error) {
+
+	resp, err := http.Post(url, contentType, body)
+
+	if err != nil {
+		return "", err
 	}
-	return nil
+
+	defer resp.Body.Close()
+
+	resBody, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		return "", err
+	}
+
+	return string(resBody), nil
 }

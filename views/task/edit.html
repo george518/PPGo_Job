@@ -66,7 +66,7 @@
             <div class="layui-input-inline mw400">
                 <input type="text" name="cron_spec" id="cron_spec" lay-verify="required" autocomplete="off" placeholder="时间表达式" class="layui-input" value="{{.task.CronSpec}}">
             </div>
-            <div class="layui-form-mid layui-word-aux"><a href="http://www.haodaquan.com/129" target="_blank"><i class="fa fa-question-circle" aria-hidden="true"></i></a></div>
+            <div class="layui-form-mid layui-word-aux"><a href="/help" target="_blank"><i class="fa fa-question-circle" aria-hidden="true"></i></a></div>
         </div>
 
         <div class="layui-form-item">
@@ -94,11 +94,25 @@
         </div>
 
         <div class="layui-form-item notify">
-            <hr>
             <label class="layui-form-label mw200">通知类型</label>
-            <div class="layui-input-inline ">
-                <input type="radio" name="notify_type" lay-verify="required" value="0" title="邮件" {{if eq .task.NotifyType 0}}checked{{end}}>
-                <input type="radio" name="notify_type" lay-verify="required" value="1" title="短信" {{if eq .task.NotifyType 1}}checked{{end}}>
+            <div class="layui-input-inline mw400">
+                <input type="radio" name="notify_type" value="0" lay-filter="notify_type" title="邮件" {{if eq .task.NotifyType 0}}checked{{end}}>
+                <input type="radio" name="notify_type" value="1" lay-filter="notify_type" title="短信" {{if eq .task.NotifyType 1}}checked{{end}}>
+                <input type="radio" name="notify_type" value="2" lay-filter="notify_type" title="钉钉" {{if eq .task.NotifyType 2}}checked{{end}}>
+                <input type="radio" name="notify_type" value="3" lay-filter="notify_type" title="微信" {{if eq .task.NotifyType 3}}checked{{end}}>
+            </div>
+            <div class="layui-form-mid layui-word-aux"></div>
+        </div>
+
+        <div class="layui-form-item notify">
+            <label class="layui-form-label mw200">通知模板</label>
+            <div class="layui-input-inline">
+                <select name="notify_tpl_id" lay-filter="notify_tpl_id">
+                    <option value="0">请选择</option>
+                    {{range $k, $v := .notifyTpl}}
+                        <option value="{{$v.id}}" {{if eq $.task.NotifyTplId $v.id}} selected {{end}}>{{$v.tpl_name}}</option>
+                    {{end}}
+                </select>
             </div>
             <div class="layui-form-mid layui-word-aux"></div>
         </div>
@@ -199,6 +213,22 @@
                 }, 2000);
                 layer.close(index);
             });
+        });
+
+        form.on('radio(notify_type)', function (data) {
+            $.post('{{urlfor "TaskController.AjaxNotifyType"}}', {notify_type: data.value}, function (out) {
+                if (out.code == 0) {
+                    $('select[name="notify_tpl_id"]').empty();
+                    $('<option value="0" selected>请选择</option>').appendTo('select[name="notify_tpl_id"]');
+                    for (var i = 0; i < out.data.length; i++) {
+                        $('<option value="' + out.data[i].id + '">' + out.data[i].tpl_name + '</option>').appendTo('select[name="notify_tpl_id"]');
+                    }
+
+                    form.render();
+                } else {
+                    layer.msg(out.message)
+                }
+            }, "json");
         });
 
         //但是，如果你的HTML是动态生成的，自动渲染就会失效

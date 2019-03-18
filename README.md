@@ -33,13 +33,13 @@ V1.x版本是一个简单的定时任务管理系统，进入V1.0 ：https://git
 
 先看效果
 ----
-![image](https://github.com/george518/PPGo_Job/blob/master/static/imgs/1-index.png?raw=true "github")
-![image](https://github.com/george518/PPGo_Job/blob/master/static/imgs/2-task.png?raw=true "github")
-![image](https://github.com/george518/PPGo_Job/blob/master/static/imgs/3-task_detail.png?raw=true "github")
-![image](https://github.com/george518/PPGo_Job/blob/master/static/imgs/10-auth.png?raw=true "github")
-![image](https://github.com/george518/PPGo_Job/blob/master/static/imgs/11-role.png?raw=true "github")
-![image](https://github.com/george518/PPGo_Job/blob/master/static/imgs/12-role_add.png?raw=true "github")
-![image](https://github.com/george518/PPGo_Job/blob/master/static/imgs/15.log.png?raw=true "github")
+![image](https://github.com/linxiaozhi/PPGo_Job/blob/master/assets/screenshot/1-index.png?raw=true "github")
+![image](https://github.com/linxiaozhi/PPGo_Job/blob/master/assets/screenshot/2-task.png?raw=true "github")
+![image](https://github.com/linxiaozhi/PPGo_Job/blob/master/assets/screenshot/3-task_detail.png?raw=true "github")
+![image](https://github.com/linxiaozhi/PPGo_Job/blob/master/assets/screenshot/10-auth.png?raw=true "github")
+![image](https://github.com/linxiaozhi/PPGo_Job/blob/master/assets/screenshot/11-role.png?raw=true "github")
+![image](https://github.com/linxiaozhi/PPGo_Job/blob/master/assets/screenshot/12-role_add.png?raw=true "github")
+![image](https://github.com/linxiaozhi/PPGo_Job/blob/master/assets/screenshot/15.log.png?raw=true "github")
 
 
 安装方法
@@ -71,9 +71,12 @@ mac
 
 windows
 
-- 暂不支持
+- 进入 https://github.com/george518/PPGo_Job/releases
+- 下载 ppgo_job-linux-2.1.0.zip 并解压
+- 进入文件夹，设置好数据库(创建数据库，导入ppgo_job2.sql)和配置文件(conf/app.conf)
+- 运行 go build
+- 运行 run.bat
 
-访问方式
 ----
 前台访问：http://your_host:8080
 用户名：admin 密码：123456
@@ -94,9 +97,8 @@ jobs.pool = 1000
 # 站点名称
 site.name = 定时任务管理器
 
-#通知方式 0=邮件，1=信息
+#通知方式 0=邮件，1=信息，2=钉钉，3=微信
 notify.type = 0
-
 
 # 数据库配置
 db.host = 127.0.0.1
@@ -115,10 +117,17 @@ email.user = ci@xxx.cn
 email.password = "xxxxxx"
 email.pool = 10
 
-
 # 短信通知方式配置
 msg.url = http://chanxiyou.com/api/tools/send_sms
 msg.pool = 10
+
+# 钉钉通知配置
+dingtalk.url = "https://oapi.dingtalk.com/robot/send?access_token=%s"
+dingtalk.pool = 10
+
+# 微信通知方式配置
+wechat.url = http://xx.com/api/tools/send_wechat
+wechat.pool = 10
 ```
 
 编译安装-可能会遇到的问题
@@ -128,6 +137,10 @@ jobs/job.go:19:2: cannot find package "golang.org/x/crypto/ssh" in any of:
 
 需要 git clone https://github.com/golang/crypto.git
 并拷贝到 $GOPATH/src/golang.org/x/ 下就OK
+
+或
+
+git clone https://github.com/golang/crypto.git $GOPATH/src/golang.org/x/crypto
 
 # Docker
 本地编译好的2进制文件放在根目录下执行下面的命令即可拥有
@@ -142,6 +155,23 @@ docker-compose up -d
 docker-compose logs -f web
 
 ```
+# Windows远程执行
+
+1.开启telnet功能
+
+控制面板->程序和功能->打开或关闭Windows功能，选择Telnet服务端和Telnet客户端
+
+2.启动telnet服务
+
+控制面板->管理工具->服务->Telnet->启动类型改为自动并启动
+
+3.登陆授权
+
+控制面板->管理工具->本地安全策略，在本地安全策略中，安全设置->本地策略->安全选项->网络访问:本地帐户的共享和安全模型->经典
+
+控制面板->管理工具->本地安全策略->安全设置->本地策略->安全选项->帐户:使用空密码的本地帐户只允许进行控制台登录->已禁用
+
+控制面板->管理工具->计算机管理->系统工具->本地用户和组->组->TelnetClients->添加用户
 
 联系我
 ----

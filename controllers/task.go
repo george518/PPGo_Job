@@ -81,6 +81,22 @@ func (self *TaskController) Edit() {
 	}
 
 	self.Data["notify_user_ids"] = notifyUserIds
+
+	notifyTplList, _, err := models.NotifyTplGetByTplTypeList(task.NotifyType)
+	tplList := make([]map[string]interface{}, len(notifyTplList))
+
+	if err == nil {
+		for k, v := range notifyTplList {
+			row := make(map[string]interface{})
+			row["id"] = v.Id
+			row["tpl_name"] = v.TplName
+			row["tpl_type"] = v.TplType
+			tplList[k] = row
+		}
+	}
+
+	self.Data["notifyTpl"] = tplList
+
 	self.display()
 }
 
@@ -179,6 +195,15 @@ func (self *TaskController) Detail() {
 	self.Data["CreateName"] = createName
 	self.Data["UpdateName"] = updateName
 	self.Data["serverName"] = serverName
+
+	self.Data["NotifyTplName"] = "未知"
+	if task.IsNotify == 1 {
+		notifyTpl, err := models.NotifyTplGetById(task.NotifyTplId)
+		if err == nil {
+			self.Data["NotifyTplName"] = notifyTpl.TplName
+		}
+	}
+
 	self.display()
 }
 
@@ -197,7 +222,12 @@ func (self *TaskController) AjaxSave() {
 		task.Timeout, _ = self.GetInt("timeout")
 		task.IsNotify, _ = self.GetInt("is_notify")
 		task.NotifyType, _ = self.GetInt("notify_type")
+		task.NotifyTplId, _ = self.GetInt("notify_tpl_id")
 		task.NotifyUserIds = strings.TrimSpace(self.GetString("notify_user_ids"))
+
+		if task.IsNotify == 1 && task.NotifyTplId <= 0 {
+			self.ajaxMsg("请选择通知模板", MSG_ERR)
+		}
 
 		msg, isBan := checkCommand(task.Command)
 		if !isBan {
@@ -213,6 +243,7 @@ func (self *TaskController) AjaxSave() {
 		if task.TaskName == "" || task.CronSpec == "" || task.Command == "" {
 			self.ajaxMsg("请填写完整信息", MSG_ERR)
 		}
+
 		if _, err := cron.Parse(task.CronSpec); err != nil {
 			self.ajaxMsg("cron表达式无效", MSG_ERR)
 		}
@@ -237,9 +268,15 @@ func (self *TaskController) AjaxSave() {
 	task.Timeout, _ = self.GetInt("timeout")
 	task.IsNotify, _ = self.GetInt("is_notify")
 	task.NotifyType, _ = self.GetInt("notify_type")
+	task.NotifyTplId, _ = self.GetInt("notify_tpl_id")
 	task.NotifyUserIds = strings.TrimSpace(self.GetString("notify_user_ids"))
 	task.UpdateId = self.userId
 	task.Status = 2 //审核中,超级管理员不需要
+
+	if task.IsNotify == 1 && task.NotifyTplId <= 0 {
+		self.ajaxMsg("请选择通知模板", MSG_ERR)
+	}
+
 	if self.userId == 1 {
 		task.Status = 0
 	}
@@ -485,6 +522,23 @@ func (self *TaskController) AjaxDel() {
 		self.ajaxMsg(err.Error(), MSG_ERR)
 	}
 	self.ajaxMsg("操作成功", MSG_OK)
+}
+
+func (self *TaskController) AjaxNotifyType() {
+	notifyType, _ := self.GetInt("notify_type")
+	result, count, _ := models.NotifyTplGetByTplTypeList(notifyType)
+
+	list := make([]map[string]interface{}, len(result))
+
+	for k, v := range result {
+		row := make(map[string]interface{})
+		row["id"] = v.Id
+		row["tpl_name"] = v.TplName
+		row["tpl_type"] = v.TplType
+		list[k] = row
+	}
+
+	self.ajaxList("成功", MSG_OK, count, list)
 }
 
 func (self *TaskController) Table() {

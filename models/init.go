@@ -1,8 +1,8 @@
 /*
 * @Author: haodaquan
 * @Date:   2017-06-20 09:44:44
-* @Last Modified by:   haodaquan
-* @Last Modified time: 2017-06-21 12:21:37
+* @Last Modified by:   Bee
+* @Last Modified time: 2019-02-15 22:12
  */
 
 package models
@@ -47,6 +47,7 @@ func Init(startTime int64) {
 		new(Group),
 		new(Task),
 		new(TaskLog),
+		new(NotifyTpl),
 	)
 
 	if beego.AppConfig.String("runmode") == "dev" {

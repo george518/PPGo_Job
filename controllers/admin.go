@@ -58,6 +58,8 @@ func (self *AdminController) Edit() {
 	row["real_name"] = Admin.RealName
 	row["phone"] = Admin.Phone
 	row["email"] = Admin.Email
+	row["dingtalk"] = Admin.Dingtalk
+	row["wechat"] = Admin.Wechat
 	row["role_ids"] = Admin.RoleIds
 	self.Data["admin"] = row
 
@@ -93,6 +95,8 @@ func (self *AdminController) AjaxSave() {
 		Admin.RealName = strings.TrimSpace(self.GetString("real_name"))
 		Admin.Phone = strings.TrimSpace(self.GetString("phone"))
 		Admin.Email = strings.TrimSpace(self.GetString("email"))
+		Admin.Dingtalk = strings.TrimSpace(self.GetString("dingtalk"))
+		Admin.Wechat = strings.TrimSpace(self.GetString("wechat"))
 		Admin.RoleIds = strings.TrimSpace(self.GetString("roleids"))
 		Admin.UpdateTime = time.Now().Unix()
 		Admin.UpdateId = self.userId
@@ -125,6 +129,8 @@ func (self *AdminController) AjaxSave() {
 	Admin.RealName = strings.TrimSpace(self.GetString("real_name"))
 	Admin.Phone = strings.TrimSpace(self.GetString("phone"))
 	Admin.Email = strings.TrimSpace(self.GetString("email"))
+	Admin.Dingtalk = strings.TrimSpace(self.GetString("dingtalk"))
+	Admin.Wechat = strings.TrimSpace(self.GetString("wechat"))
 	Admin.RoleIds = strings.TrimSpace(self.GetString("roleids"))
 	Admin.UpdateTime = time.Now().Unix()
 	Admin.UpdateId = self.userId
@@ -203,6 +209,8 @@ func (self *AdminController) Table() {
 		row["real_name"] = v.RealName
 		row["phone"] = v.Phone
 		row["email"] = v.Email
+		row["dingtalk"] = v.Dingtalk
+		row["wechat"] = v.Wechat
 		row["role_ids"] = v.RoleIds
 		row["create_time"] = beego.Date(time.Unix(v.CreateTime, 0), "Y-m-d H:i:s")
 		row["update_time"] = beego.Date(time.Unix(v.UpdateTime, 0), "Y-m-d H:i:s")

@@ -2,8 +2,8 @@
 ** @Description: notify
 ** @Author: george hao
 ** @Date:   2018-08-09 13:05
-** @Last Modified by:  george hao
-** @Last Modified time: 2018-08-09 13:05
+** @Last Modified by:  Bee
+** @Last Modified time: 2019-02-15 13:50
 *************************************************************/
 package notify
 
@@ -12,10 +12,18 @@ import (
 	"github.com/george518/PPGo_Job/libs"
 	"log"
 	"time"
+	"encoding/json"
+	"github.com/pkg/errors"
 )
 
+type SmsAjaxReturn struct {
+	Status  int         `json:"status"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data"`
+}
+
 type Sms struct {
-	Mobiles []string
+	Mobiles map[string]string
 	Param   map[string]string
 }
 
@@ -45,7 +53,7 @@ func init() {
 
 }
 
-func SendSmsToChan(mobiles []string, param map[string]string) bool {
+func SendSmsToChan(mobiles map[string]string, param map[string]string) bool {
 	sms := &Sms{
 		Mobiles: mobiles,
 		Param:   param,
@@ -60,12 +68,29 @@ func SendSmsToChan(mobiles []string, param map[string]string) bool {
 }
 
 func (s *Sms) SendSms() error {
+
 	for _, v := range s.Mobiles {
 		s.Param["mobile"] = v
-		err := libs.HttpGet(SmsUrl, s.Param)
+		res, err := libs.HttpGet(SmsUrl, s.Param)
+
 		if err != nil {
 			log.Println(err)
+			return err
 		}
+
+		ajaxData := SmsAjaxReturn{}
+		jsonErr := json.Unmarshal([]byte(res), &ajaxData)
+
+		if jsonErr != nil {
+			return jsonErr
+		}
+
+		if ajaxData.Status != 200 {
+			return errors.Errorf("msg %s", ajaxData.Message)
+		}
+
+		return nil
+
 	}
 	return nil
 }

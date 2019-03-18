@@ -2,8 +2,8 @@
 ** @Description: models
 ** @Author: haodaquan
 ** @Date:   2018-06-11 21:26
-** @Last Modified by:   haodaquan
-** @Last Modified time: 2018-06-11 21:26
+** @Last Modified by:   Bee
+** @Last Modified time: 2019-02-15 21:32
 *************************************************************/
 package models
 
@@ -35,6 +35,7 @@ type Task struct {
 	Status        int
 	IsNotify      int
 	NotifyType    int
+	NotifyTplId   int
 	NotifyUserIds string
 	CreateId      int
 	UpdateId      int

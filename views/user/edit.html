@@ -33,6 +33,19 @@
             <div class="layui-form-mid layui-word-aux">*</div>
         </div>
 
+        <div class="layui-form-item">
+            <label class="layui-form-label">钉钉通知</label>
+            <div class="layui-input-inline">
+                <input type="text" name="dingtalk" id="dingtalk" autocomplete="off" placeholder="钉钉通知" class="layui-input" value="{{.admin.dingtalk}}">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">微信帐号</label>
+            <div class="layui-input-inline">
+                <input type="text" name="wechat" id="wechat" autocomplete="off" placeholder="微信帐号" class="layui-input" value="{{.admin.wechat}}">
+            </div>
+        </div>
 
         <div class="layui-form-item">
             <label class="layui-form-label">是否修改</label>
@@ -95,7 +108,7 @@
         form.on('submit(sub)', function(data){
             var form_data = $("form").serialize();
             $.post('{{urlfor "UserController.AjaxSave"}}', form_data, function (out) {
-                if (out.status == 0) {
+                if (out.status == 0 && form_data.reset_pwd == 1) {
                     layer.msg("操作成功,请重新登录",{icon: 1,shade:0.3,time:1000},function () {
                         top.location.href="/login_out"
                     })

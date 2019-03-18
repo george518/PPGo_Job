@@ -1,8 +1,8 @@
 /*
 * @Author: haodaquan
 * @Date:   2017-06-21 12:56:08
-* @Last Modified by:   haodaquan
-* @Last Modified time: 2017-06-21 13:05:57
+* @Last Modified by:   Bee
+* @Last Modified time: 2019-02-17 22:10:15
  */
 
 package jobs
@@ -24,6 +24,10 @@ import (
 	"github.com/george518/PPGo_Job/models"
 	"github.com/george518/PPGo_Job/notify"
 	"golang.org/x/crypto/ssh"
+	"encoding/json"
+	"github.com/axgle/mahonia"
+	"github.com/pkg/errors"
+	"github.com/linxiaozhi/go-telnet"
 )
 
 type Job struct {
@@ -50,19 +54,30 @@ func NewJobFromTask(task *models.Task) (*Job, error) {
 	}
 
 	server, _ := models.TaskServerGetById(task.ServerId)
-	if server.Type == 0 {
-		//密码验证登录服务器
-		job := RemoteCommandJobByPassword(task.Id, task.TaskName, task.Command, server)
+	if server.ConnectionType == 0 {
+		if server.Type == 0 {
+			//密码验证登录服务器
+			job := RemoteCommandJobByPassword(task.Id, task.TaskName, task.Command, server)
+			job.task = task
+			job.Concurrent = task.Concurrent == 1
+			return job, nil
+		}
+
+		job := RemoteCommandJob(task.Id, task.TaskName, task.Command, server)
 		job.task = task
 		job.Concurrent = task.Concurrent == 1
 		return job, nil
+	} else if server.ConnectionType == 1 {
+		if server.Type == 0 {
+			//密码验证登录服务器
+			job := RemoteCommandJobByTelnetPassword(task.Id, task.TaskName, task.Command, server)
+			job.task = task
+			job.Concurrent = task.Concurrent == 1
+			return job, nil
+		}
 	}
 
-	job := RemoteCommandJob(task.Id, task.TaskName, task.Command, server)
-	job.task = task
-	job.Concurrent = task.Concurrent == 1
-	return job, nil
-
+	return nil, fmt.Errorf("未知ConnectionType")
 }
 
 func NewCommandJob(id int, name string, command string) *Job {
@@ -85,7 +100,7 @@ func NewCommandJob(id int, name string, command string) *Job {
 		cmd.Start()
 		err, isTimeout := runCmdWithTimeout(cmd, timeout)
 
-		return bufOut.String(), bufErr.String(), err, isTimeout
+		return gbkAsUtf8(bufOut.String()), gbkAsUtf8(bufErr.String()), err, isTimeout
 	}
 	return job
 }
@@ -208,6 +223,78 @@ func RemoteCommandJobByPassword(id int, name string, command string, servers *mo
 	return job
 }
 
+func RemoteCommandJobByTelnetPassword(id int, name string, command string, servers *models.TaskServer) *Job {
+
+	job := &Job{
+		id:   id,
+		name: name,
+	}
+	job.runFunc = func(timeout time.Duration) (string, string, error, bool) {
+
+		addr := fmt.Sprintf("%s:%d", servers.ServerIp, servers.Port)
+		conn, err := gote.DialTimeout("tcp", addr, timeout)
+		if err != nil {
+			return "", "", err, false
+		}
+
+		defer conn.Close()
+
+		buf := make([]byte, 4096)
+		_, err = conn.Read(buf)
+		if err != nil {
+			return "", "", err, false
+		}
+
+		_, err = conn.Write([]byte(servers.ServerAccount + "\r\n"))
+		if err != nil {
+			return "", "", err, false
+		}
+
+		_, err = conn.Read(buf)
+		if err != nil {
+			return "", "", err, false
+		}
+
+		_, err = conn.Write([]byte(servers.Password + "\r\n"))
+		if err != nil {
+			return "", "", err, false
+		}
+
+		_, err = conn.Read(buf)
+		if err != nil {
+			return "", "", err, false
+		}
+
+		loginStr := gbkAsUtf8(string(buf[:]))
+		if !strings.Contains(loginStr, ">") {
+			return "", "", errors.Errorf("Login failed!"), false
+		}
+
+		commandArr := strings.Split(command, "\n")
+
+		out, n := "", 0
+		for _, c := range commandArr {
+			_, err = conn.Write([]byte(c + "\r\n"))
+			if err != nil {
+				return "", "", err, false
+			}
+
+			n, err = conn.Read(buf)
+
+			out = out + gbkAsUtf8(string(buf[0:n]))
+			if err != nil ||
+				strings.Contains(out, "'"+c+"' is not recognized as an internal or external command") ||
+				strings.Contains(out, "'"+c+"' 不是内部或外部命令，也不是可运行的程序") {
+				return out, "", fmt.Errorf(gbkAsUtf8(string(buf[0:n]))), false
+			}
+		}
+
+		return out, "", nil, false
+	}
+
+	return job
+}
+
 func (j *Job) Status() int {
 	return j.status
 }
@@ -277,77 +364,106 @@ func (j *Job) Run() {
 	if log.Status < 0 && j.task.IsNotify == 1 {
 		if j.task.NotifyUserIds != "0" && j.task.NotifyUserIds != "" {
 			adminInfo := AllAdminInfo(j.task.NotifyUserIds)
-			phone := make([]string, 0)
+			phone := make(map[string]string, 0)
+			dingtalk := make(map[string]string, 0)
+			wechat := make(map[string]string, 0)
 			toEmail := ""
 			for _, v := range adminInfo {
 				if v.Phone != "0" && v.Phone != "" {
-					phone = append(phone, v.Phone)
+					phone[v.Phone] = v.Phone
 				}
 				if v.Email != "0" && v.Email != "" {
 					toEmail += v.Email + ";"
+				}
+				if v.Dingtalk != "0" && v.Dingtalk != "" {
+					dingtalk[v.Dingtalk] = v.Dingtalk
+				}
+				if v.Wechat != "0" && v.Wechat != "" {
+					wechat[v.Wechat] = v.Wechat
 				}
 			}
 			toEmail = strings.TrimRight(toEmail, ";")
 
 			TextStatus := []string{
-				"<font color='red'>超时</font>",
-				"<font color='red'>错误</font>",
-				"<font color='green'>正常</font>",
+				"超时",
+				"错误",
+				"正常",
 			}
 
 			status := log.Status + 2
 
+			title, content := "", ""
+
+			notifyTpl, err := models.NotifyTplGetById(j.task.NotifyTplId)
+			if err != nil {
+				notifyTpl, err := models.NotifyTplGetByTplType(j.task.NotifyType, models.NotifyTplTypeSystem)
+				if err == nil {
+					title = notifyTpl.Title
+					content = notifyTpl.Content
+				}
+			} else {
+				title = notifyTpl.Title
+				content = notifyTpl.Content
+			}
+
+			if title != "" {
+				title = strings.Replace(title, "{{TaskId}}", strconv.Itoa(j.task.Id), -1)
+				title = strings.Replace(title, "{{TaskName}}", j.task.TaskName, -1)
+				title = strings.Replace(title, "{{ExecuteTime}}", beego.Date(time.Unix(log.CreateTime, 0), "Y-m-d H:i:s"), -1)
+				title = strings.Replace(title, "{{ProcessTime}}", strconv.FormatFloat(float64(log.ProcessTime)/1000, 'f', 6, 64), -1)
+				title = strings.Replace(title, "{{ExecuteStatus}}", TextStatus[status], -1)
+				title = strings.Replace(title, "{{TaskOutput}}", log.Error, -1)
+			}
+
+			if content != "" {
+				content = strings.Replace(content, "{{TaskId}}", strconv.Itoa(j.task.Id), -1)
+				content = strings.Replace(content, "{{TaskName}}", j.task.TaskName, -1)
+				content = strings.Replace(content, "{{ExecuteTime}}", beego.Date(time.Unix(log.CreateTime, 0), "Y-m-d H:i:s"), -1)
+				content = strings.Replace(content, "{{ProcessTime}}", strconv.FormatFloat(float64(log.ProcessTime)/1000, 'f', 6, 64), -1)
+				content = strings.Replace(content, "{{ExecuteStatus}}", TextStatus[status], -1)
+				content = strings.Replace(content, "{{TaskOutput}}", log.Error, -1)
+			}
+
 			if j.task.NotifyType == 0 && toEmail != "" {
 				//邮件
-				//SendToChan(to, subject, body, mailtype string) bool
-				subject := fmt.Sprintf("PPGo_Job定时任务异常：%s", j.task.TaskName)
-				body := fmt.Sprintf(
-					`Hello,定时任务出问题了：
-<p style="font-size:16px;">任务执行详情：</p>
-<p style="display:block; padding:10px; background:#efefef;border:1px solid #e4e4e4">
-任务 ID：%d<br/>
-任务名称：%s<br/>
-执行时间：%s<br/>
-执行耗时：%f秒<br/>
-执行状态：%s
-</p>
-<p style="font-size:16px;">任务执行输出</p>
-<p style="display:block; padding:10px; background:#efefef;border:1px solid #e4e4e4">
-%s
-</p>
-<br/>
-<br/>
-<p>-----------------------------------------------------------------<br />
-本邮件由PPGo_Job定时系统自动发出，请勿回复<br />
-如果要取消邮件通知，请登录到系统进行设置<br />
-</p>
-`, j.task.Id,
-					j.task.TaskName,
-					beego.Date(time.Unix(log.CreateTime, 0), "Y-m-d H:i:s"),
-					float64(log.ProcessTime)/1000,
-					TextStatus[status],
-					log.Error)
 				mailtype := "html"
-
-				ok := notify.SendToChan(toEmail, subject, body, mailtype)
+				ok := notify.SendToChan(toEmail, title, content, mailtype)
 				if !ok {
 					fmt.Println("发送邮件错误", toEmail)
 				}
-
 			} else if j.task.NotifyType == 1 && len(phone) > 0 {
 				//信息
-				TextStatus := []string{
-					" 超时",
-					" 错误",
-					" 正常",
-				}
 				param := make(map[string]string)
-				param["task_id"] = " " + strconv.Itoa(j.task.Id)
-				param["task_name"] = " " + j.task.TaskName
-				param["status"] = " " + TextStatus[status]
-				notify.SendSmsToChan(phone, param)
-			}
+				err := json.Unmarshal([]byte(content), &param)
+				if err != nil {
+					fmt.Println("发送信息错误", err)
+					return
+				}
 
+				ok := notify.SendSmsToChan(phone, param)
+				if !ok {
+					fmt.Println("发送信息错误", phone)
+				}
+			} else if j.task.NotifyType == 2 && len(dingtalk) > 0 {
+				//钉钉
+				ok := notify.SendDingtalkToChan(dingtalk, content)
+				if !ok {
+					fmt.Println("发送钉钉错误", dingtalk)
+				}
+			} else if j.task.NotifyType == 3 && len(wechat) > 0 {
+				//信息
+				param := make(map[string]string)
+				err := json.Unmarshal([]byte(content), &param)
+				if err != nil {
+					fmt.Println("发送微信错误", err)
+					return
+				}
+
+				ok := notify.SendWechatToChan(phone, param)
+				if !ok {
+					fmt.Println("发送微信错误", phone)
+				}
+			}
 		}
 	}
 
@@ -364,6 +480,8 @@ type adminInfo struct {
 	Id       int
 	Email    string
 	Phone    string
+	Dingtalk string
+	Wechat   string
 	RealName string
 }
 
@@ -388,10 +506,20 @@ func AllAdminInfo(adminIds string) []*adminInfo {
 			Id:       v.Id,
 			Email:    v.Email,
 			Phone:    v.Phone,
+			Dingtalk: v.Dingtalk,
+			Wechat:   v.Wechat,
 			RealName: v.RealName,
 		}
 		adminInfos = append(adminInfos, &ai)
 	}
 
 	return adminInfos
+}
+
+func gbkAsUtf8(str string) string {
+	srcDecoder := mahonia.NewDecoder("gbk")
+	desDecoder := mahonia.NewDecoder("utf-8")
+	resStr := srcDecoder.ConvertString(str)
+	_, resBytes, _ := desDecoder.Translate([]byte(resStr), true)
+	return string(resBytes)
 }

@@ -19,6 +19,8 @@ type Admin struct {
 	RoleIds    string
 	Phone      string
 	Email      string
+	Dingtalk   string
+	Wechat     string
 	Salt       string
 	LastLogin  int64
 	LastIp     string
