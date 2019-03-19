@@ -53,28 +53,38 @@ V1.x版本是一个简单的定时任务管理系统，进入V1.0 ：https://git
 - 运行 go build
 - 运行 ./run.sh start|stop
 
+mac
+- 运行 ./package.sh -a amd64 -p darwin -v v2.3.0
+
+linux
+- 运行 ./package.sh -a 386 -p linux -v v2.3.0
+- 运行 ./package.sh -a amd64 -p linux -v v2.3.0
+
+windows
+- 运行 ./package.sh -a amd64 -p windows -v v2.3.0
+
+
 方法二、直接使用
 
 linux
 
 - 进入 https://github.com/george518/PPGo_Job/releases
-- 下载 ppgo_job-linux-2.1.0.zip 并解压
+- 下载 ppgo_job-linux-2.3.0.zip 并解压
 - 进入文件夹，设置好数据库(创建数据库，导入ppgo_job2.sql)和配置文件(conf/app.conf)
 - 运行 ./run.sh start|stop
 
 mac
 
 - 进入https://github.com/george518/PPGo_Job/releases
-- 下载 ppgo_job-mac-2.1.0.zip 并解压
+- 下载 ppgo_job-mac-2.3.0.zip 并解压
 - 进入文件夹，设置好数据库(创建数据库，导入ppgo_job2.sql)和配置文件(conf/app.conf)
 - 运行 ./run.sh start|stop
 
 windows
 
 - 进入 https://github.com/george518/PPGo_Job/releases
-- 下载 ppgo_job-linux-2.1.0.zip 并解压
+- 下载 ppgo_job-windows-2.3.0.zip 并解压
 - 进入文件夹，设置好数据库(创建数据库，导入ppgo_job2.sql)和配置文件(conf/app.conf)
-- 运行 go build
 - 运行 run.bat
 
 ----

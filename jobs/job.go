@@ -240,28 +240,24 @@ func RemoteCommandJobByTelnetPassword(id int, name string, command string, serve
 		defer conn.Close()
 
 		buf := make([]byte, 4096)
-		_, err = conn.Read(buf)
-		if err != nil {
+
+		if _, err = conn.Read(buf); err != nil {
 			return "", "", err, false
 		}
 
-		_, err = conn.Write([]byte(servers.ServerAccount + "\r\n"))
-		if err != nil {
+		if _, err = conn.Write([]byte(servers.ServerAccount + "\r\n")); err != nil {
 			return "", "", err, false
 		}
 
-		_, err = conn.Read(buf)
-		if err != nil {
+		if _, err = conn.Read(buf); err != nil {
 			return "", "", err, false
 		}
 
-		_, err = conn.Write([]byte(servers.Password + "\r\n"))
-		if err != nil {
+		if _, err = conn.Write([]byte(servers.Password + "\r\n")); err != nil {
 			return "", "", err, false
 		}
 
-		_, err = conn.Read(buf)
-		if err != nil {
+		if _, err = conn.Read(buf); err != nil {
 			return "", "", err, false
 		}
 
@@ -409,6 +405,7 @@ func (j *Job) Run() {
 			if title != "" {
 				title = strings.Replace(title, "{{TaskId}}", strconv.Itoa(j.task.Id), -1)
 				title = strings.Replace(title, "{{TaskName}}", j.task.TaskName, -1)
+				title = strings.Replace(title, "{{ExecuteCommand}}", j.task.Command, -1)
 				title = strings.Replace(title, "{{ExecuteTime}}", beego.Date(time.Unix(log.CreateTime, 0), "Y-m-d H:i:s"), -1)
 				title = strings.Replace(title, "{{ProcessTime}}", strconv.FormatFloat(float64(log.ProcessTime)/1000, 'f', 6, 64), -1)
 				title = strings.Replace(title, "{{ExecuteStatus}}", TextStatus[status], -1)
@@ -418,6 +415,7 @@ func (j *Job) Run() {
 			if content != "" {
 				content = strings.Replace(content, "{{TaskId}}", strconv.Itoa(j.task.Id), -1)
 				content = strings.Replace(content, "{{TaskName}}", j.task.TaskName, -1)
+				content = strings.Replace(content, "{{ExecuteCommand}}", j.task.Command, -1)
 				content = strings.Replace(content, "{{ExecuteTime}}", beego.Date(time.Unix(log.CreateTime, 0), "Y-m-d H:i:s"), -1)
 				content = strings.Replace(content, "{{ProcessTime}}", strconv.FormatFloat(float64(log.ProcessTime)/1000, 'f', 6, 64), -1)
 				content = strings.Replace(content, "{{ExecuteStatus}}", TextStatus[status], -1)
