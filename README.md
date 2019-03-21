@@ -1,10 +1,11 @@
-PPGo_Job定时任务管理系统 V2.0
+PPGo_Job定时任务管理系统 V2.x
 ====
+
 ![](http://www.haodaquan.com/Uploads/article/2018-07-26/153262059813931.png)
 
 PPGo_Job是一款定时任务可视化的、多人多权限的管理系统，采用golang开发，安装方便，资源消耗少，支持大并发，可同时管理多台服务器上的定时任务。
 
-前言：PPGo_Job V1.x版本开源两年多了，好几个朋友的公司都在用，反响还不错，当然，也有好多朋友提了不少合理的意见和建议，所以这次干脆重构了一下，连UI也重新编码。目前V2.0版本
+前言：PPGo_Job V1.x版本开源两年多了，不少朋友的公司都在用，反响还不错，当然，也有好多朋友提了不少合理的意见和建议，所以这次干脆重构了一下，连UI也重新编码。目前V2.x版本
 已经用于生产环境。
 
 码云地址：https://gitee.com/georgehao/PPGo_Job
@@ -64,21 +65,21 @@ V1.x版本是一个简单的定时任务管理系统，进入V1.0 ：https://git
 linux
 
 - 进入 https://github.com/george518/PPGo_Job/releases
-- 下载 ppgo_job-linux-2.1.0.zip 并解压
+- 下载 ppgo_job-linux-2.x.0.zip 并解压
 - 进入文件夹，设置好数据库(创建数据库，导入ppgo_job2.sql)和配置文件(conf/app.conf)
 - 运行 ./run.sh start|stop
 
 mac
 
 - 进入https://github.com/george518/PPGo_Job/releases
-- 下载 ppgo_job-mac-2.1.0.zip 并解压
+- 下载 ppgo_job-mac-2.x.0.zip 并解压
 - 进入文件夹，设置好数据库(创建数据库，导入ppgo_job2.sql)和配置文件(conf/app.conf)
 - 运行 ./run.sh start|stop
 
 windows
 
 - 进入 https://github.com/george518/PPGo_Job/releases
-- 下载 ppgo_job-linux-2.1.0.zip 并解压
+- 下载 ppgo_job-linux-2.x.0.zip 并解压
 - 进入文件夹，设置好数据库(创建数据库，导入ppgo_job2.sql)和配置文件(conf/app.conf)
 - 运行 go build
 - 运行 run.bat
