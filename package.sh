@@ -189,17 +189,6 @@ package_file() {
     done
 }
 
-package_cp_include_file() {
-    FILEs=$2
-    if [[ "${#FILEs[@]}" = "0" ]];then
-        return
-    fi
-
-    for item in "${FILEs[@]}"; do
-        cp -r ../${item} $1
-    done
-}
-
 # 清理
 clean() {
     if [[ -d ${BUILD_DIR} ]];then
