@@ -78,7 +78,7 @@ func (self *BaseController) Auth() {
 			}
 
 			isHasAuth := strings.Contains(self.allowUrl, self.controllerName+"/"+self.actionName)
-			noAuth := "ajaxsave/table/loginin/loginout/getnodes/start"
+			noAuth := "ajaxsave/table/loginin/loginout/getnodes/start／apitask/apistart/apipause"
 			isNoAuth := strings.Contains(noAuth, self.actionName)
 
 			if isHasAuth == false && isNoAuth == false {
@@ -95,7 +95,12 @@ func (self *BaseController) Auth() {
 		}
 	}
 
-	if self.userId == 0 && (self.controllerName != "login" && self.actionName != "loginin") {
+	if self.userId == 0 &&
+		(self.controllerName != "login" &&
+			self.actionName != "loginin" &&
+			self.actionName != "apistart" &&
+			self.actionName != "apitask" &&
+			self.actionName != "apipause") {
 		self.redirect(beego.URLFor("LoginController.Login"))
 	}
 }

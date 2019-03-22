@@ -12,8 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"fmt"
-
 	"github.com/astaxie/beego"
 	"github.com/george518/PPGo_Job/crons"
 	"github.com/george518/PPGo_Job/jobs"
@@ -46,8 +44,6 @@ func (self *TaskController) Add() {
 	self.Data["serverGroup"] = serverLists(self.serverGroups, self.userId)
 	self.Data["isAdmin"] = self.userId
 	self.Data["adminInfo"] = AllAdminInfo("")
-
-	fmt.Println(self.Data["adminInfo"])
 	self.display()
 }
 
@@ -295,6 +291,8 @@ func (self *TaskController) AjaxSave() {
 	self.ajaxMsg("", MSG_OK)
 }
 
+
+
 //检查是否含有禁用命令
 func checkCommand(command string) (string, bool) {
 
@@ -333,6 +331,8 @@ func (self *TaskController) AjaxNopass() {
 	}
 	self.ajaxMsg("", MSG_OK)
 }
+
+
 
 func (self *TaskController) AjaxStart() {
 	taskId, _ := self.GetInt("id")
@@ -656,3 +656,139 @@ func (self *TaskController) Table() {
 
 	self.ajaxList("成功", MSG_OK, count, list)
 }
+
+func (self *TaskController) ApiTask() {
+	task_id, _ := self.GetInt("id")
+	if task_id == 0 {
+		task := new(models.Task)
+		task.CreateId,_ = self.GetInt("create_id")
+		task.GroupId, _ = self.GetInt("group_id")
+		task.TaskName = strings.TrimSpace(self.GetString("task_name"))
+		task.Description = strings.TrimSpace(self.GetString("description"))
+		task.Concurrent, _ = self.GetInt("concurrent")
+		task.ServerId, _ = self.GetInt("server_id")
+		task.CronSpec = strings.TrimSpace(self.GetString("cron_spec"))
+		task.Command = strings.TrimSpace(self.GetString("command"))
+		task.Timeout, _ = self.GetInt("timeout")
+		task.IsNotify, _ = self.GetInt("is_notify")
+		task.NotifyType, _ = self.GetInt("notify_type")
+		task.NotifyTplId, _ = self.GetInt("notify_tpl_id")
+		task.NotifyUserIds = strings.TrimSpace(self.GetString("notify_user_ids"))
+
+		if task.IsNotify == 1 && task.NotifyTplId <= 0 {
+			self.ajaxMsg("请选择通知模板", MSG_ERR)
+		}
+
+		msg, isBan := checkCommand(task.Command)
+		if !isBan {
+			self.ajaxMsg("含有禁止命令："+msg, MSG_ERR)
+		}
+
+		task.CreateTime = time.Now().Unix()
+		task.UpdateTime = time.Now().Unix()
+		task.Status = 0 //接口不需要审核
+
+		if task.TaskName == "" || task.CronSpec == "" || task.Command == "" {
+			self.ajaxMsg("请填写完整信息", MSG_ERR)
+		}
+		var id int64
+		var err error
+		if _, err = cron.Parse(task.CronSpec); err != nil {
+			self.ajaxMsg("cron表达式无效", MSG_ERR)
+		}
+
+		if id, err = models.TaskAdd(task); err != nil {
+			self.ajaxMsg(err.Error(), MSG_ERR)
+		}
+		task_id = int(id)
+		self.ajaxMsg(task_id, MSG_OK)
+	}
+
+	task, _ := models.TaskGetById(task_id)
+
+	if task.Status == 1 {
+		self.ajaxMsg("运行状态无法编辑任务，请先暂停任务", MSG_ERR)
+	}
+	//修改
+	task.Id = task_id
+	task.UpdateTime = time.Now().Unix()
+	task.TaskName = strings.TrimSpace(self.GetString("task_name"))
+	task.Description = strings.TrimSpace(self.GetString("description"))
+	task.GroupId, _ = self.GetInt("group_id")
+	task.Concurrent, _ = self.GetInt("concurrent")
+	task.ServerId, _ = self.GetInt("server_id")
+	task.CronSpec = strings.TrimSpace(self.GetString("cron_spec"))
+	task.Command = strings.TrimSpace(self.GetString("command"))
+	task.Timeout, _ = self.GetInt("timeout")
+	task.IsNotify, _ = self.GetInt("is_notify")
+	task.NotifyType, _ = self.GetInt("notify_type")
+	task.NotifyTplId, _ = self.GetInt("notify_tpl_id")
+	task.NotifyUserIds = strings.TrimSpace(self.GetString("notify_user_ids"))
+	task.UpdateId , _ = self.GetInt("update_id")
+	task.Status = 0 //接口不需要
+
+	if task.IsNotify == 1 && task.NotifyTplId <= 0 {
+		self.ajaxMsg("请选择通知模板", MSG_ERR)
+	}
+
+	msg, isBan := checkCommand(task.Command)
+	if !isBan {
+		self.ajaxMsg("含有禁止命令："+msg, MSG_ERR)
+	}
+
+	if _, err := cron.Parse(task.CronSpec); err != nil {
+		self.ajaxMsg("cron表达式无效", MSG_ERR)
+	}
+
+	if err := task.Update(); err != nil {
+		self.ajaxMsg(err.Error(), MSG_ERR)
+	}
+	self.ajaxMsg(task_id, MSG_OK)
+}
+
+func (self *TaskController) ApiStart() {
+	taskId, _ := self.GetInt("id")
+	if taskId == 0 {
+		self.ajaxMsg("任务不存在", MSG_ERR)
+	}
+
+	task, err := models.TaskGetById(taskId)
+	if err != nil {
+		self.ajaxMsg("查不到该任务", MSG_ERR)
+	}
+
+	if task.Status != 0 {
+		self.ajaxMsg("任务状态有误", MSG_ERR)
+	}
+
+	job, err := jobs.NewJobFromTask(task)
+	if err != nil {
+		self.ajaxMsg("创建任务失败", MSG_ERR)
+	}
+
+	if jobs.AddJob(task.CronSpec, job) {
+		task.Status = 1
+		task.Update()
+	}
+	self.ajaxMsg("", MSG_OK)
+}
+
+func (self *TaskController) ApiPause() {
+	taskId, _ := self.GetInt("id")
+	if taskId == 0 {
+		self.ajaxMsg("任务不存在", MSG_ERR)
+	}
+
+	task, err := models.TaskGetById(taskId)
+	if err != nil {
+		self.ajaxMsg("查不到该任务", MSG_ERR)
+	}
+
+	jobs.RemoveJob(taskId)
+	task.Status = 0
+	task.Update()
+	self.ajaxMsg("", MSG_OK)
+
+}
+
+

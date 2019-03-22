@@ -1,10 +1,11 @@
-PPGo_Job定时任务管理系统 V2.0
+PPGo_Job定时任务管理系统 V2.x
 ====
+
 ![](http://www.haodaquan.com/Uploads/article/2018-07-26/153262059813931.png)
 
 PPGo_Job是一款定时任务可视化的、多人多权限的管理系统，采用golang开发，安装方便，资源消耗少，支持大并发，可同时管理多台服务器上的定时任务。
 
-前言：PPGo_Job V1.x版本开源一年多，好几个朋友的公司都在用，反响还不错，当然，也有好多朋友提了不少合理的意见和建议，所以这次干脆重构了一下，连UI也重新编码。目前V2.0版本
+前言：PPGo_Job V1.x版本开源两年多了，不少朋友的公司都在用，反响还不错，当然，也有好多朋友提了不少合理的意见和建议，所以这次干脆重构了一下，连UI也重新编码。目前V2.x版本
 已经用于生产环境。
 
 码云地址：https://gitee.com/georgehao/PPGo_Job
@@ -22,8 +23,14 @@ V1.x版本是一个简单的定时任务管理系统，进入V1.0 ：https://git
 - 3、新增服务器复制功能，让服务器资源添加更加方便。
 - 4、新增定时任务详情页面，将任务相关操作更加集中起来操作。
 - 5、新增任务审核功能，提高任务的管控能力。
-- 6、新增禁止命令管理功能，配合任务审核功能，提高任务运行安全性。
-- 7、优化日志详情页面，查看日志更方便。
+- 6、新增禁止命令管理功能，配合任务审核功能，提高任务运行安全性，总有人会犯错。
+- 7、优化日志详情页面，查看日志更方便，你想看到的现场内容都在，亲。
+- 8、支持docker化部署，这年头，系统不支持docker化部署好像不能出门似的。
+- 9、支持windows系统运行定时系统，不歧视windows，也要支持。
+- 10、提醒信息新增钉钉和微信通知功能，并支持编辑通知模版功能。让提醒内容个性化，不再死板。
+- 11、新增创建、启动、关闭任务的API，通过接口的方式控制定时任务，猜你喜欢。
+
+总之，管理定时任务，使用PPGo_Job吧，节省出来的时间，或皮或浪，随你，哈哈。
 
 感觉不错的话，给个星星吧 ：）
 
@@ -69,21 +76,21 @@ windows
 linux
 
 - 进入 https://github.com/george518/PPGo_Job/releases
-- 下载 ppgo_job-linux-2.3.0.zip 并解压
+- 下载 ppgo_job-linux-2.x.0.zip 并解压
 - 进入文件夹，设置好数据库(创建数据库，导入ppgo_job2.sql)和配置文件(conf/app.conf)
 - 运行 ./run.sh start|stop
 
 mac
 
 - 进入https://github.com/george518/PPGo_Job/releases
-- 下载 ppgo_job-mac-2.3.0.zip 并解压
+- 下载 ppgo_job-mac-2.x.0.zip 并解压
 - 进入文件夹，设置好数据库(创建数据库，导入ppgo_job2.sql)和配置文件(conf/app.conf)
 - 运行 ./run.sh start|stop
 
 windows
 
 - 进入 https://github.com/george518/PPGo_Job/releases
-- 下载 ppgo_job-windows-2.3.0.zip 并解压
+- 下载 ppgo_job-linux-2.x.0.zip 并解压
 - 进入文件夹，设置好数据库(创建数据库，导入ppgo_job2.sql)和配置文件(conf/app.conf)
 - 运行 run.bat
 
@@ -183,10 +190,79 @@ docker-compose logs -f web
 
 控制面板->管理工具->计算机管理->系统工具->本地用户和组->组->TelnetClients->添加用户
 
+任务接口说明
+----
+三个简陋的接口，满足日常所需。
+
+1、新增和修改任务接口 
+
+- url：/task/apitask
+- method：post 
+- params：
+```
+id:0
+create_id:4
+group_id:3
+task_name:测试API创建任务
+description:测试
+concurrent:0
+server_id:2
+cron_spec:*/2 * * * *
+command:free -G
+timeout:0
+is_notify:0
+notify_type:0
+notify_tpl_id:0
+notify_user_ids:0
+```
+
+参数含义详见数据库字段。
+需要注意的是id为0为新增，大于0为修改。
+
+2、任务启动接口
+ 
+- url：/task/apistart
+- method：post 
+- params：
+
+```
+id:11
+```
+
+3、任务暂停接口
+
+- url：／task/apipause
+- method：post 
+- params：
+ 
+ ```
+ id:11
+ ```
+
+
+注意使用 form-data的方式传参
+
+4、返回json，status=0表示成功，其他为失败，msg是错误理由或id
+
+```
+{
+    "message": 11,
+    "status": 0
+}
+```
+
+具体可以使用postman测试
+
 联系我
 ----
 qq群号:547564773
 欢迎交流，欢迎提交代码。
+
+感谢
+----
+@bannerchi 
+@linxiaozhi 
+@gongwalker
 
 
 
