@@ -17,15 +17,6 @@ import (
 	"bytes"
 )
 
-type Msg struct {
-	MsgType string `json:"msgtype"`
-	Text    *Text  `json:"text"`
-}
-
-type Text struct {
-	Content string `json:"content"`
-}
-
 type Dingtalk struct {
 	Dingtalks map[string]string
 	Content   map[string]interface{}
