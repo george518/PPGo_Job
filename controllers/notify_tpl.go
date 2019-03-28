@@ -59,7 +59,7 @@ func (self *NotifyTplController) AjaxSave() {
 		notifyTpl.Type = models.NotifyTplTypeDefault
 		notifyTpl.Status, _ = self.GetInt("status")
 
-		if notifyTpl.TplType == 1 || notifyTpl.TplType == 3 {
+		if notifyTpl.TplType == 1 || notifyTpl.TplType == 2 || notifyTpl.TplType == 3 {
 			m := make(map[string]string)
 			err := json.Unmarshal([]byte(notifyTpl.Content), &m)
 			if err != nil {
@@ -85,7 +85,7 @@ func (self *NotifyTplController) AjaxSave() {
 	notifyTpl.Content = strings.TrimSpace(self.GetString("content"))
 	notifyTpl.Status, _ = self.GetInt("status")
 
-	if notifyTpl.TplType == 1 || notifyTpl.TplType == 3 {
+	if notifyTpl.TplType == 1 || notifyTpl.TplType == 2 || notifyTpl.TplType == 3 {
 		m := make(map[string]string)
 		err := json.Unmarshal([]byte(notifyTpl.Content), &m)
 		if err != nil {

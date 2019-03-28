@@ -43,6 +43,13 @@ SUPPORT_ARCH=(386 amd64)
 LDFLAGS=''
 # 需要打包的文件
 INCLUDE_FILE=()
+# linux需要打包的文件
+INCLUDE_LINUX_FILE=()
+# darwin需要打包的文件
+INCLUDE_DARWIN_FILE=()
+# windows需要打包的文件
+INCLUDE_WINDOWS_FILE=()
+
 # 打包文件生成目录
 PACKAGE_DIR=''
 # 编译文件生成目录
@@ -164,6 +171,22 @@ package_file() {
     for item in "${INCLUDE_FILE[@]}"; do
             cp -r ../${item} $1
     done
+
+    for OS in "${INPUT_OS[@]}";do
+        if [[ "${OS}" = "linux" ]];then
+            for item in "${INCLUDE_LINUX_FILE[@]}"; do
+                cp -r ../${item} $1
+            done
+        elif [[ "${OS}" = "darwin" ]];then
+            for item in "${INCLUDE_DARWIN_FILE[@]}"; do
+                cp -r ../${item} $1
+            done
+        elif [[ "${OS}" = "windows" ]];then
+            for item in "${INCLUDE_WINDOWS_FILE[@]}"; do
+                cp -r ../${item} $1
+            done
+        fi
+    done
 }
 
 # 清理
@@ -184,7 +207,10 @@ run() {
 package_ppgo_job() {
     BINARY_NAME='PPGo_Job'
     MAIN_FILE="./main.go"
-    INCLUDE_FILE=("conf" "static" "views" "ppgo_job2.sql" "run.sh" "run.bat")
+    INCLUDE_FILE=("conf" "static" "views" "ppgo_job2.sql")
+    INCLUDE_LINUX_FILE=("run.sh")
+    INCLUDE_DARWIN_FILE=("run.sh")
+    INCLUDE_WINDOWS_FILE=("run.bat")
 
     run
 }

@@ -17,18 +17,9 @@ import (
 	"bytes"
 )
 
-type Msg struct {
-	MsgType string `json:"msgtype"`
-	Text    *Text  `json:"text"`
-}
-
-type Text struct {
-	Content string `json:"content"`
-}
-
 type Dingtalk struct {
 	Dingtalks map[string]string
-	Content   string
+	Content   map[string]interface{}
 }
 
 var DingtalkChan chan *Dingtalk
@@ -57,7 +48,7 @@ func init() {
 
 }
 
-func SendDingtalkToChan(dingtalks map[string]string, content string) bool {
+func SendDingtalkToChan(dingtalks map[string]string, content map[string]interface{}) bool {
 	dingTalk := &Dingtalk{
 		Dingtalks: dingtalks,
 		Content:   content,
@@ -74,13 +65,7 @@ func SendDingtalkToChan(dingtalks map[string]string, content string) bool {
 func (s *Dingtalk) SendDingtalk() error {
 
 	for _, v := range s.Dingtalks {
-
-		msg := Msg{MsgType: "text"}
-		text := new(Text)
-		text.Content = s.Content
-		msg.Text = text
-
-		body, err := json.Marshal(msg)
+		body, err := json.Marshal(s.Content)
 		if err != nil {
 			log.Println(err)
 			return err

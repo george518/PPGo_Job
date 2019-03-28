@@ -240,28 +240,24 @@ func RemoteCommandJobByTelnetPassword(id int, name string, command string, serve
 		defer conn.Close()
 
 		buf := make([]byte, 4096)
-		_, err = conn.Read(buf)
-		if err != nil {
+
+		if _, err = conn.Read(buf); err != nil {
 			return "", "", err, false
 		}
 
-		_, err = conn.Write([]byte(servers.ServerAccount + "\r\n"))
-		if err != nil {
+		if _, err = conn.Write([]byte(servers.ServerAccount + "\r\n")); err != nil {
 			return "", "", err, false
 		}
 
-		_, err = conn.Read(buf)
-		if err != nil {
+		if _, err = conn.Read(buf); err != nil {
 			return "", "", err, false
 		}
 
-		_, err = conn.Write([]byte(servers.Password + "\r\n"))
-		if err != nil {
+		if _, err = conn.Write([]byte(servers.Password + "\r\n")); err != nil {
 			return "", "", err, false
 		}
 
-		_, err = conn.Read(buf)
-		if err != nil {
+		if _, err = conn.Read(buf); err != nil {
 			return "", "", err, false
 		}
 
@@ -392,7 +388,7 @@ func (j *Job) Run() {
 
 			status := log.Status + 2
 
-			title, content := "", ""
+			title, content, taskOutput, errOutput := "", "", "", ""
 
 			notifyTpl, err := models.NotifyTplGetById(j.task.NotifyTplId)
 			if err != nil {
@@ -406,22 +402,31 @@ func (j *Job) Run() {
 				content = notifyTpl.Content
 			}
 
+			taskOutput = strings.Replace(log.Output, "\n", " ", -1)
+			taskOutput = strings.Replace(taskOutput, "\"", "\\\"", -1)
+			errOutput = strings.Replace(log.Error, "\n", " ", -1)
+			errOutput = strings.Replace(errOutput, "\"", "\\\"", -1)
+
 			if title != "" {
 				title = strings.Replace(title, "{{TaskId}}", strconv.Itoa(j.task.Id), -1)
 				title = strings.Replace(title, "{{TaskName}}", j.task.TaskName, -1)
+				title = strings.Replace(title, "{{ExecuteCommand}}", j.task.Command, -1)
 				title = strings.Replace(title, "{{ExecuteTime}}", beego.Date(time.Unix(log.CreateTime, 0), "Y-m-d H:i:s"), -1)
 				title = strings.Replace(title, "{{ProcessTime}}", strconv.FormatFloat(float64(log.ProcessTime)/1000, 'f', 6, 64), -1)
 				title = strings.Replace(title, "{{ExecuteStatus}}", TextStatus[status], -1)
-				title = strings.Replace(title, "{{TaskOutput}}", log.Error, -1)
+				title = strings.Replace(title, "{{TaskOutput}}", taskOutput, -1)
+				title = strings.Replace(title, "{{ErrorOutput}}", errOutput, -1)
 			}
 
 			if content != "" {
 				content = strings.Replace(content, "{{TaskId}}", strconv.Itoa(j.task.Id), -1)
 				content = strings.Replace(content, "{{TaskName}}", j.task.TaskName, -1)
+				content = strings.Replace(content, "{{ExecuteCommand}}", j.task.Command, -1)
 				content = strings.Replace(content, "{{ExecuteTime}}", beego.Date(time.Unix(log.CreateTime, 0), "Y-m-d H:i:s"), -1)
 				content = strings.Replace(content, "{{ProcessTime}}", strconv.FormatFloat(float64(log.ProcessTime)/1000, 'f', 6, 64), -1)
 				content = strings.Replace(content, "{{ExecuteStatus}}", TextStatus[status], -1)
-				content = strings.Replace(content, "{{TaskOutput}}", log.Error, -1)
+				content = strings.Replace(content, "{{TaskOutput}}", taskOutput, -1)
+				content = strings.Replace(content, "{{ErrorOutput}}", errOutput, -1)
 			}
 
 			if j.task.NotifyType == 0 && toEmail != "" {
@@ -446,12 +451,20 @@ func (j *Job) Run() {
 				}
 			} else if j.task.NotifyType == 2 && len(dingtalk) > 0 {
 				//钉钉
-				ok := notify.SendDingtalkToChan(dingtalk, content)
+				param := make(map[string]interface{})
+
+				err := json.Unmarshal([]byte(content), &param)
+				if err != nil {
+					fmt.Println("发送钉钉错误", err)
+					return
+				}
+
+				ok := notify.SendDingtalkToChan(dingtalk, param)
 				if !ok {
 					fmt.Println("发送钉钉错误", dingtalk)
 				}
 			} else if j.task.NotifyType == 3 && len(wechat) > 0 {
-				//信息
+				//微信
 				param := make(map[string]string)
 				err := json.Unmarshal([]byte(content), &param)
 				if err != nil {

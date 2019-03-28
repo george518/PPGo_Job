@@ -9,6 +9,14 @@
                     <div class="layui-inline" style="width: 40%">
                         <input class="layui-input" name="serverName" id="serverName" autocomplete="off" placeholder="资源名称" >
                     </div>
+                    <div class="layui-inline" style="width: 20%;text-align: left;">
+                        <select name="serverGroupId" id="serverGroupId">
+                            <option value="0">全部</option>
+                        {{range $k, $v := .serverGroup}}
+                            <option value="{{$k}}">{{$v}}</option>
+                        {{end}}
+                        </select>
+                    </div>
                     <button class="layui-btn" data-type="reload">查询</button>
                 </div>
             </form>
@@ -64,6 +72,7 @@
                 table.reload('listReload', {
                     where: {
                         serverName: $('#serverName').val(),
+                        serverGroupId:$('#serverGroupId').val(),
                     }
                 });
             }

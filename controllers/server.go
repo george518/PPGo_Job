@@ -26,6 +26,7 @@ type ServerController struct {
 
 func (self *ServerController) List() {
 	self.Data["pageTitle"] = "资源管理"
+	self.Data["serverGroup"] = serverGroupLists(self.serverGroups, self.userId)
 	self.display()
 }
 
@@ -368,6 +369,9 @@ func (self *ServerController) Table() {
 	if err != nil {
 		limit = 30
 	}
+
+	serverGroupId, err := self.GetInt("serverGroupId")
+
 	serverName := strings.TrimSpace(self.GetString("serverName"))
 	StatusText := []string{
 		"正常",
@@ -390,16 +394,28 @@ func (self *ServerController) Table() {
 	//查询条件
 	filters := make([]interface{}, 0)
 	filters = append(filters, "status", 0)
+
+	groupsIds := make([]int, 0)
 	if self.userId != 1 {
 		groups := strings.Split(self.serverGroups, ",")
 
-		groupsIds := make([]int, 0)
 		for _, v := range groups {
 			id, _ := strconv.Atoi(v)
-			groupsIds = append(groupsIds, id)
+			if serverGroupId > 0 {
+				if id == serverGroupId {
+					groupsIds = append(groupsIds, id)
+					break
+				}
+			} else {
+				groupsIds = append(groupsIds, id)
+			}
 		}
 		filters = append(filters, "group_id__in", groupsIds)
+	} else if serverGroupId > 0 {
+		groupsIds = append(groupsIds, serverGroupId)
+		filters = append(filters, "group_id__in", groupsIds)
 	}
+
 	if serverName != "" {
 		filters = append(filters, "server_name__icontains", serverName)
 	}
