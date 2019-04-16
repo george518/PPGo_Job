@@ -8,6 +8,7 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/george518/PPGo_Job/libs"
 	"github.com/george518/PPGo_Job/models"
@@ -74,9 +75,12 @@ func (self *TaskLogController) Table() {
 	for k, v := range result {
 		row := make(map[string]interface{})
 		row["id"] = v.Id
-		row["task_id"] = v.TaskId
+		row["task_id"] = jobKey(v.TaskId, v.ServerId)
 		row["start_time"] = beego.Date(time.Unix(v.CreateTime, 0), "Y-m-d H:i:s")
 		row["process_time"] = float64(v.ProcessTime) / 1000
+
+		row["server_id"] = v.ServerId
+		row["server_name"] = v.ServerName + "#" + strconv.Itoa(v.ServerId)
 		if v.Status == 0 {
 			row["output_size"] = libs.SizeFormat(float64(len(v.Output)))
 		} else {
@@ -99,6 +103,8 @@ func (self *TaskLogController) Detail() {
 	//日志内容
 	id, _ := self.GetInt("id")
 	tasklog, err := models.TaskLogGetById(id)
+
+	fmt.Println(tasklog)
 	if err != nil {
 		self.Ctx.WriteString("日志不存在")
 		return
@@ -118,6 +124,8 @@ func (self *TaskLogController) Detail() {
 	} else {
 		row["output_size"] = libs.SizeFormat(float64(len(tasklog.Error)))
 	}
+
+	row["server_name"] = tasklog.ServerName
 
 	row["output"] = tasklog.Output
 	row["error"] = tasklog.Error
@@ -149,15 +157,31 @@ func (self *TaskLogController) Detail() {
 	// 分组列表
 	self.Data["taskGroup"] = taskGroupLists(self.taskGroups, self.userId)
 
-	serverName := "本地服务器"
-	if task.ServerId == 0 {
+	serverName := ""
+	if task.ServerIds == "0" {
 		serverName = "本地服务器"
 	} else {
-		server, err := models.TaskServerGetById(task.ServerId)
-		if err == nil {
-			serverName = server.ServerName
+
+		serverIdSli := strings.Split(task.ServerIds, ",")
+		for _, v := range serverIdSli {
+			if v == "0" {
+				serverName = "本地服务器  "
+			}
+		}
+		servers, n := models.TaskServerGetByIds(task.ServerIds)
+		if n > 0 {
+			for _, server := range servers {
+				if server.Status != 0 {
+					serverName += server.ServerName + "【无效】 "
+				} else {
+					serverName += server.ServerName + " "
+				}
+			}
+		} else {
+			serverName = "服务器异常!!  "
 		}
 	}
+
 	self.Data["serverName"] = serverName
 
 	//任务分组

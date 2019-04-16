@@ -9,6 +9,8 @@ package models
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/astaxie/beego/orm"
 )
@@ -93,6 +95,22 @@ func TaskServerGetById(id int) (*TaskServer, error) {
 		return nil, err
 	}
 	return obj, nil
+}
+
+//
+func TaskServerGetByIds(ids string) ([]*TaskServer, int64) {
+
+	serverFilters := make([]interface{}, 0)
+	//serverFilters = append(serverFilters, "status", 1)
+
+	TaskServerIdsArr := strings.Split(ids, ",")
+	TaskServerIds := make([]int, 0)
+	for _, v := range TaskServerIdsArr {
+		id, _ := strconv.Atoi(v)
+		TaskServerIds = append(TaskServerIds, id)
+	}
+	serverFilters = append(serverFilters, "id__in", TaskServerIds)
+	return TaskServerGetList(1, 1000, serverFilters...)
 }
 
 func TaskServerDelById(id int) error {

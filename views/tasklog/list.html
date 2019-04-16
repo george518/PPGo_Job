@@ -46,12 +46,13 @@
             ,url: "/tasklog/table?task_id={{.task_id}}"
             ,cols: [[
                 {checkbox: true, fixed: true}
-                ,{field:'id', title: 'ID', align:'center',sort: true, width:150}
-                ,{field:'task_id', title: '任务ID', align:'center',sort: true, width:150}
+                // ,{field:'id', title: 'ID', align:'center',sort: true, width:150}
+                ,{field:'task_id', title: '任务ID', align:'center',width:100}
+                ,{field:'server_name', title: '服务器', width:150}
                 ,{field:'start_time',title: '开始时间'}
                 ,{field:'process_time',width:100, title: '执行时间'}
                 ,{field:'output_size',title: '输出'}
-                ,{field:'status', width:170,title: '状态'}
+                ,{field:'status', width:100,title: '状态'}
                 ,{fixed: 'right', align:'center', title:'操作', toolbar: '#bar'}
             ]]
             ,id: 'listReload'

@@ -14,6 +14,8 @@ import (
 type TaskLog struct {
 	Id          int
 	TaskId      int
+	ServerId    int
+	ServerName  string
 	Output      string
 	Error       string
 	Status      int

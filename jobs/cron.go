@@ -32,7 +32,7 @@ func AddJob(spec string, job *Job) bool {
 	lock.Lock()
 	defer lock.Unlock()
 
-	if GetEntryById(job.id) != nil {
+	if GetEntryById(job.jobKey) != nil {
 		return false
 	}
 	err := mainCron.AddJob(spec, job)
@@ -40,13 +40,14 @@ func AddJob(spec string, job *Job) bool {
 		beego.Error("AddJob: ", err.Error())
 		return false
 	}
+	//fmt.Println(job)
 	return true
 }
 
-func RemoveJob(id int) {
+func RemoveJob(jobKey int) {
 	mainCron.RemoveJob(func(e *cron.Entry) bool {
 		if v, ok := e.Job.(*Job); ok {
-			if v.id == id {
+			if v.jobKey == jobKey {
 				return true
 			}
 		}
@@ -54,11 +55,11 @@ func RemoveJob(id int) {
 	})
 }
 
-func GetEntryById(id int) *cron.Entry {
+func GetEntryById(jobKey int) *cron.Entry {
 	entries := mainCron.Entries()
 	for _, e := range entries {
 		if v, ok := e.Job.(*Job); ok {
-			if v.id == id {
+			if v.jobKey == jobKey {
 				return e
 			}
 		}

@@ -9,11 +9,11 @@ package controllers
 
 import (
 	"github.com/astaxie/beego"
+	"github.com/axgle/mahonia"
 	"github.com/george518/PPGo_Job/libs"
 	"github.com/george518/PPGo_Job/models"
 	"strconv"
 	"strings"
-	"github.com/axgle/mahonia"
 )
 
 const (
@@ -361,4 +361,9 @@ func gbkAsUtf8(str string) string {
 	resStr := srcDecoder.ConvertString(str)
 	_, resBytes, _ := desDecoder.Translate([]byte(resStr), true)
 	return string(resBytes)
+}
+
+//任务识别码
+func jobKey(taskId, serverId int) int {
+	return taskId*10000 + serverId
 }

@@ -23,7 +23,7 @@ const (
 type Task struct {
 	Id            int
 	GroupId       int
-	ServerId      int
+	ServerIds     string
 	TaskName      string
 	Description   string
 	CronSpec      string

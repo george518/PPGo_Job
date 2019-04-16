@@ -8,6 +8,7 @@
 package controllers
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -78,6 +79,15 @@ func (self *TaskController) Edit() {
 
 	self.Data["notify_user_ids"] = notifyUserIds
 
+	server_ids := strings.Split(task.ServerIds, ",")
+	var server_ids_arr []int
+	for _, sv := range server_ids {
+		i, _ := strconv.Atoi(sv)
+		server_ids_arr = append(server_ids_arr, i)
+	}
+
+	self.Data["service_ids"] = server_ids_arr
+
 	notifyTplList, _, err := models.NotifyTplGetByTplTypeList(task.NotifyType)
 	tplList := make([]map[string]interface{}, len(notifyTplList))
 
@@ -145,13 +155,28 @@ func (self *TaskController) Detail() {
 	// 分组列表
 	self.Data["taskGroup"] = taskGroupLists(self.taskGroups, self.userId)
 
-	serverName := "本地服务器"
-	if task.ServerId == 0 {
+	serverName := ""
+	if task.ServerIds == "0" {
 		serverName = "本地服务器"
 	} else {
-		server, err := models.TaskServerGetById(task.ServerId)
-		if err == nil {
-			serverName = server.ServerName
+		serverIdSli := strings.Split(task.ServerIds, ",")
+		for _, v := range serverIdSli {
+			if v == "0" {
+				serverName = "本地服务器  "
+			}
+		}
+		servers, n := models.TaskServerGetByIds(task.ServerIds)
+		if n > 0 {
+			for _, server := range servers {
+				fmt.Println(server.Status)
+				if server.Status != 0 {
+					serverName += server.ServerName + "【无效】 "
+				} else {
+					serverName += server.ServerName + " "
+				}
+			}
+		} else {
+			serverName += "服务器异常!!"
 		}
 	}
 
@@ -212,7 +237,7 @@ func (self *TaskController) AjaxSave() {
 		task.TaskName = strings.TrimSpace(self.GetString("task_name"))
 		task.Description = strings.TrimSpace(self.GetString("description"))
 		task.Concurrent, _ = self.GetInt("concurrent")
-		task.ServerId, _ = self.GetInt("server_id")
+		task.ServerIds = strings.TrimSpace(self.GetString("server_ids"))
 		task.CronSpec = strings.TrimSpace(self.GetString("cron_spec"))
 		task.Command = strings.TrimSpace(self.GetString("command"))
 		task.Timeout, _ = self.GetInt("timeout")
@@ -258,7 +283,7 @@ func (self *TaskController) AjaxSave() {
 	task.Description = strings.TrimSpace(self.GetString("description"))
 	task.GroupId, _ = self.GetInt("group_id")
 	task.Concurrent, _ = self.GetInt("concurrent")
-	task.ServerId, _ = self.GetInt("server_id")
+	task.ServerIds = strings.TrimSpace(self.GetString("server_ids"))
 	task.CronSpec = strings.TrimSpace(self.GetString("cron_spec"))
 	task.Command = strings.TrimSpace(self.GetString("command"))
 	task.Timeout, _ = self.GetInt("timeout")
@@ -290,8 +315,6 @@ func (self *TaskController) AjaxSave() {
 	}
 	self.ajaxMsg("", MSG_OK)
 }
-
-
 
 //检查是否含有禁用命令
 func checkCommand(command string) (string, bool) {
@@ -332,8 +355,6 @@ func (self *TaskController) AjaxNopass() {
 	self.ajaxMsg("", MSG_OK)
 }
 
-
-
 func (self *TaskController) AjaxStart() {
 	taskId, _ := self.GetInt("id")
 	if taskId == 0 {
@@ -349,15 +370,19 @@ func (self *TaskController) AjaxStart() {
 		self.ajaxMsg("任务状态有误", MSG_ERR)
 	}
 
-	job, err := jobs.NewJobFromTask(task)
+	jobArr, err := jobs.NewJobFromTask(task)
+
 	if err != nil {
 		self.ajaxMsg("创建任务失败", MSG_ERR)
 	}
 
-	if jobs.AddJob(task.CronSpec, job) {
-		task.Status = 1
-		task.Update()
+	for _, job := range jobArr {
+		if jobs.AddJob(task.CronSpec, job) {
+			task.Status = 1
+			task.Update()
+		}
 	}
+
 	self.ajaxMsg("", MSG_OK)
 }
 
@@ -372,9 +397,18 @@ func (self *TaskController) AjaxPause() {
 		self.ajaxMsg("查不到该任务", MSG_ERR)
 	}
 
-	jobs.RemoveJob(taskId)
+	//移出任务
+	TaskServerIdsArr := strings.Split(task.ServerIds, ",")
+
+	for _, server_id := range TaskServerIdsArr {
+		server_id_int, _ := strconv.Atoi(server_id)
+		jobKey := jobKey(task.Id, server_id_int)
+		jobs.RemoveJob(jobKey)
+	}
+
 	task.Status = 0
 	task.Update()
+
 	self.ajaxMsg("", MSG_OK)
 
 }
@@ -387,11 +421,14 @@ func (self *TaskController) AjaxRun() {
 		self.ajaxMsg(err.Error(), MSG_ERR)
 	}
 
-	job, err := jobs.NewJobFromTask(task)
+	jobArr, err := jobs.NewJobFromTask(task)
 	if err != nil {
 		self.ajaxMsg(err.Error(), MSG_ERR)
 	}
-	job.Run()
+	for _, job := range jobArr {
+		job.Run()
+	}
+
 	self.ajaxMsg("", MSG_OK)
 }
 
@@ -408,9 +445,12 @@ func (self *TaskController) AjaxBatchStart() {
 		}
 
 		if task, err := models.TaskGetById(id); err == nil {
-			job, err := jobs.NewJobFromTask(task)
+			jobArr, err := jobs.NewJobFromTask(task)
 			if err == nil {
-				jobs.AddJob(task.CronSpec, job)
+				for _, job := range jobArr {
+					jobs.AddJob(task.CronSpec, job)
+				}
+
 				task.Status = 1
 				task.Update()
 			}
@@ -430,9 +470,17 @@ func (self *TaskController) AjaxBatchPause() {
 		if id < 1 {
 			continue
 		}
-		jobs.RemoveJob(id)
 
-		if task, err := models.TaskGetById(id); err == nil {
+		task, err := models.TaskGetById(id)
+		//移出任务
+		TaskServerIdsArr := strings.Split(task.ServerIds, ",")
+
+		for _, server_id := range TaskServerIdsArr {
+			server_id_int, _ := strconv.Atoi(server_id)
+			jobKey := jobKey(task.Id, server_id_int)
+			jobs.RemoveJob(jobKey)
+		}
+		if err == nil {
 			task.Status = 0
 			task.Update()
 		}
@@ -451,9 +499,19 @@ func (self *TaskController) AjaxBatchDel() {
 		if id < 1 {
 			continue
 		}
+
+		task, _ := models.TaskGetById(id)
+
+		//移出任务
+		TaskServerIdsArr := strings.Split(task.ServerIds, ",")
+
+		for _, server_id := range TaskServerIdsArr {
+			server_id_int, _ := strconv.Atoi(server_id)
+			jobKey := jobKey(task.Id, server_id_int)
+			jobs.RemoveJob(jobKey)
+		}
 		models.TaskDel(id)
 		models.TaskLogDelByTaskId(id)
-		jobs.RemoveJob(id)
 	}
 	self.ajaxMsg("", MSG_OK)
 }
@@ -661,12 +719,12 @@ func (self *TaskController) ApiTask() {
 	task_id, _ := self.GetInt("id")
 	if task_id == 0 {
 		task := new(models.Task)
-		task.CreateId,_ = self.GetInt("create_id")
+		task.CreateId, _ = self.GetInt("create_id")
 		task.GroupId, _ = self.GetInt("group_id")
 		task.TaskName = strings.TrimSpace(self.GetString("task_name"))
 		task.Description = strings.TrimSpace(self.GetString("description"))
 		task.Concurrent, _ = self.GetInt("concurrent")
-		task.ServerId, _ = self.GetInt("server_id")
+		task.ServerIds = strings.TrimSpace(self.GetString("server_ids"))
 		task.CronSpec = strings.TrimSpace(self.GetString("cron_spec"))
 		task.Command = strings.TrimSpace(self.GetString("command"))
 		task.Timeout, _ = self.GetInt("timeout")
@@ -716,7 +774,7 @@ func (self *TaskController) ApiTask() {
 	task.Description = strings.TrimSpace(self.GetString("description"))
 	task.GroupId, _ = self.GetInt("group_id")
 	task.Concurrent, _ = self.GetInt("concurrent")
-	task.ServerId, _ = self.GetInt("server_id")
+	task.ServerIds = strings.TrimSpace(self.GetString("server_ids"))
 	task.CronSpec = strings.TrimSpace(self.GetString("cron_spec"))
 	task.Command = strings.TrimSpace(self.GetString("command"))
 	task.Timeout, _ = self.GetInt("timeout")
@@ -724,7 +782,7 @@ func (self *TaskController) ApiTask() {
 	task.NotifyType, _ = self.GetInt("notify_type")
 	task.NotifyTplId, _ = self.GetInt("notify_tpl_id")
 	task.NotifyUserIds = strings.TrimSpace(self.GetString("notify_user_ids"))
-	task.UpdateId , _ = self.GetInt("update_id")
+	task.UpdateId, _ = self.GetInt("update_id")
 	task.Status = 0 //接口不需要
 
 	if task.IsNotify == 1 && task.NotifyTplId <= 0 {
@@ -761,15 +819,18 @@ func (self *TaskController) ApiStart() {
 		self.ajaxMsg("任务状态有误", MSG_ERR)
 	}
 
-	job, err := jobs.NewJobFromTask(task)
+	jobArr, err := jobs.NewJobFromTask(task)
 	if err != nil {
 		self.ajaxMsg("创建任务失败", MSG_ERR)
 	}
 
-	if jobs.AddJob(task.CronSpec, job) {
-		task.Status = 1
-		task.Update()
+	for _, job := range jobArr {
+		if jobs.AddJob(task.CronSpec, job) {
+			task.Status = 1
+			task.Update()
+		}
 	}
+
 	self.ajaxMsg("", MSG_OK)
 }
 
@@ -784,11 +845,17 @@ func (self *TaskController) ApiPause() {
 		self.ajaxMsg("查不到该任务", MSG_ERR)
 	}
 
-	jobs.RemoveJob(taskId)
+	//移出任务
+	TaskServerIdsArr := strings.Split(task.ServerIds, ",")
+
+	for _, server_id := range TaskServerIdsArr {
+		server_id_int, _ := strconv.Atoi(server_id)
+		jobKey := jobKey(task.Id, server_id_int)
+		jobs.RemoveJob(jobKey)
+	}
+
 	task.Status = 0
 	task.Update()
 	self.ajaxMsg("", MSG_OK)
 
 }
-
-

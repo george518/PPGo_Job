@@ -27,19 +27,22 @@
 
         <div class="layui-form-item">
             <label class="layui-form-label mw200">服务器资源</label>
-            <div class="layui-inline">
-
-                <div class="layui-input-inline">
-                    <select name="server_id">
-                        <option value="0">本地服务器</option>
-                    {{range $k, $v := .serverGroup}}
-                        <optgroup label="{{$v.GroupName}}">
-                        {{range $kk, $vv := $v.Servers}}
-                            <option value="{{$kk}}">{{$vv}}</option>
+            <div class="layui-block">
+                <div class="layui-col-md3"></div>
+                <div class="layui-col-md9">
+                    <div style="margin-bottom: 20px;">
+                        <input type="checkbox" name="server_id" lay-skin="primary" title="本地服务器" value="0">
+                    </div>
+                    <div class="layui-row layui-col-space10">
+                        {{range $k, $v := .serverGroup}}
+                            <div class="layui-col-md12" style="background: #efefef;">{{$v.GroupName}}</div>
+                            {{range $kk, $vv := $v.Servers}}
+                                <div class="layui-col-md4">
+                                    <input type="checkbox" name="server_id" lay-skin="primary" title="{{$vv}}" value="{{$kk}}">
+                                </div>
+                            {{end}}
                         {{end}}
-                        </optgroup>
-                    {{end}}
-                    </select>
+                    </div>
                 </div>
             </div>
         </div>
@@ -129,7 +132,7 @@
                 <input type="checkbox" name="notify_user" lay-filter="notify_user" title="{{$v.RealName}}"
                        value="{{$v.Id}}" lay-skin="primary">
             {{end}}
-                <input type="hidden" name="notify_user_ids" id="notify_user_ids" value="">
+
             </div>
             <div class="layui-form-mid layui-word-aux"></div>
         </div>
@@ -159,7 +162,7 @@
             layer.tips('设为“是”的话，如果该任务在上一个时间点还没执行完，则略过不执行', '#des', {
                 tips: [1, '#0FA6D8'] //还可配置颜色
             });
-        })
+        });
 
 
         var notify_user_ids = [];
@@ -176,6 +179,7 @@
             }
             $("#notify_user_ids").val(notify_user_ids.join(","));
         });
+
         form.on('radio(is_notify)', function (data) {
             if (data.value == 1) {
                 $(".notify").show()
@@ -185,12 +189,36 @@
         });
 
         form.on('submit(sub)', function (data) {
+
             var form_data = data.field;
+            var server_arr = new Array();
+            $("input:checkbox[name=server_id]:checked").each(function(){
+                server_arr.push($(this).val());
+            });
+
+            form_data.server_ids = server_arr.join(",");
+
+            if (form_data.server_ids==="" || form_data.server_ids===null){
+                layer.msg("请选择服务器资源");
+                return false;
+            }
+
+            var notify_user_arr = new Array();
+            $("input:checkbox[name=notify_user]:checked").each(function(){
+                notify_user_arr.push($(this).val());
+            });
+            form_data.notify_user_ids = notify_user_arr.join(",");
+            
+            if (form_data.is_notify==1 && form_data.notify_user_ids==="") {
+                layer.msg("请选择通知用户");
+                return false;
+            }
+
             $.post('{{urlfor "TaskController.AjaxSave"}}', form_data, function (out) {
                 if (out.status == 0) {
                     layer.msg("操作成功", {icon: 1, shade: 0.3, time: 1000}, function () {
                         // window.history.go(-1)
-                        window.location.reload();
+                        window.parent.deleteCurrentTab();
                     })
 
                 } else {

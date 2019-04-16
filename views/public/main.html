@@ -106,6 +106,29 @@
         return str;
     }
 
+    //新页面编辑或者新增，完成后关闭本页并刷新上一页
+    function deleteCurrentTab(){
+        //关闭
+        var lay_id = $(parent.document).find("ul.layui-tab-title").children("li.layui-this").find(".layui-tab-close");
+        lay_id.click();
+
+        //刷新
+        var currents =$(parent.document).find("div.layui-tab-content").find("div.layui-show").find("iframe").contents();
+        $(currents[0]).find("body").find("#reload").click();
+    }
+
+    function getCheckboxValue(name)
+    {
+        var arr = new Array();
+        $("input:checkbox[name="+name+"]:checked").each(function(){
+            console.log($(this).val());
+            arr.push($(this).val());
+        });
+
+        return arr.join(",");
+    }
+
+
     function openTab(url,title,id,icon){
 
         if (!url || !title || !id) {
@@ -234,6 +257,9 @@
         $(".pp-nav-childs").find('a').hover(function(){
             layer.tips($(this).attr('data-title'), $(this),{time:1000});
         });
+
+
+
 
         element.render();
         // $("#default_tab").html('<i class="fa fa-home back_space1"></i>系统首页');
