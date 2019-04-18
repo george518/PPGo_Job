@@ -451,6 +451,7 @@ func (j *Job) Run() {
 
 			if title != "" {
 				title = strings.Replace(title, "{{TaskId}}", strconv.Itoa(j.task.Id), -1)
+				title = strings.Replace(title, "{{ServerId}}", strconv.Itoa(j.serverId), -1)
 				title = strings.Replace(title, "{{TaskName}}", j.task.TaskName, -1)
 				title = strings.Replace(title, "{{ExecuteCommand}}", j.task.Command, -1)
 				title = strings.Replace(title, "{{ExecuteTime}}", beego.Date(time.Unix(log.CreateTime, 0), "Y-m-d H:i:s"), -1)
@@ -462,6 +463,7 @@ func (j *Job) Run() {
 
 			if content != "" {
 				content = strings.Replace(content, "{{TaskId}}", strconv.Itoa(j.task.Id), -1)
+				content = strings.Replace(content, "{{ServerId}}", strconv.Itoa(j.serverId), -1)
 				content = strings.Replace(content, "{{TaskName}}", j.task.TaskName, -1)
 				content = strings.Replace(content, "{{ExecuteCommand}}", j.task.Command, -1)
 				content = strings.Replace(content, "{{ExecuteTime}}", beego.Date(time.Unix(log.CreateTime, 0), "Y-m-d H:i:s"), -1)
