@@ -35,7 +35,7 @@
                     </div>
                     <div class="layui-row layui-col-space10">
                         {{range $k, $v := .serverGroup}}
-                            <div class="layui-col-md12" style="background: #efefef;">{{$v.GroupName}}</div>
+                            <div class="layui-col-md12" ><i class="layui-icon">&#xe65b;</i>  {{$v.GroupName}}</div>
                             {{range $kk, $vv := $v.Servers}}
                                 <div class="layui-col-md4">
                                     <input type="checkbox" name="server_id" lay-skin="primary" title="{{$vv}}" value="{{$kk}}">
