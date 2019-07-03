@@ -64,8 +64,14 @@
                 <td></td>
             </tr>
             <tr>
-                <td>服务资源</td>
-                <td> {{.serverName}}</td>
+                <td>执行资源</td>
+                <td>  {{str2html .serverName}}</td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td>执行策略</td>
+                <td>  {{.ServerType}}</td>
                 <td></td>
             </tr>
             <tr>
@@ -114,7 +120,7 @@
                 <td>通知用户</td>
                 <td>
                 {{range $k, $v := .adminInfo}}
-                    {{$v.RealName}} &nbsp;&nbsp;&nbsp;
+                    {{$v.RealName}} &nbsp;<br>
                 {{end}}
                 </td>
                 <td></td>

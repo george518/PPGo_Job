@@ -3,6 +3,7 @@
         display: none;
     }
 </style>
+
 <div class="layui-layout layui-layout-admin" style="padding-left: 40px;margin-top: 20px;">
     <form class="layui-form" action="" method="post">
         <div class="layui-form-item">
@@ -14,7 +15,7 @@
             <div class="layui-form-mid layui-word-aux"></div>
         </div>
         <div class="layui-form-item">
-            <label class="layui-form-label mw200">所属分组</label>
+            <label class="layui-form-label mw200">任务分组</label>
             <div class="layui-input-inline">
                 <select name="group_id" lay-verify="required">
                 {{range $k, $v := .taskGroup}}
@@ -25,27 +26,34 @@
             <div class="layui-form-mid layui-word-aux"></div>
         </div>
 
+
         <div class="layui-form-item">
-            <label class="layui-form-label mw200">服务器资源</label>
-            <div class="layui-block">
-                <div class="layui-col-md3"></div>
-                <div class="layui-col-md9">
-                    <div style="margin-bottom: 20px;">
-                        <input type="checkbox" name="server_id" lay-skin="primary" title="本地服务器" value="0">
-                    </div>
-                    <div class="layui-row layui-col-space10">
-                        {{range $k, $v := .serverGroup}}
-                            <div class="layui-col-md12" ><i class="layui-icon">&#xe65b;</i>  {{$v.GroupName}}</div>
+            <label class="layui-form-label mw200">执行资源</label>
+            <div class="layui-input-inline mw400">
+                <select name="server_id" lay-verify="required" lay-search xm-select="select_server" >
+                    <option value="">请选择</option>
+                    <option value="0">本机执行</option>
+                    {{range $k, $v := .serverGroup}}
+                        <optgroup label="{{$v.GroupName}}">
                             {{range $kk, $vv := $v.Servers}}
-                                <div class="layui-col-md4">
-                                    <input type="checkbox" name="server_id" lay-skin="primary" title="{{$vv}}" value="{{$kk}}">
-                                </div>
+                                <option value="{{$kk}}">{{$vv}}</option>
                             {{end}}
-                        {{end}}
-                    </div>
-                </div>
+                        </optgroup>
+                    {{end}}
+                </select>
             </div>
+            <div class="layui-form-mid layui-word-aux"></div>
         </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200">执行策略</label>
+            <div class="layui-input-inline mw400">
+                <input type="radio" name="server_type" value="0" lay-filter="server_type" title="同时执行" checked>
+                <input type="radio" name="server_type" value="1" lay-filter="server_type" title="轮询执行">
+            </div>
+            <div class="layui-form-mid layui-word-aux"></div>
+        </div>
+
 
         <div class="layui-form-item">
             <label class="layui-form-label mw200">任务说明</label>
@@ -71,7 +79,7 @@
             <label class="layui-form-label mw200">时间表达式</label>
             <div class="layui-input-inline mw400">
                 <input type="text" name="cron_spec" id="cron_spec" lay-verify="required" autocomplete="off"
-                       placeholder="时间表达式" class="layui-input" value="">
+                       placeholder="*/40 * * * * " class="layui-input" value="">
             </div>
             <div class="layui-form-mid layui-word-aux"><a href="/help" target="_blank"><i class="fa fa-question-circle"
                                                                                           aria-hidden="true"></i></a>
@@ -81,7 +89,7 @@
         <div class="layui-form-item">
             <label class="layui-form-label mw200">命令脚本</label>
             <div class="layui-input-inline mw400">
-                <textarea name="command" id="command" rows="5" placeholder="请输入命令内容" class="layui-textarea"></textarea>
+                <textarea name="command" id="command" rows="5" placeholder="echo hello world && ls -a" class="layui-textarea"></textarea>
             </div>
         </div>
 
@@ -125,14 +133,16 @@
             <div class="layui-form-mid layui-word-aux"></div>
         </div>
 
-        <div class="layui-form-item  notify">
-            <label class="layui-form-label mw200">通知用户</label>
-            <div class="layui-input-inline mw400 ">
-            {{range $k, $v := .adminInfo}}
-                <input type="checkbox" name="notify_user" lay-filter="notify_user" title="{{$v.RealName}}"
-                       value="{{$v.Id}}" lay-skin="primary">
-            {{end}}
 
+        <div class="layui-form-item notify">
+            <label class="layui-form-label mw200">通知用户</label>
+            <div class="layui-input-inline mw400">
+                <select name="notify_user"  lay-search xm-select="select_notify" >
+                    <option value="">请选择</option>
+                    {{range $k, $v := .adminInfo}}
+                        <option value="{{$v.Id}}">{{$v.RealName}}</option>
+                    {{end}}
+                </select>
             </div>
             <div class="layui-form-mid layui-word-aux"></div>
         </div>
@@ -148,9 +158,25 @@
     </form>
 </div>
 <script>
-    layui.use(['form', 'element', 'layer', 'jquery'], function () {
+
+    layui.config({
+       base:'/static/admin/js/'
+    }).extend({
+        formSelects: 'formSelects-v3'
+    });
+    layui.use(['form', 'element', 'layer', 'jquery','formSelects'], function () {
         var form = layui.form; //只有执行了这一步，部分表单元素才会自动修饰成功
         var $ = layui.jquery;
+        var formSelects = layui.formSelects;
+
+        formSelects.render({
+            name : 'select_server',
+        });
+
+        formSelects.render({
+            name : 'select_notify',
+        });
+
         var error_info = "{{.flash.error}}";
         if (error_info) {
             layer.msg(error_info, {icon: 2, shade: 0.3}, function () {
@@ -165,20 +191,6 @@
         });
 
 
-        var notify_user_ids = [];
-        form.on('checkbox(notify_user)', function (data) {
-            if (data.elem.checked == true) {
-                notify_user_ids.push(data.value)
-            } else {
-                $.each(notify_user_ids, function (index, item) {
-                    // index是索引值（即下标）   item是每次遍历得到的值；
-                    if (item == data.value) {
-                        notify_user_ids.splice(index, 1);
-                    }
-                });
-            }
-            $("#notify_user_ids").val(notify_user_ids.join(","));
-        });
 
         form.on('radio(is_notify)', function (data) {
             if (data.value == 1) {
@@ -191,10 +203,18 @@
         form.on('submit(sub)', function (data) {
 
             var form_data = data.field;
+
+            //选择执行器
+            var ids = formSelects.value('select_server');	//获取选中的
+            if (ids.length<1){
+                layer.msg("请选择执行资源");
+                return false;
+            }
+
             var server_arr = new Array();
-            $("input:checkbox[name=server_id]:checked").each(function(){
-                server_arr.push($(this).val());
-            });
+            $.each(ids,function (k,v) {
+                server_arr.push(v.val);
+            })
 
             form_data.server_ids = server_arr.join(",");
 
@@ -203,16 +223,27 @@
                 return false;
             }
 
-            var notify_user_arr = new Array();
-            $("input:checkbox[name=notify_user]:checked").each(function(){
-                notify_user_arr.push($(this).val());
-            });
-            form_data.notify_user_ids = notify_user_arr.join(",");
-            
-            if (form_data.is_notify==1 && form_data.notify_user_ids==="") {
-                layer.msg("请选择通知用户");
-                return false;
+            //选择通知人
+            if (form_data.is_notify==1 ) {
+                var ids = formSelects.value('select_notify');	//获取选中的
+                if (ids.length<1){
+                    layer.msg("请选择通知人");
+                    return false;
+                }
+
+                var notify_arr = new Array();
+                $.each(ids,function (k,v) {
+                    notify_arr.push(v.val);
+                })
+
+                form_data.notify_user_ids = notify_arr.join(",");
+
+                if (form_data.notify_user_ids==="" || form_data.notify_user_ids===null){
+                    layer.msg("请选择通知人");
+                    return false;
+                }
             }
+
 
             $.post('{{urlfor "TaskController.AjaxSave"}}', form_data, function (out) {
                 if (out.status == 0) {

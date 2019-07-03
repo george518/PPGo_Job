@@ -9,10 +9,10 @@ package libs
 
 import (
 	"github.com/pkg/errors"
-	"io/ioutil"
-	"strings"
-	"net/http"
 	"io"
+	"io/ioutil"
+	"net/http"
+	"strings"
 )
 
 func HttpGet(url string, param map[string]string) (string, error) {

@@ -9,6 +9,7 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/george518/PPGo_Job/libs"
 	"strconv"
 	"strings"
 	"time"
@@ -115,11 +116,18 @@ func (self *TaskController) Copy() {
 	if err != nil {
 		self.ajaxMsg(err.Error(), MSG_ERR)
 	}
+
+	if task.Status == 1 {
+		self.ajaxMsg("运行状态无法编辑任务，请先暂停任务", MSG_ERR)
+	}
 	self.Data["task"] = task
+
+	self.Data["adminInfo"] = AllAdminInfo("")
 
 	// 分组列表
 	self.Data["taskGroup"] = taskGroupLists(self.taskGroups, self.userId)
 	self.Data["serverGroup"] = serverLists(self.serverGroups, self.userId)
+	self.Data["isAdmin"] = self.userId
 	var notifyUserIds []int
 	if task.NotifyUserIds != "0" {
 		notifyUserIdsStr := strings.Split(task.NotifyUserIds, ",")
@@ -128,7 +136,33 @@ func (self *TaskController) Copy() {
 			notifyUserIds = append(notifyUserIds, i)
 		}
 	}
+
 	self.Data["notify_user_ids"] = notifyUserIds
+
+	server_ids := strings.Split(task.ServerIds, ",")
+	var server_ids_arr []int
+	for _, sv := range server_ids {
+		i, _ := strconv.Atoi(sv)
+		server_ids_arr = append(server_ids_arr, i)
+	}
+
+	self.Data["service_ids"] = server_ids_arr
+
+	notifyTplList, _, err := models.NotifyTplGetByTplTypeList(task.NotifyType)
+	tplList := make([]map[string]interface{}, len(notifyTplList))
+
+	if err == nil {
+		for k, v := range notifyTplList {
+			row := make(map[string]interface{})
+			row["id"] = v.Id
+			row["tpl_name"] = v.TplName
+			row["tpl_type"] = v.TplType
+			tplList[k] = row
+		}
+	}
+
+	self.Data["notifyTpl"] = tplList
+
 	self.display()
 }
 
@@ -157,12 +191,12 @@ func (self *TaskController) Detail() {
 
 	serverName := ""
 	if task.ServerIds == "0" {
-		serverName = "本地服务器"
+		serverName = "本地服务器 <br>"
 	} else {
 		serverIdSli := strings.Split(task.ServerIds, ",")
 		for _, v := range serverIdSli {
 			if v == "0" {
-				serverName = "本地服务器  "
+				serverName = "本地服务器 <br>"
 			}
 		}
 		servers, n := models.TaskServerGetByIds(task.ServerIds)
@@ -170,14 +204,20 @@ func (self *TaskController) Detail() {
 			for _, server := range servers {
 				fmt.Println(server.Status)
 				if server.Status != 0 {
-					serverName += server.ServerName + "【无效】 "
+					serverName += server.ServerName + " <i class='fa fa-ban' style='color:#FF5722'></i> <br/> "
 				} else {
-					serverName += server.ServerName + " "
+					serverName += server.ServerName + " <br/> "
 				}
 			}
 		} else {
 			serverName += "服务器异常!!"
 		}
+	}
+
+	//执行策略
+	self.Data["ServerType"] = "同时执行"
+	if task.ServerType == 1 {
+		self.Data["ServerType"] = "轮询执行"
 	}
 
 	//任务分组
@@ -242,6 +282,8 @@ func (self *TaskController) AjaxSave() {
 		task.Command = strings.TrimSpace(self.GetString("command"))
 		task.Timeout, _ = self.GetInt("timeout")
 		task.IsNotify, _ = self.GetInt("is_notify")
+		task.ServerType, _ = self.GetInt("server_type")
+
 		task.NotifyType, _ = self.GetInt("notify_type")
 		task.NotifyTplId, _ = self.GetInt("notify_tpl_id")
 		task.NotifyUserIds = strings.TrimSpace(self.GetString("notify_user_ids"))
@@ -287,6 +329,7 @@ func (self *TaskController) AjaxSave() {
 	task.CronSpec = strings.TrimSpace(self.GetString("cron_spec"))
 	task.Command = strings.TrimSpace(self.GetString("command"))
 	task.Timeout, _ = self.GetInt("timeout")
+	task.ServerType, _ = self.GetInt("server_type")
 	task.IsNotify, _ = self.GetInt("is_notify")
 	task.NotifyType, _ = self.GetInt("notify_type")
 	task.NotifyTplId, _ = self.GetInt("notify_tpl_id")
@@ -402,7 +445,7 @@ func (self *TaskController) AjaxPause() {
 
 	for _, server_id := range TaskServerIdsArr {
 		server_id_int, _ := strconv.Atoi(server_id)
-		jobKey := jobKey(task.Id, server_id_int)
+		jobKey := libs.JobKey(task.Id, server_id_int)
 		jobs.RemoveJob(jobKey)
 	}
 
@@ -477,7 +520,7 @@ func (self *TaskController) AjaxBatchPause() {
 
 		for _, server_id := range TaskServerIdsArr {
 			server_id_int, _ := strconv.Atoi(server_id)
-			jobKey := jobKey(task.Id, server_id_int)
+			jobKey := libs.JobKey(task.Id, server_id_int)
 			jobs.RemoveJob(jobKey)
 		}
 		if err == nil {
@@ -507,7 +550,7 @@ func (self *TaskController) AjaxBatchDel() {
 
 		for _, server_id := range TaskServerIdsArr {
 			server_id_int, _ := strconv.Atoi(server_id)
-			jobKey := jobKey(task.Id, server_id_int)
+			jobKey := libs.JobKey(task.Id, server_id_int)
 			jobs.RemoveJob(jobKey)
 		}
 		models.TaskDel(id)
@@ -688,8 +731,16 @@ func (self *TaskController) Table() {
 		row["status"] = v.Status
 		row["pre_time"] = beego.Date(time.Unix(v.PrevTime, 0), "Y-m-d H:i:s")
 		row["execute_times"] = v.ExecuteTimes
+		row["cron_spec"] = v.CronSpec
 
-		e := jobs.GetEntryById(v.Id)
+		TaskServerIdsArr := strings.Split(v.ServerIds, ",")
+		serverId := 0
+		if len(TaskServerIdsArr) > 1 {
+			serverId, _ = strconv.Atoi(TaskServerIdsArr[0])
+		}
+		jobskey := libs.JobKey(v.Id, serverId)
+		e := jobs.GetEntryById(jobskey)
+
 		if e != nil {
 			row["next_time"] = beego.Date(e.Next, "Y-m-d H:i:s")
 			row["prev_time"] = "-"
@@ -850,7 +901,7 @@ func (self *TaskController) ApiPause() {
 
 	for _, server_id := range TaskServerIdsArr {
 		server_id_int, _ := strconv.Atoi(server_id)
-		jobKey := jobKey(task.Id, server_id_int)
+		jobKey := libs.JobKey(task.Id, server_id_int)
 		jobs.RemoveJob(jobKey)
 	}
 

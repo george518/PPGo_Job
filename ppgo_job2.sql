@@ -332,11 +332,14 @@ COMMIT;
 
 BEGIN;
 ALTER TABLE `ppgo_job2`.`pp_task` CHANGE COLUMN `server_id` `server_ids` varchar(200) NOT NULL DEFAULT '0' COMMENT '服务器id字符串，英文都好隔开';
-BEGIN;
+COMMIT;
 
 BEGIN;
 ALTER TABLE `ppgo_job2`.`pp_task_log` ADD COLUMN `server_id` int(11) NOT NULL DEFAULT '-1' COMMENT '服务器ID，-1，异常' AFTER `task_id`, CHANGE COLUMN `output` `output` mediumtext NOT NULL COMMENT '任务输出' AFTER `server_id`, CHANGE COLUMN `error` `error` text NOT NULL COMMENT '错误信息' AFTER `output`, CHANGE COLUMN `status` `status` tinyint(4) NOT NULL COMMENT '状态' AFTER `error`, CHANGE COLUMN `process_time` `process_time` int(11) NOT NULL DEFAULT '0' COMMENT '消耗时间/毫秒' AFTER `status`, CHANGE COLUMN `create_time` `create_time` int(11) UNSIGNED NOT NULL DEFAULT '0' COMMENT '创建时间' AFTER `process_time`;
 ALTER TABLE `ppgo_job2`.`pp_task_log` ADD COLUMN `server_name` varchar(60) NOT NULL DEFAULT '\"\"' COMMENT '服务器名称' AFTER `server_id`, CHANGE COLUMN `output` `output` mediumtext NOT NULL COMMENT '任务输出' AFTER `server_name`, CHANGE COLUMN `error` `error` text NOT NULL COMMENT '错误信息' AFTER `output`, CHANGE COLUMN `status` `status` tinyint(4) NOT NULL COMMENT '状态' AFTER `error`, CHANGE COLUMN `process_time` `process_time` int(11) NOT NULL DEFAULT '0' COMMENT '消耗时间/毫秒' AFTER `status`, CHANGE COLUMN `create_time` `create_time` int(11) UNSIGNED NOT NULL DEFAULT '0' COMMENT '创建时间' AFTER `process_time`;
-BEGIN;
+COMMIT;
 
+BEGIN;
+ALTER TABLE `ppgo_job2`.`pp_task` CHANGE COLUMN `is_notify` ` is_notify` tinyint(1) UNSIGNED NOT NULL DEFAULT '0' COMMENT '0-不通知，1-通知', ADD COLUMN `server_type` tinyint(1) UNSIGNED NOT NULL DEFAULT '1' COMMENT '执行策略：0-同时执行，1-轮询执行' AFTER `update_id`;
+COMMIT;
 SET FOREIGN_KEY_CHECKS = 1;

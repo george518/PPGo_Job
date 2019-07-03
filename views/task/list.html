@@ -58,12 +58,12 @@
             ,url: '/task/table'
             ,cols: [[
                 {checkbox: true, fixed: true},
-                {field:'id', title: 'ID', align:'center', width:50,sort: true}
-                ,{field:'task_name',width:300, title: '任务名称'}
-                ,{field:'description',title: '任务说明'}
+                {field:'id', title: 'ID', align:'center', width:100,sort: true}
+                ,{field:'task_name', title: '任务名称'}
+                ,{field:'cron_spec',title: '时间表达式', width:150}
                 ,{field:'next_time', width:170,title: '下次执行时间'}
-                ,{field:'pre_time', title: '上次执行时间'}
-                ,{field:'execute_times', title: '次数'}
+                ,{field:'pre_time', title: '上次执行时间',width:170,}
+                ,{field:'execute_times', title: '次数',width:100}
                 ,{width:120, align:'center', title:'操作', toolbar: '#bar'}
             ]]
             ,id: 'listReload'

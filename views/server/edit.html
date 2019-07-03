@@ -23,6 +23,7 @@
             <div class="layui-input-inline mw400">
                 <input type="radio" name="connection_type" lay-verify="type" value="0" title="SSH" {{if eq .server.connection_type 0}}checked{{end}}>
                 <input type="radio" name="connection_type" lay-verify="type" value="1" title="Telnet" {{if eq .server.connection_type 1}}checked{{end}}>
+                <input type="radio" name="connection_type" lay-verify="type" value="2" title="Agent" {{if eq .server.connection_type 2}}checked{{end}}>
             </div>
             <div class="layui-form-mid layui-word-aux"></div>
         </div>

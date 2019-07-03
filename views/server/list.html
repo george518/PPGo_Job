@@ -7,7 +7,7 @@
             <form class="layui-form" action="" onsubmit="javascript:return false;">
                 <div class="demoTable">
                     <div class="layui-inline" style="width: 40%">
-                        <input class="layui-input" name="serverName" id="serverName" autocomplete="off" placeholder="资源名称" >
+                        <input class="layui-input" name="serverName" id="serverName" autocomplete="off" placeholder="执行资源名称" >
                     </div>
                     <div class="layui-inline" style="width: 20%;text-align: left;">
                         <select name="serverGroupId" id="serverGroupId">
@@ -53,13 +53,12 @@
             ,url: '/server/table'
             ,cols: [[
                 // {checkbox: true, fixed: true},
-                {field:'id', title: 'ID', align:'center',sort: true, width:150}
-                ,{field:'server_name',title: '资源名称'}
-                ,{field:'group_name',title: '分组名称'}
-                ,{field:'connection_type', title: '连接类型'}
-                ,{field:'type', title: '登录类型'}
+                {field:'id', title: 'ID', align:'center',sort: true, width:80}
+                ,{field:'server_name',title: '执行资源名称',width:350}
+                ,{field:'connection_type', title: '类型',width:100}
+                ,{field:'ip_port', title: 'IP端口'}
+                ,{field:'group_name',title: '分组名称',width:200}
                 ,{field:'detail', title: '备注'}
-                // ,{field:'status_text', title: '状态'}
                 ,{fixed: 'right', width:160, align:'center', toolbar: '#bar'}
             ]]
             ,id: 'listReload'

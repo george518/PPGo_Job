@@ -4,7 +4,7 @@
     }
 </style>
 <div class="layui-layout layui-layout-admin" style="padding-left: 40px;margin-top: 20px;">
-    <form class="layui-form" action="" method="post" >
+    <form class="layui-form" action="javascript:void(0)" method="post" >
         <div class="layui-form-item">
             <label class="layui-form-label mw200">任务名称</label>
             <div class="layui-input-inline mw400">
@@ -16,31 +16,40 @@
             <label class="layui-form-label mw200">所属分组</label>
             <div class="layui-input-inline">
                 <select name="group_id" lay-verify="required">
-                {{range $k, $v := .taskGroup}}
-                    <option value="{{$k}}" {{if eq $k $.task.GroupId}}selected{{end}}>{{$v}}</option>
-                {{end}}
+                    {{range $k, $v := .taskGroup}}
+                        <option value="{{$k}}" {{if eq $k $.task.GroupId}}selected{{end}}>{{$v}}</option>
+                    {{end}}
+                </select>
+            </div>
+            <div class="layui-form-mid layui-word-aux"></div>
+        </div>
+
+
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200">执行资源</label>
+            <div class="layui-input-inline mw400">
+                <select name="server_id"   xm-select="select_server" >
+                    <option value="">请选择</option>
+                    <option value="0">本机执行</option>
+                    {{range $k, $v := .serverGroup}}
+                        <optgroup label="{{$v.GroupName}}">
+                            {{range $kk, $vv := $v.Servers}}
+                                <option value="{{$kk}}">{{$vv}}</option>
+                            {{end}}
+                        </optgroup>
+                    {{end}}
                 </select>
             </div>
             <div class="layui-form-mid layui-word-aux"></div>
         </div>
 
         <div class="layui-form-item">
-            <label class="layui-form-label mw200">服务器资源</label>
-            <div class="layui-inline">
-
-                <div class="layui-input-inline">
-                    <select name="server_id">
-                        <option value="0">本地服务器</option>
-                    {{range $k, $v := .serverGroup}}
-                        <optgroup label="{{$v.GroupName}}">
-                        {{range $kk, $vv := $v.Servers}}
-                            <option value="{{$kk}}" {{if eq $kk $.task.ServerId}}selected{{end}} >{{$vv}}</option>
-                        {{end}}
-                        </optgroup>
-                    {{end}}
-                    </select>
-                </div>
+            <label class="layui-form-label mw200">执行策略</label>
+            <div class="layui-input-inline mw400">
+                <input type="radio" name="server_type" value="0" lay-filter="server_type" title="同时执行" {{if eq .task.ServerType 0}}checked{{end}}>
+                <input type="radio" name="server_type" value="1" lay-filter="server_type" title="轮询执行" {{if eq .task.ServerType 1}}checked{{end}}>
             </div>
+            <div class="layui-form-mid layui-word-aux"></div>
         </div>
 
 
@@ -95,28 +104,42 @@
         </div>
 
         <div class="layui-form-item notify">
-            <hr>
             <label class="layui-form-label mw200">通知类型</label>
             <div class="layui-input-inline mw400">
-                <input type="radio" name="notify_type" lay-verify="required" value="0" title="邮件" {{if eq .task.NotifyType 0}}checked{{end}}>
-                <input type="radio" name="notify_type" lay-verify="required" value="1" title="短信" {{if eq .task.NotifyType 1}}checked{{end}}>
-                <input type="radio" name="notify_type" lay-verify="required" value="2" title="钉钉" {{if eq .task.NotifyType 2}}checked{{end}}>
-                <input type="radio" name="notify_type" lay-verify="required" value="3" title="微信" {{if eq .task.NotifyType 3}}checked{{end}}>
+                <input type="radio" name="notify_type" value="0" lay-filter="notify_type" title="邮件" {{if eq .task.NotifyType 0}}checked{{end}}>
+                <input type="radio" name="notify_type" value="1" lay-filter="notify_type" title="短信" {{if eq .task.NotifyType 1}}checked{{end}}>
+                <input type="radio" name="notify_type" value="2" lay-filter="notify_type" title="钉钉" {{if eq .task.NotifyType 2}}checked{{end}}>
+                <input type="radio" name="notify_type" value="3" lay-filter="notify_type" title="微信" {{if eq .task.NotifyType 3}}checked{{end}}>
             </div>
             <div class="layui-form-mid layui-word-aux"></div>
         </div>
 
-        <div class="layui-form-item  notify">
-            <label class="layui-form-label mw200">通知用户</label>
-            <div class="layui-input-inline mw400 ">
-            {{range $k, $v := .adminInfo}}
-                <input type="checkbox" name="notify_user" lay-filter="notify_user" title="{{$v.RealName}}" value="{{$v.Id}}" lay-skin="primary" {{range $ks,$vs:=$.notify_user_ids}} {{if eq $v.Id $vs}}checked{{end}}{{end}}>
-            {{end}}
-                <input type="hidden" name="notify_user_ids" id="notify_user_ids" value="{{.task.NotifyUserIds}}">
+        <div class="layui-form-item notify">
+            <label class="layui-form-label mw200">通知模板</label>
+            <div class="layui-input-inline">
+                <select name="notify_tpl_id" lay-filter="notify_tpl_id">
+                    <option value="0">请选择</option>
+                    {{range $k, $v := .notifyTpl}}
+                        <option value="{{$v.id}}" {{if eq $.task.NotifyTplId $v.id}} selected {{end}}>{{$v.tpl_name}}</option>
+                    {{end}}
+                </select>
             </div>
             <div class="layui-form-mid layui-word-aux"></div>
         </div>
-        <input type="hidden" name="id" id="id" value="0">
+
+        <div class="layui-form-item notify">
+            <label class="layui-form-label mw200">通知用户</label>
+            <div class="layui-input-inline mw400">
+                <select name="notify_user"  lay-search xm-select="select_notify" >
+                    <option value="">请选择</option>
+                    {{range $k, $v := .adminInfo}}
+                        <option value="{{$v.Id}}">{{$v.RealName}}</option>
+                    {{end}}
+                </select>
+            </div>
+            <div class="layui-form-mid layui-word-aux"></div>
+        </div>
+
         <div class="layui-form-item">
             <label class="layui-form-label mw200"></label>
             <div class="layui-input-inline mw400">
@@ -127,16 +150,38 @@
     </form>
 </div>
 <script>
-    layui.use(['form','element','layer','jquery'],function(){
+    layui.config({
+        base:'/static/admin/js/'
+    }).extend({
+        formSelects: 'formSelects-v3'
+    }).use(['form','element','layer','jquery','formSelects'],function(){
         var form = layui.form; //只有执行了这一步，部分表单元素才会自动修饰成功
         var $ = layui.jquery;
-            var error_info = "{{.flash.error}}";
-            if(error_info){
-                layer.msg(error_info,{icon: 2,shade:0.3},function () {
-                    window.history.go(-1)
-                })
-                return;
-            }
+
+        var formSelects = layui.formSelects;
+
+        var server_id = {{$.service_ids}};
+        formSelects.render({
+            init : server_id,
+            name : 'select_server',
+        });
+
+        var select_notify = {{$.notify_user_ids}};
+
+        console.log(select_notify);
+        formSelects.render({
+            init : select_notify,
+            name : 'select_notify',
+        });
+
+        var error_info = "{{.flash.error}}";
+        if(error_info){
+            layer.msg(error_info,{icon: 2,shade:0.3},function () {
+                self.location=document.referrer;
+            })
+            return;
+        }
+
         $("#des").on('click',function () {
             layer.tips('设为“是”的话，如果该任务在上一个时间点还没执行完，则略过不执行', '#des', {
                 tips: [1, '#0FA6D8'] //还可配置颜色
@@ -154,34 +199,91 @@
             }
         });
 
-        var notify_user_ids = [];
-        form.on('checkbox(notify_user)', function(data){
-            if(data.elem.checked==true){
-                notify_user_ids.push(data.value)
-            }else{
-                $.each(notify_user_ids,function(index,item){
-                    // index是索引值（即下标）   item是每次遍历得到的值；
-                    if(item==data.value){
-                        notify_user_ids.splice(index,1);
-                    }
-                });
+        form.on('submit(sub)', function(data){
+            var isAdmin = "{{.isAdmin}}";
+            var msg = "编辑任务需要重新审核，是否确认需要编辑？";
+            var okmsg = "操作成功，可去【任务审核】中查看该任务";
+
+            if (isAdmin==1){
+                msg = "是否确认需要编辑？";
+                okmsg = "操作成功";
             }
-            $("#notify_user_ids").val(notify_user_ids.join(","));
+
+            layer.confirm(msg, {icon: 3, title:'提示'}, function(index){
+                var form_data = data.field;
+
+                //选择执行器
+                var ids = formSelects.value('select_server');	//获取选中的
+                if (ids.length<1){
+                    layer.msg("请选择执行资源");
+                    return false;
+                }
+
+                var server_arr = new Array();
+                $.each(ids,function (k,v) {
+                    server_arr.push(v.val);
+                })
+
+                form_data.server_ids = server_arr.join(",");
+
+                if (form_data.server_ids==="" || form_data.server_ids===null){
+                    layer.msg("请选择服务器资源");
+                    return false;
+                }
+
+                //选择通知人
+                if (form_data.is_notify==1 ) {
+                    var ids = formSelects.value('select_notify');	//获取选中的
+                    if (ids.length<1){
+                        layer.msg("请选择通知人");
+                        return false;
+                    }
+
+                    var notify_arr = new Array();
+                    $.each(ids,function (k,v) {
+                        notify_arr.push(v.val);
+                    });
+
+                    form_data.notify_user_ids = notify_arr.join(",");
+                    if (form_data.notify_user_ids==="" || form_data.notify_user_ids===null){
+                        layer.msg("请选择通知人");
+                        return false;
+                    }
+                }
+
+                $.post('{{urlfor "TaskController.AjaxSave"}}', form_data, function (out) {
+                    if (out.status == 0) {
+                        layer.msg(okmsg,{icon: 1,shade:0.3,time:1000},function () {
+                            // self.location=document.referrer;
+                            window.parent.deleteCurrentTab();
+                        })
+                    } else {
+                        layer.msg(out.message);
+                        return  false;
+                    }
+                }, "json");
+
+                setTimeout(function(){
+                    layer.closeAll('loading');
+                }, 2000);
+                layer.close(index);
+            });
         });
 
-        form.on('submit(sub)', function(data){
-            var form_data = data.field;
-            $.post('{{urlfor "TaskController.AjaxSave"}}', form_data, function (out) {
-                if (out.status == 0) {
-                    layer.msg("复制成功!，请到列表中查看",{icon: 1,shade:0.3,time:1000},function () {
-                        //self.location=document.referrer;
-                        window.parent.deleteCurrentTab();
-                    })
+        form.on('radio(notify_type)', function (data) {
+            $.post('{{urlfor "TaskController.AjaxNotifyType"}}', {notify_type: data.value}, function (out) {
+                if (out.code == 0) {
+                    $('select[name="notify_tpl_id"]').empty();
+                    $('<option value="0" selected>请选择</option>').appendTo('select[name="notify_tpl_id"]');
+                    for (var i = 0; i < out.data.length; i++) {
+                        $('<option value="' + out.data[i].id + '">' + out.data[i].tpl_name + '</option>').appendTo('select[name="notify_tpl_id"]');
+                    }
+
+                    form.render();
                 } else {
                     layer.msg(out.message)
                 }
             }, "json");
-            return false;
         });
 
         //但是，如果你的HTML是动态生成的，自动渲染就会失效

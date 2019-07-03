@@ -8,7 +8,6 @@
 package controllers
 
 import (
-	"fmt"
 	"strconv"
 	"time"
 
@@ -43,7 +42,6 @@ func (self *LoginController) LoginIn() {
 		password := strings.TrimSpace(self.GetString("password"))
 		if username != "" && password != "" {
 			user, err := models.AdminGetByName(username)
-			fmt.Println(user)
 			if err != nil || user.Password != libs.Md5([]byte(password+user.Salt)) {
 				self.ajaxMsg("帐号或密码错误", MSG_ERR)
 			} else if user.Status == -1 {

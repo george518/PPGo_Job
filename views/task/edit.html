@@ -4,7 +4,7 @@
     }
 </style>
 <div class="layui-layout layui-layout-admin" style="padding-left: 40px;margin-top: 20px;">
-    <form class="layui-form" action="javascript:return false;" method="post" >
+    <form class="layui-form" action="javascript:void(0)" method="post" >
         <div class="layui-form-item">
             <label class="layui-form-label mw200">任务名称</label>
             <div class="layui-input-inline mw400">
@@ -24,28 +24,34 @@
             <div class="layui-form-mid layui-word-aux"></div>
         </div>
 
-        <div class="layui-form-item">
-            <label class="layui-form-label mw200">服务器资源</label>
-            <div class="layui-block">
-                <div class="layui-col-md3"></div>
-                <div class="layui-col-md9">
-                    <div style="margin-bottom: 20px;">
-                        <input type="checkbox" name="server_id" lay-skin="primary" title="本地服务器" value="0" {{range $ks,$vs:=$.service_ids}} {{if eq 0 $vs}}checked{{end}}{{end}}>
-                    </div>
-                    <div class="layui-row layui-col-space10">
-                        {{range $k, $v := .serverGroup}}
-                            <div class="layui-col-md12" ><i class="layui-icon">&#xe65b;</i>  {{$v.GroupName}}</div>
-                            {{range $kk, $vv := $v.Servers}}
-                                <div class="layui-col-md4">
-                                    <input type="checkbox" name="server_id" lay-skin="primary" title="{{$vv}}" value="{{$kk}}" {{range $ks,$vs:=$.service_ids}} {{if eq $kk $vs}}checked{{end}}{{end}}>
-                                </div>
-                            {{end}}
-                        {{end}}
-                    </div>
-                </div>
 
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200">执行资源</label>
+            <div class="layui-input-inline mw400">
+                <select name="server_id"   xm-select="select_server" >
+                    <option value="">请选择</option>
+                    <option value="0">本机执行</option>
+                    {{range $k, $v := .serverGroup}}
+                        <optgroup label="{{$v.GroupName}}">
+                            {{range $kk, $vv := $v.Servers}}
+                                <option value="{{$kk}}">{{$vv}}</option>
+                            {{end}}
+                        </optgroup>
+                    {{end}}
+                </select>
             </div>
+            <div class="layui-form-mid layui-word-aux"></div>
         </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label mw200">执行策略</label>
+            <div class="layui-input-inline mw400">
+                <input type="radio" name="server_type" value="0" lay-filter="server_type" title="同时执行" {{if eq .task.ServerType 0}}checked{{end}}>
+                <input type="radio" name="server_type" value="1" lay-filter="server_type" title="轮询执行" {{if eq .task.ServerType 1}}checked{{end}}>
+            </div>
+            <div class="layui-form-mid layui-word-aux"></div>
+        </div>
+
 
         <div class="layui-form-item">
             <label class="layui-form-label mw200">任务说明</label>
@@ -121,16 +127,20 @@
             <div class="layui-form-mid layui-word-aux"></div>
         </div>
 
-        <div class="layui-form-item  notify">
+        <div class="layui-form-item notify">
             <label class="layui-form-label mw200">通知用户</label>
-            <div class="layui-input-inline mw400 ">
-            {{range $k, $v := .adminInfo}}
-                <input type="checkbox" name="notify_user" lay-filter="notify_user" title="{{$v.RealName}}" value="{{$v.Id}}" lay-skin="primary" {{range $ks,$vs:=$.notify_user_ids}} {{if eq $v.Id $vs}}checked{{end}}{{end}}>
-            {{end}}
-                <input type="hidden" name="notify_user_ids" id="notify_user_ids" value="{{.task.NotifyUserIds}}">
+            <div class="layui-input-inline mw400">
+                <select name="notify_user"  lay-search xm-select="select_notify" >
+                    <option value="">请选择</option>
+                    {{range $k, $v := .adminInfo}}
+                        <option value="{{$v.Id}}">{{$v.RealName}}</option>
+                    {{end}}
+                </select>
             </div>
             <div class="layui-form-mid layui-word-aux"></div>
         </div>
+
+
         <input type="hidden" name="id" id="id" value="{{.task.Id}}">
         <div class="layui-form-item">
             <label class="layui-form-label mw200"></label>
@@ -142,9 +152,29 @@
     </form>
 </div>
 <script>
-    layui.use(['form','element','layer','jquery'],function(){
+    layui.config({
+        base:'/static/admin/js/'
+    }).extend({
+        formSelects: 'formSelects-v3'
+    }).use(['form','element','layer','jquery','formSelects'],function(){
         var form = layui.form; //只有执行了这一步，部分表单元素才会自动修饰成功
         var $ = layui.jquery;
+
+        var formSelects = layui.formSelects;
+
+        var server_id = {{$.service_ids}};
+        formSelects.render({
+            init : server_id,
+            name : 'select_server',
+        });
+
+        var select_notify = {{$.notify_user_ids}};
+
+        console.log(select_notify);
+        formSelects.render({
+            init : select_notify,
+            name : 'select_notify',
+        });
 
         var error_info = "{{.flash.error}}";
         if(error_info){
@@ -171,22 +201,6 @@
             }
         });
 
-        var notify_user_ids = [];
-        form.on('checkbox(notify_user)', function(data){
-            if(data.elem.checked==true){
-                notify_user_ids.push(data.value)
-            }else{
-                $.each(notify_user_ids,function(index,item){
-                    // index是索引值（即下标）   item是每次遍历得到的值；
-                    if(item==data.value){
-                        notify_user_ids.splice(index,1);
-                    }
-                });
-            }
-            $("#notify_user_ids").val(notify_user_ids.join(","));
-        });
-
-
         form.on('submit(sub)', function(data){
             var isAdmin = "{{.isAdmin}}";
             var msg = "编辑任务需要重新审核，是否确认需要编辑？";
@@ -198,19 +212,46 @@
             }
 
             layer.confirm(msg, {icon: 3, title:'提示'}, function(index){
-
                 var form_data = data.field;
-                var ids = [];
-                $("input[name=server_id][type=checkbox]").each(function() {
-                    if ($(this).prop("checked")) {
-                        ids.push($(this).val());
-                    }
-                });
+
+                //选择执行器
+                var ids = formSelects.value('select_server');	//获取选中的
                 if (ids.length<1){
-                    layer.msg("请选择服务资源");
+                    layer.msg("请选择执行资源");
                     return false;
                 }
-                form_data.server_ids = ids.join(",");
+
+                var server_arr = new Array();
+                $.each(ids,function (k,v) {
+                    server_arr.push(v.val);
+                })
+
+                form_data.server_ids = server_arr.join(",");
+
+                if (form_data.server_ids==="" || form_data.server_ids===null){
+                    layer.msg("请选择服务器资源");
+                    return false;
+                }
+
+                //选择通知人
+                if (form_data.is_notify==1 ) {
+                    var ids = formSelects.value('select_notify');	//获取选中的
+                    if (ids.length<1){
+                        layer.msg("请选择通知人");
+                        return false;
+                    }
+
+                    var notify_arr = new Array();
+                    $.each(ids,function (k,v) {
+                        notify_arr.push(v.val);
+                    });
+
+                    form_data.notify_user_ids = notify_arr.join(",");
+                    if (form_data.notify_user_ids==="" || form_data.notify_user_ids===null){
+                        layer.msg("请选择通知人");
+                        return false;
+                    }
+                }
 
                 $.post('{{urlfor "TaskController.AjaxSave"}}', form_data, function (out) {
                     if (out.status == 0) {
@@ -219,8 +260,8 @@
                             window.parent.deleteCurrentTab();
                         })
                     } else {
-                        layer.msg(out.message)
-                        return
+                        layer.msg(out.message);
+                        return  false;
                     }
                 }, "json");
 

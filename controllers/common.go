@@ -9,7 +9,6 @@ package controllers
 
 import (
 	"github.com/astaxie/beego"
-	"github.com/axgle/mahonia"
 	"github.com/george518/PPGo_Job/libs"
 	"github.com/george518/PPGo_Job/models"
 	"strconv"
@@ -100,7 +99,10 @@ func (self *BaseController) Auth() {
 			self.actionName != "loginin" &&
 			self.actionName != "apistart" &&
 			self.actionName != "apitask" &&
-			self.actionName != "apipause") {
+			self.actionName != "apipause" &&
+			self.actionName != "apisave" &&
+			self.actionName != "apistatus" &&
+			self.actionName != "apiget") {
 		self.redirect(beego.URLFor("LoginController.Login"))
 	}
 }
@@ -336,7 +338,7 @@ type serverList struct {
 func serverLists(authStr string, adminId int) (sls []serverList) {
 	serverGroup := serverGroupLists(authStr, adminId)
 	Filters := make([]interface{}, 0)
-	Filters = append(Filters, "status", 0)
+	Filters = append(Filters, "status__in", []int{0, 1})
 
 	Result, _ := models.TaskServerGetList(1, 1000, Filters...)
 	for k, v := range serverGroup {
@@ -353,17 +355,4 @@ func serverLists(authStr string, adminId int) (sls []serverList) {
 		sls = append(sls, sl)
 	}
 	return sls
-}
-
-func gbkAsUtf8(str string) string {
-	srcDecoder := mahonia.NewDecoder("gbk")
-	desDecoder := mahonia.NewDecoder("utf-8")
-	resStr := srcDecoder.ConvertString(str)
-	_, resBytes, _ := desDecoder.Translate([]byte(resStr), true)
-	return string(resBytes)
-}
-
-//任务识别码
-func jobKey(taskId, serverId int) int {
-	return taskId*10000 + serverId
 }

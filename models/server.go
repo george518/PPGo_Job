@@ -16,22 +16,22 @@ import (
 )
 
 type TaskServer struct {
-	Id            int
-	GroupId       int
+	Id             int
+	GroupId        int
 	ConnectionType int
-	ServerName    string
-	ServerAccount string
-	ServerOuterIp string
-	ServerIp      string
-	Port          int
-	Password      string
-	PrivateKeySrc string
-	PublicKeySrc  string
-	Type          int
-	Detail        string
-	CreateTime    int64
-	UpdateTime    int64
-	Status        int
+	ServerName     string
+	ServerAccount  string
+	ServerOuterIp  string
+	ServerIp       string
+	Port           int
+	Password       string
+	PrivateKeySrc  string
+	PublicKeySrc   string
+	Type           int
+	Detail         string
+	CreateTime     int64
+	UpdateTime     int64
+	Status         int
 }
 
 func (t *TaskServer) TableName() string {
@@ -95,6 +95,20 @@ func TaskServerGetById(id int) (*TaskServer, error) {
 		return nil, err
 	}
 	return obj, nil
+}
+
+func TaskServerForActuator(serverIp string, port int) int {
+	serverFilters := make([]interface{}, 0)
+	serverFilters = append(serverFilters, "status__in", []int{0, 1})
+	serverFilters = append(serverFilters, "server_ip", serverIp)
+	serverFilters = append(serverFilters, "port", port)
+
+	server, _ := TaskServerGetList(1, 1, serverFilters...)
+
+	if len(server) == 1 {
+		return server[0].Id
+	}
+	return 0
 }
 
 //

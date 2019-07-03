@@ -75,7 +75,7 @@ func (self *TaskLogController) Table() {
 	for k, v := range result {
 		row := make(map[string]interface{})
 		row["id"] = v.Id
-		row["task_id"] = jobKey(v.TaskId, v.ServerId)
+		row["task_id"] = libs.JobKey(v.TaskId, v.ServerId)
 		row["start_time"] = beego.Date(time.Unix(v.CreateTime, 0), "Y-m-d H:i:s")
 		row["process_time"] = float64(v.ProcessTime) / 1000
 

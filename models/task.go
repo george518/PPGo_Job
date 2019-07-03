@@ -24,6 +24,7 @@ type Task struct {
 	Id            int
 	GroupId       int
 	ServerIds     string
+	ServerType    int
 	TaskName      string
 	Description   string
 	CronSpec      string
