@@ -22,7 +22,8 @@ Wiki:https://github.com/george518/PPGo_Job/wiki
 ----
 ![](http://www.haodaquan.com/Uploads/editormd/2019-07-06/156240332990478.png)
 
-##特性
+三、特性
+----
 
 V2.x新增以下功能和特性：
 
@@ -51,7 +52,7 @@ V2.x新增以下功能和特性：
 
 ![github](https://github.com/george518/PP_blog/blob/master/static/public/images/weixin.png?raw=true "github")
 
-先看效果
+四、先睹为快
 ----
 ![image](https://github.com/linxiaozhi/PPGo_Job/blob/master/assets/screenshot/1-index.png?raw=true "github")
 ![image](https://github.com/linxiaozhi/PPGo_Job/blob/master/assets/screenshot/2-task.png?raw=true "github")
@@ -62,7 +63,7 @@ V2.x新增以下功能和特性：
 ![image](https://github.com/linxiaozhi/PPGo_Job/blob/master/assets/screenshot/15.log.png?raw=true "github")
 
 
-安装方法
+五、安装方法
 ----
 
 方法一、 编译安装
@@ -160,7 +161,7 @@ wechat.url = http://xx.com/api/tools/send_wechat
 wechat.pool = 10
 ```
 
-编译安装-可能会遇到的问题
+六、编译安装-可能会遇到的问题
 ----
 go build 时遇到以下错误：
 jobs/job.go:19:2: cannot find package "golang.org/x/crypto/ssh" in any of:
@@ -203,7 +204,7 @@ docker-compose logs -f web
 
 控制面板->管理工具->计算机管理->系统工具->本地用户和组->组->TelnetClients->添加用户
 
-任务接口说明
+七、任务接口说明
 ----
 三个简陋的接口，满足日常所需。
 
@@ -267,7 +268,7 @@ id:11
 具体可以使用postman测试
 
 
-常见操作问题
+八、常见操作问题
 ----
 1、如何删除任务？
 
@@ -280,16 +281,17 @@ id:11
 
 
 
-联系我
+九、联系我
 ----
 qq群号:547564773
 欢迎交流，欢迎提交代码。
 
-感谢
+十、感谢
 ----
 @bannerchi 
 @linxiaozhi 
 @gongwalker
+
 
 
 
