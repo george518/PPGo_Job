@@ -3,7 +3,8 @@ PPGo_Job定时任务管理系统
 
 ![](http://www.haodaquan.com/Uploads/article/2018-07-26/153262059813931.png)
 
-##说明
+一、说明
+----
 PPGo_Job是一款轻量级定时任务管理系统，go语言开发，部署超级简单，资源消耗少，运行稳定。
 支持定时任务可视化管理、多人多权限的管理，支持大并发，可同时管理多台服务器上的定时任务。
 
@@ -17,8 +18,8 @@ Github地址:https://github.com/george518/PPGo_Job
 文档地址：http://www.haodaquan.com/topics/1###
 Wiki:https://github.com/george518/PPGo_Job/wiki
 
-##架构
-
+二、架构 
+----
 ![](http://www.haodaquan.com/Uploads/editormd/2019-07-06/156240332990478.png)
 
 ##特性
@@ -42,10 +43,12 @@ V2.x新增以下功能和特性：
 
 
 
-##支持
+三、支持
 ----
-####1、给项目一个star
-####2、请我喝瓶水
+1、给项目一个star
+
+2、请我喝瓶水
+
 ![github](https://github.com/george518/PP_blog/blob/master/static/public/images/weixin.png?raw=true "github")
 
 先看效果
