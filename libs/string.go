@@ -79,5 +79,5 @@ func GbkAsUtf8(str string) string {
 
 //任务识别码
 func JobKey(taskId, serverId int) int {
-	return taskId*10000000 + serverId
+	return taskId*100000 + serverId
 }

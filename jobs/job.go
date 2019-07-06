@@ -192,8 +192,8 @@ func NewCommandJob(id int, serverId int, name string, command string) *Job {
 		cmd.Start()
 		err, isTimeout := runCmdWithTimeout(cmd, timeout)
 		jobresult = new(JobResult)
-		jobresult.OutMsg = libs.GbkAsUtf8(bufOut.String())
-		jobresult.ErrMsg = libs.GbkAsUtf8(bufErr.String())
+		jobresult.OutMsg = bufOut.String()
+		jobresult.ErrMsg = bufErr.String()
 
 		jobresult.IsOk = true
 		if err != nil {

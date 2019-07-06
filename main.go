@@ -21,7 +21,6 @@ func init() {
 	var StartTime = time.Now().Unix()
 	models.Init(StartTime)
 	jobs.InitJobs()
-
 }
 
 func main() {

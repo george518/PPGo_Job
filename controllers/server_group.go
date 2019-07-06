@@ -11,6 +11,8 @@ import (
 	"strings"
 	"time"
 
+	"fmt"
+
 	"strconv"
 
 	"github.com/astaxie/beego"
@@ -53,6 +55,7 @@ func (self *ServerGroupController) AjaxSave() {
 
 	servergroup_id, _ := self.GetInt("id")
 
+	fmt.Println(servergroup_id)
 	if servergroup_id == 0 {
 		//新增
 		servergroup.CreateTime = time.Now().Unix()

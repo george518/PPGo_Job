@@ -80,8 +80,8 @@ func ResetCommandJob(id int, serverId int, name string, command string) *Job {
 		err, isTimeout := runCmdWithTimeout(cmd, timeout)
 
 		jobResult = new(JobResult)
-		jobResult.ErrMsg = libs.GbkAsUtf8(bufErr.String())
-		jobResult.OutMsg = libs.GbkAsUtf8(bufOut.String())
+		jobResult.ErrMsg = bufErr.String()
+		jobResult.OutMsg = bufOut.String()
 		jobResult.IsOk = true
 		if err != nil {
 			jobResult.IsOk = false

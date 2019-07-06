@@ -1,12 +1,15 @@
-PPGo_Job定时任务管理系统 V2.x
+PPGo_Job定时任务管理系统
 ====
 
 ![](http://www.haodaquan.com/Uploads/article/2018-07-26/153262059813931.png)
 
-PPGo_Job是一款定时任务可视化的、多人多权限的管理系统，采用golang开发，安装方便，资源消耗少，支持大并发，可同时管理多台服务器上的定时任务。
+##说明
+PPGo_Job是一款轻量级定时任务管理系统，go语言开发，部署超级简单，资源消耗少，运行稳定。
+支持定时任务可视化管理、多人多权限的管理，支持大并发，可同时管理多台服务器上的定时任务。
 
-前言：PPGo_Job V1.x版本开源两年多了，不少朋友的公司都在用，反响还不错，当然，也有好多朋友提了不少合理的意见和建议，所以这次干脆重构了一下，连UI也重新编码。目前V2.x版本
-已经用于生产环境。
+PPGo_Job从v1.0开源以来，得到众多技术朋友的支持和欢迎，已应用在多个公司的生产环境，同时也
+吸收使用者的建议和意见，不断改进和优化，目前已经上线了20余个版本，9个稳定版本（生产环境部署完成后才发布新版本）。
+
 
 码云地址：https://gitee.com/georgehao/PPGo_Job
 Github地址:https://github.com/george518/PPGo_Job
@@ -14,11 +17,15 @@ Github地址:https://github.com/george518/PPGo_Job
 文档地址：http://www.haodaquan.com/topics/1###
 Wiki:https://github.com/george518/PPGo_Job/wiki
 
+##架构
 
-V1.x版本是一个简单的定时任务管理系统，进入V1.0 ：https://github.com/george518/PPGo_Job/releases/tag/v1.2.1
-相对于V1.x版本，V2.0新增以下功能和特性：
+![](http://www.haodaquan.com/Uploads/editormd/2019-07-06/156240332990478.png)
 
-- 1、全新UI,基于LayUI2.3构建全新页面，后端模板手工搭建，让操作更加人性化。后台模板地址：https://github.com/george518/PP_admin-template
+##特性
+
+V2.x新增以下功能和特性：
+
+- 1、全新UI,基于LayUI构建全新页面，后端模板手工搭建，让操作更加人性化。后台模板地址：https://github.com/george518/PP_admin-template
 - 2、新增权限管理功能，根据菜单权限、操作权限和数据权限进行划分，方便多用户多权限管理定时任务。
 - 3、新增服务器复制功能，让服务器资源添加更加方便。
 - 4、新增定时任务详情页面，将任务相关操作更加集中起来操作。
@@ -29,13 +36,16 @@ V1.x版本是一个简单的定时任务管理系统，进入V1.0 ：https://git
 - 9、支持windows系统运行定时系统，不歧视windows，也要支持。
 - 10、提醒信息新增钉钉和微信通知功能，并支持编辑通知模版功能。让提醒内容个性化，不再死板。
 - 11、新增创建、启动、关闭任务的API，通过接口的方式控制定时任务，猜你喜欢。
+- 12、**新增任务执行器agent，可以通过ssh，telnet或者agent的方式分发任务**
 
-总之，管理定时任务，使用PPGo_Job吧，节省出来的时间，或皮或浪，随你，哈哈。
+总之，管理定时任务，使用PPGo_Job吧，节省出来的时间，或皮或浪，随你。
 
-感觉不错的话，给个星星吧 ：）
 
-也可以请我喝水
+
+##支持
 ----
+####1、给项目一个star
+####2、请我喝瓶水
 ![github](https://github.com/george518/PP_blog/blob/master/static/public/images/weixin.png?raw=true "github")
 
 先看效果

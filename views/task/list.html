@@ -35,7 +35,7 @@
         {{/*<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="status">启|停</a>*/}}
         {{/*<a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>*/}}
         <a class="layui-btn layui-btn-xs " lay-event="detail">详细</a>
-        {{/*<a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="run">测试</a>*/}}
+        <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="run">测试</a>
         <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="log">日志</a>
     </script>
 </div>
@@ -58,13 +58,13 @@
             ,url: '/task/table'
             ,cols: [[
                 {checkbox: true, fixed: true},
-                {field:'id', title: 'ID', align:'center', width:100,sort: true}
+                {field:'id', title: 'ID', align:'center', width:80,sort: true}
                 ,{field:'task_name', title: '任务名称'}
-                ,{field:'cron_spec',title: '时间表达式', width:150}
+                ,{field:'cron_spec',title: '时间表达式', width:100}
                 ,{field:'next_time', width:170,title: '下次执行时间'}
                 ,{field:'pre_time', title: '上次执行时间',width:170,}
                 ,{field:'execute_times', title: '次数',width:100}
-                ,{width:120, align:'center', title:'操作', toolbar: '#bar'}
+                ,{width:180, align:'center', title:'操作', toolbar: '#bar'}
             ]]
             ,id: 'listReload'
             ,page: true

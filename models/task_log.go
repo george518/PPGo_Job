@@ -71,8 +71,22 @@ func TaskLogDelByTaskId(taskId int) (int64, error) {
 	return orm.NewOrm().QueryTable(TableName("task_log")).Filter("task_id", taskId).Delete()
 }
 
-// func GetTodaySuccessNum() (num, error) {
-// 	o := orm.NewOrm()
-// 	var r RawSeter
-// 	r = o.Raw("SELECT COUNT(*) AS num WHERE create_time>=? AND status<0", "")
-// }
+func GetLogNum(status int) (int64, error) {
+	return orm.NewOrm().QueryTable(TableName("task_log")).Filter("status", status).Count()
+}
+
+type SumDays struct {
+	Day string
+	Sum int
+}
+
+func SumByDays(limit int, status string) orm.Params {
+	res := make(orm.Params)
+	_, err := orm.NewOrm().Raw("SELECT FROM_UNIXTIME(create_time,'%Y-%m-%d') days,COUNT(id) count FROM pp_task_log WHERE status in(?) GROUP BY days ORDER BY days DESC limit ?;",
+		status, limit).RowsToMap(&res, "days", "count")
+
+	if err != nil {
+		return nil
+	}
+	return res
+}

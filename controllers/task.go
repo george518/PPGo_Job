@@ -223,7 +223,7 @@ func (self *TaskController) Detail() {
 	//任务分组
 	groupName := "默认分组"
 	if task.GroupId > 0 {
-		group, err := models.TaskGroupGetById(task.GroupId)
+		group, err := models.GroupGetById(task.GroupId)
 		if err == nil {
 			groupName = group.GroupName
 		}
