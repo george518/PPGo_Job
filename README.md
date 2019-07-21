@@ -18,12 +18,16 @@ Github地址:https://github.com/george518/PPGo_Job
 文档地址：http://www.haodaquan.com/topics/1###
 Wiki:https://github.com/george518/PPGo_Job/wiki
 
+
 二、架构 
 ----
 ![](http://www.haodaquan.com/Uploads/editormd/2019-07-06/156240332990478.png)
 
+
+![](http://www.haodaquan.com/Uploads/editormd/2019-07-21/156368574611565.png)
 三、特性
 ----
+
 
 V2.x新增以下功能和特性：
 
@@ -38,7 +42,7 @@ V2.x新增以下功能和特性：
 - 9、支持windows系统运行定时系统，不歧视windows，也要支持。
 - 10、提醒信息新增钉钉和微信通知功能，并支持编辑通知模版功能。让提醒内容个性化，不再死板。
 - 11、新增创建、启动、关闭任务的API，通过接口的方式控制定时任务，猜你喜欢。
-- 12、**新增任务执行器agent，可以通过ssh，telnet或者agent的方式分发任务**
+- 12、**新增任务执行器agent，可以通过ssh，telnet或者agent的方式接受并执行任务**
 
 总之，管理定时任务，使用PPGo_Job吧，节省出来的时间，或皮或浪，随你。
 
