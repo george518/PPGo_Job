@@ -117,9 +117,9 @@ func (self *TaskController) Copy() {
 		self.ajaxMsg(err.Error(), MSG_ERR)
 	}
 
-	if task.Status == 1 {
-		self.ajaxMsg("运行状态无法编辑任务，请先暂停任务", MSG_ERR)
-	}
+	//if task.Status == 1 {
+	//	self.ajaxMsg("运行状态无法编辑任务，请先暂停任务", MSG_ERR)
+	//}
 	self.Data["task"] = task
 
 	self.Data["adminInfo"] = AllAdminInfo("")

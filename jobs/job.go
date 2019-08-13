@@ -573,6 +573,9 @@ func PollServer(j *Job) bool {
 		server.Status = 1
 		server.Update()
 		return false
+	} else {
+		server.Status = 0
+		server.Update()
 	}
 
 	return true
