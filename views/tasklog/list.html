@@ -65,7 +65,8 @@
                 table.reload('listReload', {
                     where: {
                         status: $("select[name=status]").val()
-                    }
+                    },
+                    page: 1
                 });
             }
         };
