@@ -15,8 +15,6 @@ import (
 	"runtime"
 	"sort"
 	"strconv"
-
-	//"strconv"
 	"time"
 )
 
@@ -173,6 +171,7 @@ func (self *HomeController) Start() {
 	self.Data["okNum"] = okNum
 	self.Data["errNum"] = errNum
 	self.Data["expiredNum"] = expiredNum
+
 	self.Data["cpuNum"] = runtime.NumCPU()
 
 	//系统运行信息
