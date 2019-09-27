@@ -53,11 +53,11 @@
             ,url: '/task/table?status=2'
             ,cols: [[
                 {checkbox: true, fixed: true},
-                {field:'id', title: 'ID', align:'center',sort: true, width:50}
+                {field:'id', title: 'ID', align:'center',sort: true, width:80}
                 ,{field:'task_name',title: '任务名称'}
-                ,{field:'description',title: '任务说明'}
+                ,{field:'cron_spec',title: '执行时间', width:150}
                 ,{field:'pre_time', width:170,title: '上次执行时间'}
-                ,{field:'execute_times', width:70,title: '次数'}
+                ,{field:'execute_times', width:100,title: '次数'}
                 ,{fixed:'right', width:150, align:'center', title:'操作', toolbar: '#bar'}
             ]]
             ,id: 'listReload'

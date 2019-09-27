@@ -9,83 +9,175 @@ package jobs
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
+	"github.com/astaxie/beego/logs"
+	"github.com/george518/PPGo_Job/libs"
+	"github.com/george518/PPGo_Job/models"
 	"io/ioutil"
 	"net"
+	"net/rpc"
+	"net/rpc/jsonrpc"
 	"os/exec"
 	"runtime/debug"
+	"sync"
 	"time"
 
 	"runtime"
 	"strconv"
 	"strings"
 
-	"github.com/astaxie/beego"
-	"github.com/george518/PPGo_Job/models"
-	"github.com/george518/PPGo_Job/notify"
-	"golang.org/x/crypto/ssh"
 	"encoding/json"
-	"github.com/axgle/mahonia"
-	"github.com/pkg/errors"
+	"github.com/astaxie/beego"
+	"github.com/george518/PPGo_Job/notify"
 	"github.com/linxiaozhi/go-telnet"
+	"golang.org/x/crypto/ssh"
 )
 
 type Job struct {
-	id         int                                               // 任务ID
-	logId      int64                                             // 日志记录ID
-	name       string                                            // 任务名称
-	task       *models.Task                                      // 任务对象
-	runFunc    func(time.Duration) (string, string, error, bool) // 执行函数
-	status     int                                               // 任务状态，大于0表示正在执行中
-	Concurrent bool                                              // 同一个任务是否允许并行执行
+	JobKey     int                            // jobId = id*10000+serverId
+	Id         int                            // taskID
+	LogId      int64                          // 日志记录ID
+	ServerId   int                            // 执行器信息
+	ServerName string                         // 执行器名称
+	ServerType int                            // 执行器类型，2-agent 1-telnet 0-ssh
+	Name       string                         // 任务名称
+	Task       *models.Task                   // 任务对象
+	RunFunc    func(time.Duration) *JobResult // 执行函数
+	Status     int                            // 任务状态，大于0表示正在执行中
+	Concurrent bool                           // 同一个任务是否允许并行执行
 }
 
-func NewJobFromTask(task *models.Task) (*Job, error) {
+type JobResult struct {
+	OutMsg    string
+	ErrMsg    string
+	IsOk      bool
+	IsTimeout bool
+}
+
+//调度计数器
+var Counter sync.Map
+
+func GetCounter(key string) int {
+	if v, ok := Counter.LoadOrStore(key, 0); ok {
+		n := v.(int)
+		return n
+	}
+	return 0
+}
+
+func SetCounter(key string) {
+	if v, ok := Counter.Load(key); ok {
+		n := v.(int)
+		m := n + 1
+		if n > 1000 {
+			m = 0
+		}
+		Counter.Store(key, m)
+	}
+}
+
+func NewJobFromTask(task *models.Task) ([]*Job, error) {
 	if task.Id < 1 {
 		return nil, fmt.Errorf("ToJob: 缺少id")
 	}
 
-	//本地程序执行
-	if task.ServerId == 0 {
-		job := NewCommandJob(task.Id, task.TaskName, task.Command)
-		job.task = task
-		job.Concurrent = task.Concurrent == 1
-		return job, nil
+	if task.ServerIds == "" {
+		return nil, fmt.Errorf("任务执行失败，找不到执行的服务器")
 	}
 
-	server, _ := models.TaskServerGetById(task.ServerId)
-	if server.ConnectionType == 0 {
-		if server.Type == 0 {
-			//密码验证登录服务器
-			job := RemoteCommandJobByPassword(task.Id, task.TaskName, task.Command, server)
-			job.task = task
-			job.Concurrent = task.Concurrent == 1
-			return job, nil
-		}
+	TaskServerIdsArr := strings.Split(task.ServerIds, ",")
+	jobArr := make([]*Job, 0)
+	for _, server_id := range TaskServerIdsArr {
+		if server_id == "0" {
+			//本地执行
+			job := NewCommandJob(task.Id, 0, task.TaskName, task.Command)
+			job.Task = task
+			job.Concurrent = false
+			if task.Concurrent == 1 {
+				job.Concurrent = true
+			}
+			//job.Concurrent = task.Concurrent == 1
+			job.ServerId = 0
+			job.ServerName = "本地服务器"
+			jobArr = append(jobArr, job)
+		} else {
+			server_id_int, _ := strconv.Atoi(server_id)
+			//远程执行
+			server, _ := models.TaskServerGetById(server_id_int)
 
-		job := RemoteCommandJob(task.Id, task.TaskName, task.Command, server)
-		job.task = task
-		job.Concurrent = task.Concurrent == 1
-		return job, nil
-	} else if server.ConnectionType == 1 {
-		if server.Type == 0 {
-			//密码验证登录服务器
-			job := RemoteCommandJobByTelnetPassword(task.Id, task.TaskName, task.Command, server)
-			job.task = task
-			job.Concurrent = task.Concurrent == 1
-			return job, nil
+			if server.Status == 2 {
+				fmt.Println("服务器已禁用")
+				continue
+			}
+
+			if server.ConnectionType == 0 {
+				if server.Type == 0 {
+					//密码验证登录服务器
+					job := RemoteCommandJobByPassword(task.Id, server_id_int, task.TaskName, task.Command, server)
+					job.Task = task
+					job.Concurrent = false
+					if task.Concurrent == 1 {
+						job.Concurrent = true
+					}
+					//job.Concurrent = task.Concurrent == 1
+					job.ServerId = server_id_int
+					job.ServerName = server.ServerName
+					jobArr = append(jobArr, job)
+				} else {
+					job := RemoteCommandJob(task.Id, server_id_int, task.TaskName, task.Command, server)
+					job.Task = task
+					job.Concurrent = false
+					if task.Concurrent == 1 {
+						job.Concurrent = true
+					}
+					//job.Concurrent = task.Concurrent == 1
+					job.ServerId = server_id_int
+					job.ServerName = server.ServerName
+					jobArr = append(jobArr, job)
+				}
+			} else if server.ConnectionType == 1 {
+				if server.Type == 0 {
+					//密码验证登录服务器
+					job := RemoteCommandJobByTelnetPassword(task.Id, server_id_int, task.TaskName, task.Command, server)
+					job.Task = task
+					job.Concurrent = false
+					if task.Concurrent == 1 {
+						job.Concurrent = true
+					}
+					//job.Concurrent = task.Concurrent == 1
+					job.ServerId = server_id_int
+					job.ServerName = server.ServerName
+					jobArr = append(jobArr, job)
+				}
+			} else if server.ConnectionType == 2 {
+				//密码验证登录服务器
+				job := RemoteCommandJobByAgentPassword(task.Id, server_id_int, task.TaskName, task.Command, server)
+				job.Task = task
+				job.Concurrent = false
+				if task.Concurrent == 1 {
+					job.Concurrent = true
+				}
+				//job.Concurrent = task.Concurrent == 1
+				job.ServerId = server_id_int
+				job.ServerName = server.ServerName
+				jobArr = append(jobArr, job)
+
+			}
 		}
 	}
 
-	return nil, fmt.Errorf("未知ConnectionType")
+	return jobArr, nil
 }
 
-func NewCommandJob(id int, name string, command string) *Job {
+func NewCommandJob(id int, serverId int, name string, command string) *Job {
 	job := &Job{
-		id:   id,
-		name: name,
+		Id:   id,
+		Name: name,
 	}
-	job.runFunc = func(timeout time.Duration) (string, string, error, bool) {
+
+	job.JobKey = libs.JobKey(id, serverId)
+	job.RunFunc = func(timeout time.Duration) (jobresult *JobResult) {
 		bufOut := new(bytes.Buffer)
 		bufErr := new(bytes.Buffer)
 		//cmd := exec.Command("/bin/bash", "-c", command)
@@ -99,28 +191,48 @@ func NewCommandJob(id int, name string, command string) *Job {
 		cmd.Stderr = bufErr
 		cmd.Start()
 		err, isTimeout := runCmdWithTimeout(cmd, timeout)
+		jobresult = new(JobResult)
+		jobresult.OutMsg = bufOut.String()
+		jobresult.ErrMsg = bufErr.String()
 
-		return gbkAsUtf8(bufOut.String()), gbkAsUtf8(bufErr.String()), err, isTimeout
+		jobresult.IsOk = true
+		if err != nil {
+			jobresult.IsOk = false
+		}
+
+		jobresult.IsTimeout = isTimeout
+
+		return jobresult
 	}
 	return job
 }
 
 //远程执行任务 密钥验证
-func RemoteCommandJob(id int, name string, command string, servers *models.TaskServer) *Job {
+func RemoteCommandJob(id int, serverId int, name string, command string, servers *models.TaskServer) *Job {
 	job := &Job{
-		id:   id,
-		name: name,
+		Id:       id,
+		Name:     name,
+		ServerId: serverId,
 	}
-	job.runFunc = func(timeout time.Duration) (string, string, error, bool) {
+
+	job.JobKey = libs.JobKey(id, serverId)
+
+	job.RunFunc = func(timeout time.Duration) (jobresult *JobResult) {
+		jobresult = new(JobResult)
+		jobresult.OutMsg = ""
+		jobresult.ErrMsg = ""
+		jobresult.IsTimeout = false
 
 		key, err := ioutil.ReadFile(servers.PrivateKeySrc)
 		if err != nil {
-			return "", "", err, false
+			jobresult.IsOk = false
+			return
 		}
 		// Create the Signer for this private key.
 		signer, err := ssh.ParsePrivateKey(key)
 		if err != nil {
-			return "", "", err, false
+			jobresult.IsOk = false
+			return
 		}
 		addr := fmt.Sprintf("%s:%d", servers.ServerIp, servers.Port)
 		config := &ssh.ClientConfig{
@@ -137,14 +249,16 @@ func RemoteCommandJob(id int, name string, command string, servers *models.TaskS
 		// Connect to the remote server and perform the SSH handshake.47.93.220.5
 		client, err := ssh.Dial("tcp", addr, config)
 		if err != nil {
-			return "", "", err, false
+			jobresult.IsOk = false
+			return
 		}
 
 		defer client.Close()
 
 		session, err := client.NewSession()
 		if err != nil {
-			return "", "", err, false
+			jobresult.IsOk = false
+			return
 		}
 		defer session.Close()
 
@@ -158,15 +272,19 @@ func RemoteCommandJob(id int, name string, command string, servers *models.TaskS
 
 		//session.Output(command)
 		if err := session.Run(command); err != nil {
-			return "", "", err, false
+			jobresult.IsOk = false
+			return
 		}
-		isTimeout := false
-		return b.String(), c.String(), err, isTimeout
+		jobresult.OutMsg = b.String()
+		jobresult.ErrMsg = c.String()
+		jobresult.IsOk = true
+		jobresult.IsTimeout = false
+		return
 	}
 	return job
 }
 
-func RemoteCommandJobByPassword(id int, name string, command string, servers *models.TaskServer) *Job {
+func RemoteCommandJobByPassword(id int, serverId int, name string, command string, servers *models.TaskServer) *Job {
 	var (
 		auth         []ssh.AuthMethod
 		addr         string
@@ -177,10 +295,18 @@ func RemoteCommandJobByPassword(id int, name string, command string, servers *mo
 	)
 
 	job := &Job{
-		id:   id,
-		name: name,
+		Id:         id,
+		Name:       name,
+		ServerId:   serverId,
+		ServerType: servers.ConnectionType,
 	}
-	job.runFunc = func(timeout time.Duration) (string, string, error, bool) {
+	job.JobKey = libs.JobKey(id, serverId)
+	job.RunFunc = func(timeout time.Duration) (jobresult *JobResult) {
+		jobresult = new(JobResult)
+		jobresult.OutMsg = ""
+		jobresult.ErrMsg = ""
+		jobresult.IsTimeout = false
+
 		// get auth method
 		auth = make([]ssh.AuthMethod, 0)
 		auth = append(auth, ssh.Password(servers.Password))
@@ -198,14 +324,16 @@ func RemoteCommandJobByPassword(id int, name string, command string, servers *mo
 		addr = fmt.Sprintf("%s:%d", servers.ServerIp, servers.Port)
 
 		if client, err = ssh.Dial("tcp", addr, clientConfig); err != nil {
-			return "", "", err, false
+			jobresult.IsOk = false
+			return
 		}
 
 		defer client.Close()
 
 		// create session
 		if session, err = client.NewSession(); err != nil {
-			return "", "", err, false
+			jobresult.IsOk = false
+			return
 		}
 
 		var b bytes.Buffer
@@ -214,27 +342,39 @@ func RemoteCommandJobByPassword(id int, name string, command string, servers *mo
 		session.Stderr = &c
 		//session.Output(command)
 		if err := session.Run(command); err != nil {
-			return "", "", err, false
+			jobresult.IsOk = false
+			return
 		}
-		isTimeout := false
-		return b.String(), c.String(), err, isTimeout
+		jobresult.OutMsg = b.String()
+		jobresult.ErrMsg = c.String()
+		jobresult.IsOk = true
+		jobresult.IsTimeout = false
+		return
 	}
 
 	return job
 }
 
-func RemoteCommandJobByTelnetPassword(id int, name string, command string, servers *models.TaskServer) *Job {
+func RemoteCommandJobByTelnetPassword(id int, serverId int, name string, command string, servers *models.TaskServer) *Job {
 
 	job := &Job{
-		id:   id,
-		name: name,
+		Id:       id,
+		Name:     name,
+		ServerId: serverId,
 	}
-	job.runFunc = func(timeout time.Duration) (string, string, error, bool) {
+
+	job.JobKey = libs.JobKey(id, serverId)
+	job.RunFunc = func(timeout time.Duration) (jobresult *JobResult) {
+		jobresult = new(JobResult)
+		jobresult.OutMsg = ""
+		jobresult.ErrMsg = ""
+		jobresult.IsTimeout = false
 
 		addr := fmt.Sprintf("%s:%d", servers.ServerIp, servers.Port)
 		conn, err := gote.DialTimeout("tcp", addr, timeout)
 		if err != nil {
-			return "", "", err, false
+			jobresult.IsOk = false
+			return
 		}
 
 		defer conn.Close()
@@ -242,28 +382,35 @@ func RemoteCommandJobByTelnetPassword(id int, name string, command string, serve
 		buf := make([]byte, 4096)
 
 		if _, err = conn.Read(buf); err != nil {
-			return "", "", err, false
+			jobresult.IsOk = false
+			return
 		}
 
 		if _, err = conn.Write([]byte(servers.ServerAccount + "\r\n")); err != nil {
-			return "", "", err, false
+			jobresult.IsOk = false
+			return
 		}
 
 		if _, err = conn.Read(buf); err != nil {
-			return "", "", err, false
+			jobresult.IsOk = false
+			return
 		}
 
 		if _, err = conn.Write([]byte(servers.Password + "\r\n")); err != nil {
-			return "", "", err, false
+			jobresult.IsOk = false
+			return
 		}
 
 		if _, err = conn.Read(buf); err != nil {
-			return "", "", err, false
+			jobresult.IsOk = false
+			return
 		}
 
-		loginStr := gbkAsUtf8(string(buf[:]))
+		loginStr := libs.GbkAsUtf8(string(buf[:]))
 		if !strings.Contains(loginStr, ">") {
-			return "", "", errors.Errorf("Login failed!"), false
+			jobresult.ErrMsg = jobresult.ErrMsg + "Login failed!"
+			jobresult.IsOk = false
+			return
 		}
 
 		commandArr := strings.Split(command, "\n")
@@ -272,44 +419,178 @@ func RemoteCommandJobByTelnetPassword(id int, name string, command string, serve
 		for _, c := range commandArr {
 			_, err = conn.Write([]byte(c + "\r\n"))
 			if err != nil {
-				return "", "", err, false
+				jobresult.IsOk = false
+				return
 			}
 
 			n, err = conn.Read(buf)
 
-			out = out + gbkAsUtf8(string(buf[0:n]))
+			out = out + libs.GbkAsUtf8(string(buf[0:n]))
 			if err != nil ||
 				strings.Contains(out, "'"+c+"' is not recognized as an internal or external command") ||
 				strings.Contains(out, "'"+c+"' 不是内部或外部命令，也不是可运行的程序") {
-				return out, "", fmt.Errorf(gbkAsUtf8(string(buf[0:n]))), false
+				jobresult.ErrMsg = jobresult.ErrMsg + " " + libs.GbkAsUtf8(string(buf[0:n]))
+				jobresult.IsOk = false
+				jobresult.OutMsg = out
+				return
 			}
 		}
-
-		return out, "", nil, false
+		jobresult.IsOk = true
+		jobresult.OutMsg = out
+		return
 	}
 
 	return job
 }
 
-func (j *Job) Status() int {
-	return j.status
+func RemoteCommandJobByAgentPassword(id int, serverId int, name string, command string, servers *models.TaskServer) *Job {
+
+	job := &Job{
+		Id:         id,
+		Name:       name,
+		ServerType: servers.ConnectionType,
+	}
+
+	job.JobKey = libs.JobKey(id, serverId)
+	job.RunFunc = func(timeout time.Duration) *JobResult {
+		return new(JobResult)
+	}
+	return job
+
+}
+
+func (j *Job) GetStatus() int {
+	return j.Status
 }
 
 func (j *Job) GetName() string {
-	return j.name
+	return j.Name
 }
 
 func (j *Job) GetId() int {
-	return j.id
+	return j.Id
 }
 
 func (j *Job) GetLogId() int64 {
-	return j.logId
+	return j.LogId
+}
+
+type RpcResult struct {
+	Status  int
+	Message string
+}
+
+func (j *Job) agentRun() (reply *JobResult) {
+
+	server, _ := models.TaskServerGetById(j.ServerId)
+	conn, err := net.Dial("tcp", fmt.Sprintf("%s:%d", server.ServerIp, server.Port))
+	reply = new(JobResult)
+	if err != nil {
+		logs.Error("Net error:", err)
+		reply.IsOk = false
+		reply.ErrMsg = "Net error:" + err.Error()
+		reply.IsTimeout = false
+		reply.OutMsg = ""
+		return reply
+	}
+
+	defer conn.Close()
+	client := rpc.NewClientWithCodec(jsonrpc.NewClientCodec(conn))
+
+	defer client.Close()
+	reply = new(JobResult)
+
+	task := j.Task
+	err = client.Call("RpcTask.RunTask", task, &reply)
+	if err != nil {
+		reply.IsOk = false
+		reply.ErrMsg = "Net error:" + err.Error()
+		reply.IsTimeout = false
+		reply.OutMsg = ""
+		return reply
+	}
+	return
+}
+
+func TestServer(server *models.TaskServer) error {
+	if server.ConnectionType == 0 {
+		switch server.Type {
+		case 0:
+			//密码登录
+			return libs.RemoteCommandByPassword(server)
+		case 1:
+			//密钥登录
+			return libs.RemoteCommandByKey(server)
+		default:
+			return errors.New("未知的登录方式")
+
+		}
+	} else if server.ConnectionType == 1 {
+		if server.Type == 0 {
+			//密码登录]
+			return libs.RemoteCommandByTelnetPassword(server)
+		} else {
+			return errors.New("Telnet方式暂不支持密钥登陆！")
+		}
+
+	} else if server.ConnectionType == 2 {
+		return libs.RemoteAgent(server)
+	}
+
+	return errors.New("未知错误")
+}
+
+func PollServer(j *Job) bool {
+	//判断是否是当前执行器执行
+	TaskServerIdsArr := strings.Split(j.Task.ServerIds, ",")
+	num := len(TaskServerIdsArr)
+
+	if num == 0 {
+		return false
+	}
+
+	count := GetCounter(strconv.Itoa(j.Task.Id))
+	index := count % num
+	pollServerId, _ := strconv.Atoi(TaskServerIdsArr[index])
+
+	if j.ServerId != pollServerId {
+		return false
+	}
+
+	//本地服务器
+	if pollServerId == 0 {
+		return true
+	}
+
+	//判断执行器或者服务器是否存活
+	server, _ := models.TaskServerGetById(pollServerId)
+
+	if server.Status != 0 {
+		return false
+	}
+
+	if err := TestServer(server); err != nil {
+		server.Status = 1
+		server.Update()
+		return false
+	}
+
+	return true
+
 }
 
 func (j *Job) Run() {
-	if !j.Concurrent && j.status > 0 {
-		beego.Warn(fmt.Sprintf("任务[%d]上一次执行尚未结束，本次被忽略。", j.id))
+	//执行策略 轮询
+	if j.Task.ServerType == 1 {
+		if !PollServer(j) {
+			return
+		} else {
+			SetCounter(strconv.Itoa(j.Task.Id))
+		}
+	}
+
+	if !j.Concurrent && j.Status > 0 {
+		beego.Warn(fmt.Sprintf("任务[%d]上一次执行尚未结束，本次被忽略。", j.JobKey))
 		return
 	}
 
@@ -326,40 +607,50 @@ func (j *Job) Run() {
 		}()
 	}
 
-	beego.Debug(fmt.Sprintf("开始执行任务: %d", j.id))
+	beego.Debug(fmt.Sprintf("开始执行任务: %d", j.JobKey))
 
-	j.status++
+	j.Status++
 	defer func() {
-		j.status--
+		j.Status--
 	}()
 
 	t := time.Now()
 	timeout := time.Duration(time.Hour * 24)
-	if j.task.Timeout > 0 {
-		timeout = time.Second * time.Duration(j.task.Timeout)
+	if j.Task.Timeout > 0 {
+		timeout = time.Second * time.Duration(j.Task.Timeout)
 	}
-	cmdOut, cmdErr, err, isTimeout := j.runFunc(timeout)
+
+	var jobResult = new(JobResult)
+	//anget
+	if j.ServerType == 2 {
+		jobResult = j.agentRun()
+	} else {
+		jobResult = j.RunFunc(timeout)
+	}
+
 	ut := time.Now().Sub(t) / time.Millisecond
 
 	// 插入日志
 	log := new(models.TaskLog)
-	log.TaskId = j.id
-	log.Output = cmdOut
-	log.Error = cmdErr
+	log.TaskId = j.Id
+	log.ServerId = j.ServerId
+	log.ServerName = j.ServerName
+	log.Output = jobResult.OutMsg
+	log.Error = jobResult.ErrMsg
 	log.ProcessTime = int(ut)
 	log.CreateTime = t.Unix()
 
-	if isTimeout {
+	if jobResult.IsTimeout {
 		log.Status = models.TASK_TIMEOUT
-		log.Error = fmt.Sprintf("任务执行超过 %d 秒\n----------------------\n%s\n", int(timeout/time.Second), cmdErr)
-	} else if err != nil {
+		log.Error = fmt.Sprintf("任务执行超过 %d 秒\n----------------------\n%s\n", int(timeout/time.Second), jobResult.ErrMsg)
+	} else if !jobResult.IsOk {
 		log.Status = models.TASK_ERROR
-		log.Error = err.Error() + ":" + cmdErr
+		log.Error = "ERROR:" + jobResult.ErrMsg
 	}
 
-	if log.Status < 0 && j.task.IsNotify == 1 {
-		if j.task.NotifyUserIds != "0" && j.task.NotifyUserIds != "" {
-			adminInfo := AllAdminInfo(j.task.NotifyUserIds)
+	if log.Status < 0 && j.Task.IsNotify == 1 {
+		if j.Task.NotifyUserIds != "0" && j.Task.NotifyUserIds != "" {
+			adminInfo := AllAdminInfo(j.Task.NotifyUserIds)
 			phone := make(map[string]string, 0)
 			dingtalk := make(map[string]string, 0)
 			wechat := make(map[string]string, 0)
@@ -390,9 +681,9 @@ func (j *Job) Run() {
 
 			title, content, taskOutput, errOutput := "", "", "", ""
 
-			notifyTpl, err := models.NotifyTplGetById(j.task.NotifyTplId)
+			notifyTpl, err := models.NotifyTplGetById(j.Task.NotifyTplId)
 			if err != nil {
-				notifyTpl, err := models.NotifyTplGetByTplType(j.task.NotifyType, models.NotifyTplTypeSystem)
+				notifyTpl, err := models.NotifyTplGetByTplType(j.Task.NotifyType, models.NotifyTplTypeSystem)
 				if err == nil {
 					title = notifyTpl.Title
 					content = notifyTpl.Content
@@ -408,9 +699,10 @@ func (j *Job) Run() {
 			errOutput = strings.Replace(errOutput, "\"", "\\\"", -1)
 
 			if title != "" {
-				title = strings.Replace(title, "{{TaskId}}", strconv.Itoa(j.task.Id), -1)
-				title = strings.Replace(title, "{{TaskName}}", j.task.TaskName, -1)
-				title = strings.Replace(title, "{{ExecuteCommand}}", j.task.Command, -1)
+				title = strings.Replace(title, "{{TaskId}}", strconv.Itoa(j.Task.Id), -1)
+				title = strings.Replace(title, "{{ServerId}}", strconv.Itoa(j.ServerId), -1)
+				title = strings.Replace(title, "{{TaskName}}", j.Task.TaskName, -1)
+				title = strings.Replace(title, "{{ExecuteCommand}}", j.Task.Command, -1)
 				title = strings.Replace(title, "{{ExecuteTime}}", beego.Date(time.Unix(log.CreateTime, 0), "Y-m-d H:i:s"), -1)
 				title = strings.Replace(title, "{{ProcessTime}}", strconv.FormatFloat(float64(log.ProcessTime)/1000, 'f', 6, 64), -1)
 				title = strings.Replace(title, "{{ExecuteStatus}}", TextStatus[status], -1)
@@ -419,9 +711,10 @@ func (j *Job) Run() {
 			}
 
 			if content != "" {
-				content = strings.Replace(content, "{{TaskId}}", strconv.Itoa(j.task.Id), -1)
-				content = strings.Replace(content, "{{TaskName}}", j.task.TaskName, -1)
-				content = strings.Replace(content, "{{ExecuteCommand}}", j.task.Command, -1)
+				content = strings.Replace(content, "{{TaskId}}", strconv.Itoa(j.Task.Id), -1)
+				content = strings.Replace(content, "{{ServerId}}", strconv.Itoa(j.ServerId), -1)
+				content = strings.Replace(content, "{{TaskName}}", j.Task.TaskName, -1)
+				content = strings.Replace(content, "{{ExecuteCommand}}", j.Task.Command, -1)
 				content = strings.Replace(content, "{{ExecuteTime}}", beego.Date(time.Unix(log.CreateTime, 0), "Y-m-d H:i:s"), -1)
 				content = strings.Replace(content, "{{ProcessTime}}", strconv.FormatFloat(float64(log.ProcessTime)/1000, 'f', 6, 64), -1)
 				content = strings.Replace(content, "{{ExecuteStatus}}", TextStatus[status], -1)
@@ -429,14 +722,14 @@ func (j *Job) Run() {
 				content = strings.Replace(content, "{{ErrorOutput}}", errOutput, -1)
 			}
 
-			if j.task.NotifyType == 0 && toEmail != "" {
+			if j.Task.NotifyType == 0 && toEmail != "" {
 				//邮件
 				mailtype := "html"
 				ok := notify.SendToChan(toEmail, title, content, mailtype)
 				if !ok {
 					fmt.Println("发送邮件错误", toEmail)
 				}
-			} else if j.task.NotifyType == 1 && len(phone) > 0 {
+			} else if j.Task.NotifyType == 1 && len(phone) > 0 {
 				//信息
 				param := make(map[string]string)
 				err := json.Unmarshal([]byte(content), &param)
@@ -449,7 +742,7 @@ func (j *Job) Run() {
 				if !ok {
 					fmt.Println("发送信息错误", phone)
 				}
-			} else if j.task.NotifyType == 2 && len(dingtalk) > 0 {
+			} else if j.Task.NotifyType == 2 && len(dingtalk) > 0 {
 				//钉钉
 				param := make(map[string]interface{})
 
@@ -463,7 +756,7 @@ func (j *Job) Run() {
 				if !ok {
 					fmt.Println("发送钉钉错误", dingtalk)
 				}
-			} else if j.task.NotifyType == 3 && len(wechat) > 0 {
+			} else if j.Task.NotifyType == 3 && len(wechat) > 0 {
 				//微信
 				param := make(map[string]string)
 				err := json.Unmarshal([]byte(content), &param)
@@ -480,12 +773,12 @@ func (j *Job) Run() {
 		}
 	}
 
-	j.logId, _ = models.TaskLogAdd(log)
+	j.LogId, _ = models.TaskLogAdd(log)
 
 	// 更新上次执行时间
-	j.task.PrevTime = t.Unix()
-	j.task.ExecuteTimes++
-	j.task.Update("PrevTime", "ExecuteTimes")
+	j.Task.PrevTime = t.Unix()
+	j.Task.ExecuteTimes++
+	j.Task.Update("PrevTime", "ExecuteTimes")
 }
 
 //冗余代码
@@ -527,12 +820,4 @@ func AllAdminInfo(adminIds string) []*adminInfo {
 	}
 
 	return adminInfos
-}
-
-func gbkAsUtf8(str string) string {
-	srcDecoder := mahonia.NewDecoder("gbk")
-	desDecoder := mahonia.NewDecoder("utf-8")
-	resStr := srcDecoder.ConvertString(str)
-	_, resBytes, _ := desDecoder.Translate([]byte(resStr), true)
-	return string(resBytes)
 }

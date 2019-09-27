@@ -16,6 +16,7 @@ import (
 )
 
 func init() {
+
 	//初始化数据模型
 	var StartTime = time.Now().Unix()
 	models.Init(StartTime)

@@ -8,13 +8,13 @@
 package notify
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/george518/PPGo_Job/libs"
 	"log"
 	"time"
-	"fmt"
-	"encoding/json"
-	"bytes"
 )
 
 type Dingtalk struct {
@@ -41,6 +41,7 @@ func init() {
 				}
 				if err := m.SendDingtalk(); err != nil {
 					beego.Error("SendDingtalk:", err.Error())
+
 				}
 			}
 		}

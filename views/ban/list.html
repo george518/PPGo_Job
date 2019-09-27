@@ -60,7 +60,8 @@
                 table.reload('listReload', {
                     where: {
                         code: $('#code').val(),
-                    }
+                    },
+                    page: 1
                 });
             }
         };
@@ -74,7 +75,7 @@
                 title:"新增禁用命令",
                 content: '/ban/add',
                 area:['500px','250px'],
-                cancel:function(){
+                cancel:function(index){
                     window.location.reload();
                     layer.close(index);
                 }
@@ -92,7 +93,7 @@
                     title:"编辑禁用命令",
                     content: '/ban/edit?id='+data.id,
                     area:['500px','250px'],
-                    cancel:function(){
+                    cancel:function(index){
                         window.location.reload();
                         layer.close(index);
                     }

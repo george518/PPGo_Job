@@ -1,12 +1,16 @@
-PPGo_Job定时任务管理系统 V2.x
+PPGo_Job定时任务管理系统
 ====
 
 ![](http://www.haodaquan.com/Uploads/article/2018-07-26/153262059813931.png)
 
-PPGo_Job是一款定时任务可视化的、多人多权限的管理系统，采用golang开发，安装方便，资源消耗少，支持大并发，可同时管理多台服务器上的定时任务。
+一、说明
+----
+PPGo_Job是一款轻量级定时任务管理系统，go语言开发，部署超级简单，资源消耗少，运行稳定。
+支持定时任务可视化管理、多人多权限的管理，支持大并发，可同时管理多台服务器上的定时任务。
 
-前言：PPGo_Job V1.x版本开源两年多了，不少朋友的公司都在用，反响还不错，当然，也有好多朋友提了不少合理的意见和建议，所以这次干脆重构了一下，连UI也重新编码。目前V2.x版本
-已经用于生产环境。
+PPGo_Job从v1.0开源以来，得到众多技术朋友的支持和欢迎，已应用在多个公司的生产环境，同时也
+吸收使用者的建议和意见，不断改进和优化，目前已经上线了20余个版本，9个稳定版本（生产环境部署完成后才发布新版本）。
+
 
 码云地址：https://gitee.com/georgehao/PPGo_Job
 Github地址:https://github.com/george518/PPGo_Job
@@ -15,10 +19,19 @@ Github地址:https://github.com/george518/PPGo_Job
 Wiki:https://github.com/george518/PPGo_Job/wiki
 
 
-V1.x版本是一个简单的定时任务管理系统，进入V1.0 ：https://github.com/george518/PPGo_Job/releases/tag/v1.2.1
-相对于V1.x版本，V2.0新增以下功能和特性：
+二、架构 
+----
+![](http://www.haodaquan.com/Uploads/editormd/2019-07-06/156240332990478.png)
 
-- 1、全新UI,基于LayUI2.3构建全新页面，后端模板手工搭建，让操作更加人性化。后台模板地址：https://github.com/george518/PP_admin-template
+
+![](http://www.haodaquan.com/Uploads/editormd/2019-07-21/156368574611565.png)
+三、特性
+----
+
+
+V2.x新增以下功能和特性：
+
+- 1、全新UI,基于LayUI构建全新页面，后端模板手工搭建，让操作更加人性化。后台模板地址：https://github.com/george518/PP_admin-template
 - 2、新增权限管理功能，根据菜单权限、操作权限和数据权限进行划分，方便多用户多权限管理定时任务。
 - 3、新增服务器复制功能，让服务器资源添加更加方便。
 - 4、新增定时任务详情页面，将任务相关操作更加集中起来操作。
@@ -29,16 +42,21 @@ V1.x版本是一个简单的定时任务管理系统，进入V1.0 ：https://git
 - 9、支持windows系统运行定时系统，不歧视windows，也要支持。
 - 10、提醒信息新增钉钉和微信通知功能，并支持编辑通知模版功能。让提醒内容个性化，不再死板。
 - 11、新增创建、启动、关闭任务的API，通过接口的方式控制定时任务，猜你喜欢。
+- 12、**新增任务执行器agent，可以通过ssh，telnet或者agent的方式接受并执行任务**
 
-总之，管理定时任务，使用PPGo_Job吧，节省出来的时间，或皮或浪，随你，哈哈。
+总之，管理定时任务，使用PPGo_Job吧，节省出来的时间，或皮或浪，随你。
 
-感觉不错的话，给个星星吧 ：）
 
-也可以请我喝水
+
+三、支持
 ----
+1、给项目一个star
+
+2、请我喝瓶水
+
 ![github](https://github.com/george518/PP_blog/blob/master/static/public/images/weixin.png?raw=true "github")
 
-先看效果
+四、先睹为快
 ----
 ![image](https://github.com/linxiaozhi/PPGo_Job/blob/master/assets/screenshot/1-index.png?raw=true "github")
 ![image](https://github.com/linxiaozhi/PPGo_Job/blob/master/assets/screenshot/2-task.png?raw=true "github")
@@ -49,7 +67,7 @@ V1.x版本是一个简单的定时任务管理系统，进入V1.0 ：https://git
 ![image](https://github.com/linxiaozhi/PPGo_Job/blob/master/assets/screenshot/15.log.png?raw=true "github")
 
 
-安装方法
+五、安装方法
 ----
 
 方法一、 编译安装
@@ -147,7 +165,7 @@ wechat.url = http://xx.com/api/tools/send_wechat
 wechat.pool = 10
 ```
 
-编译安装-可能会遇到的问题
+六、编译安装-可能会遇到的问题
 ----
 go build 时遇到以下错误：
 jobs/job.go:19:2: cannot find package "golang.org/x/crypto/ssh" in any of:
@@ -190,7 +208,7 @@ docker-compose logs -f web
 
 控制面板->管理工具->计算机管理->系统工具->本地用户和组->组->TelnetClients->添加用户
 
-任务接口说明
+七、任务接口说明
 ----
 三个简陋的接口，满足日常所需。
 
@@ -254,7 +272,7 @@ id:11
 具体可以使用postman测试
 
 
-常见操作问题
+八、常见操作问题
 ----
 1、如何删除任务？
 
@@ -267,16 +285,17 @@ id:11
 
 
 
-联系我
+九、联系我
 ----
 qq群号:547564773
 欢迎交流，欢迎提交代码。
 
-感谢
+十、感谢
 ----
 @bannerchi 
 @linxiaozhi 
 @gongwalker
+
 
 
 

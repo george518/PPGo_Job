@@ -9,6 +9,7 @@ package models
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/astaxie/beego/orm"
@@ -23,7 +24,8 @@ const (
 type Task struct {
 	Id            int
 	GroupId       int
-	ServerId      int
+	ServerIds     string
+	ServerType    int
 	TaskName      string
 	Description   string
 	CronSpec      string
@@ -114,4 +116,26 @@ func TaskDel(id int) (int64, error) {
 	})
 	//_, err := orm.NewOrm().QueryTable(TableName("task")).Filter("id", id).Delete()
 	//return err
+}
+
+//运行总次数
+func TaskTotalRunNum() (int64, error) {
+
+	res := make(orm.Params)
+	_, err := orm.NewOrm().Raw("select sum(execute_times) as num,task_name from pp_task").RowsToMap(&res, "num", "task_name")
+
+	if err != nil {
+		return 0, err
+	}
+
+	for k, _ := range res {
+		i64, err := strconv.ParseInt(k, 10, 64)
+		if err != nil {
+			return 0, err
+		}
+
+		return i64, nil
+
+	}
+	return 0, nil
 }

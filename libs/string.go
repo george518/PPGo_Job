@@ -11,6 +11,7 @@ package libs
 import (
 	"crypto/md5"
 	"fmt"
+	"github.com/axgle/mahonia"
 	"math/rand"
 	"regexp"
 	"time"
@@ -66,4 +67,17 @@ func GetRandomString(lens int) string {
 		result = append(result, bytes[r.Intn(len(bytes))])
 	}
 	return string(result)
+}
+
+func GbkAsUtf8(str string) string {
+	srcDecoder := mahonia.NewDecoder("gbk")
+	desDecoder := mahonia.NewDecoder("utf-8")
+	resStr := srcDecoder.ConvertString(str)
+	_, resBytes, _ := desDecoder.Translate([]byte(resStr), true)
+	return string(resBytes)
+}
+
+//任务识别码
+func JobKey(taskId, serverId int) int {
+	return taskId*100000 + serverId
 }

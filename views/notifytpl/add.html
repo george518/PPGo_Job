@@ -40,6 +40,7 @@
                 <pre class="layui-code" style="margin: 0;">
 
   {{"任务 ID {{TaskId}}"}}
+  {{"资源 ID {{ServerId}}"}}
   {{"任务名称 {{TaskName}}"}}
   {{"执行命令 {{ExecuteCommand}}"}}
   {{"执行时间 {{ExecuteTime}}"}}
@@ -89,8 +90,7 @@
             $.post('{{urlfor "NotifyTplController.AjaxSave"}}', form_data, function (out) {
                 if (out.status == 0) {
                     layer.msg("操作成功", {icon: 1, shade: 0.3, time: 1000}, function () {
-                        // window.history.go(-1)//
-                        window.location.reload()
+                        window.parent.deleteCurrentTab();
                     })
                 } else {
                     layer.msg(out.message)

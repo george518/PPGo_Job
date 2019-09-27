@@ -13,7 +13,8 @@ import (
 	"github.com/george518/PPGo_Job/libs"
 	"github.com/george518/PPGo_Job/models"
 	"runtime"
-	//"strconv"
+	"sort"
+	"strconv"
 	"time"
 )
 
@@ -34,9 +35,47 @@ func (self *HomeController) Help() {
 }
 
 func (self *HomeController) Start() {
+
+	//总任务数量
+	_, count := models.TaskGetList(1, 10)
+	self.Data["totalJob"] = count
+
+	//日志总量
+	_, totalLog := models.TaskLogGetList(1, 10)
+	self.Data["totalLog"] = totalLog
+
+	//待审核任务数量
+	_, totalAuditTask := models.TaskGetList(1, 10, "status", 2)
+	self.Data["totalAuditTask"] = totalAuditTask
+
+	//失败
+	errorNum, err := models.GetLogNum(-1)
+	if err != nil {
+		errorNum = 0
+	}
+	self.Data["errorNum"] = errorNum
+
+	//成功
+	successNum, err := models.GetLogNum(0)
+	if err != nil {
+		successNum = 0
+	}
+	self.Data["successNum"] = successNum
+
+	//用户数
+	_, userNum := models.AdminGetList(1, 10, "status", 1)
+	self.Data["userNum"] = userNum
+
+	//累计运行总次数
+	n, err := models.TaskTotalRunNum()
+	if err != nil {
+		n = 0
+	}
+	self.Data["TaskTotalRunNum"] = n
+
 	groups_map := serverGroupLists(self.serverGroups, self.userId)
 	//计算总任务数量
-	_, count := models.TaskGetList(1, 300)
+
 	// 即将执行的任务
 	entries := jobs.GetEntries(30)
 	jobList := make([]map[string]interface{}, len(entries))
@@ -53,35 +92,10 @@ func (self *HomeController) Start() {
 		startJob++
 	}
 
-	// 最近执行的日志
-	logs, _ := models.TaskLogGetList(1, 20)
-	recentLogs := make([]map[string]interface{}, len(logs))
-	failJob := 0 //最近失败的数量
-	okJob := 0   //最近成功的数量
-	for k, v := range logs {
-		task, err := models.TaskGetById(v.TaskId)
-		taskName := ""
-		if err == nil {
-			taskName = task.TaskName
-		}
-		row := make(map[string]interface{})
-		row["task_name"] = taskName
-		row["id"] = v.Id
-		row["start_time"] = beego.Date(time.Unix(v.CreateTime, 0), "Y-m-d H:i:s")
-		row["process_time"] = float64(v.ProcessTime) / 1000
-		row["ouput_size"] = libs.SizeFormat(float64(len(v.Output)))
-		row["output"] = beego.Substr(v.Output, 0, 100)
-		row["status"] = v.Status
-		recentLogs[k] = row
-		if v.Status != 0 {
-			failJob++
-		} else {
-			okJob++
-		}
-	}
+	self.Data["recentLogs"] = jobList
 
 	// 最近执行失败的日志
-	logs, _ = models.TaskLogGetList(1, 20, "status__lt", 0)
+	logs, _ := models.TaskLogGetList(1, 30, "status__lt", 0)
 	errLogs := make([]map[string]interface{}, len(logs))
 
 	for k, v := range logs {
@@ -102,15 +116,62 @@ func (self *HomeController) Start() {
 		errLogs[k] = row
 
 	}
-
+	self.Data["errLogs"] = errLogs
 	self.Data["startJob"] = startJob
-	self.Data["okJob"] = okJob
-	self.Data["failJob"] = failJob
-	self.Data["totalJob"] = count
-
-	self.Data["recentLogs"] = recentLogs
-	// this.Data["errLogs"] = errLogs
 	self.Data["jobs"] = jobList
+
+	//折线图
+	okRun := models.SumByDays(30, "0")
+	errRun := models.SumByDays(30, "-1")
+	expiredRun := models.SumByDays(30, "-2")
+
+	days := []string{}
+	okNum := []int64{}
+	errNum := []int64{}
+	expiredNum := []int64{}
+
+	type kv struct {
+		Key   string
+		Value int64
+	}
+
+	//排序
+	var ss []kv
+	for k, v := range okRun {
+		i, _ := strconv.ParseInt(v.(string), 10, 64)
+		ss = append(ss, kv{k, i})
+	}
+
+	sort.Slice(ss, func(i, j int) bool {
+
+		return ss[i].Key < ss[j].Key
+	})
+
+	for _, v := range ss {
+
+		days = append(days, v.Key)
+		okNum = append(okNum, v.Value)
+
+		if _, ok := errRun[v.Key]; ok {
+			i, _ := strconv.ParseInt(errRun[v.Key].(string), 10, 64)
+			errNum = append(errNum, i)
+		} else {
+			errNum = append(errNum, 0)
+		}
+
+		if _, ok := expiredRun[v.Key]; ok {
+			i, _ := strconv.ParseInt(expiredRun[v.Key].(string), 10, 64)
+			expiredNum = append(expiredNum, i)
+		} else {
+			expiredNum = append(expiredNum, 0)
+		}
+	}
+
+	self.Data["days"] = days
+	self.Data["okNum"] = okNum
+	self.Data["errNum"] = errNum
+	self.Data["expiredNum"] = expiredNum
+
 	self.Data["cpuNum"] = runtime.NumCPU()
 
 	//系统运行信息
