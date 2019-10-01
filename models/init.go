@@ -20,20 +20,35 @@ var StartTime int64
 
 func Init(startTime int64) {
 	StartTime = startTime
+	dbtype := beego.AppConfig.String("db.type")
 	dbhost := beego.AppConfig.String("db.host")
 	dbport := beego.AppConfig.String("db.port")
 	dbuser := beego.AppConfig.String("db.user")
 	dbpassword := beego.AppConfig.String("db.password")
 	dbname := beego.AppConfig.String("db.name")
 	timezone := beego.AppConfig.String("db.timezone")
-	if dbport == "" {
-		dbport = "3306"
+	sslmode := beego.AppConfig.String("db.sslmode")
+
+	if dbtype == "mysql" {
+		if dbport == "" {
+			dbport = "3306"
+		}
+		dsn := dbuser + ":" + dbpassword + "@tcp(" + dbhost + ":" + dbport + ")/" + dbname + "?charset=utf8"
+		if timezone != "" {
+			dsn = dsn + "&loc=" + url.QueryEscape(timezone)
+		}
+		orm.RegisterDataBase("default", "mysql", dsn)
+	}else if dbtype == "postgres" {
+		if dbport == "" {
+			dbport = "5432"
+		}
+		dsn := "user="+dbuser + " password=" + dbpassword + " host=" + dbhost + " port=" + dbport + " dbname=" + dbname
+		if sslmode != "" {
+			dsn = dsn + " sslmode=disable"
+		}
+		orm.RegisterDataBase("default", "postgres", dsn)
 	}
-	dsn := dbuser + ":" + dbpassword + "@tcp(" + dbhost + ":" + dbport + ")/" + dbname + "?charset=utf8"
-	if timezone != "" {
-		dsn = dsn + "&loc=" + url.QueryEscape(timezone)
-	}
-	orm.RegisterDataBase("default", "mysql", dsn)
+
 	orm.RegisterModel(
 		new(Admin),
 		new(Auth),
