@@ -735,7 +735,7 @@ func (self *TaskController) Table() {
 
 		TaskServerIdsArr := strings.Split(v.ServerIds, ",")
 		serverId := 0
-		if len(TaskServerIdsArr) > 1 {
+		if len(TaskServerIdsArr) > 0 {
 			serverId, _ = strconv.Atoi(TaskServerIdsArr[0])
 		}
 		jobskey := libs.JobKey(v.Id, serverId)
