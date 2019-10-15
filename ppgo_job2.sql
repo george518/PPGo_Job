@@ -331,7 +331,7 @@ ALTER TABLE `pp_task_server` ADD `connection_type` TINYINT(1) NOT NULL DEFAULT '
 COMMIT;
 
 BEGIN;
-ALTER TABLE `pp_task` CHANGE COLUMN `server_id` `server_ids` varchar(200) NOT NULL DEFAULT '0' COMMENT '服务器id字符串，英文都好隔开';
+ALTER TABLE `pp_task` CHANGE COLUMN `server_id` `server_ids` varchar(200) NOT NULL DEFAULT '0' COMMENT '服务器id字符串，英文逗号隔开';
 COMMIT;
 
 BEGIN;
