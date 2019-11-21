@@ -4,15 +4,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <title>{{.siteName}}</title>
-    <link rel="shortcut icon" href="/static/admin/images/favicon.ico">
-    <link rel="stylesheet" href="/static/layui/css/layui.css">
-    <link rel="stylesheet" href="/static/admin/css/main.css?t=10">
-    <link rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css" media="all">
+    <link rel="shortcut icon" href="{{.siteDir}}/static/admin/images/favicon.ico">
+    <link rel="stylesheet" href="{{.siteDir}}/static/layui/css/layui.css">
+    <link rel="stylesheet" href="{{.siteDir}}/static/admin/css/main.css?t=10">
+    <link rel="stylesheet" href="{{.siteDir}}/static/font-awesome/css/font-awesome.min.css" media="all">
 </head>
 <body class="layui-layout-body">
 <div class="layui-layout layui-layout-admin">
     <div class="layui-header">
-        <div class="layui-logo">&nbsp;&nbsp;&nbsp;<img src="/static/admin/images/logo.png" width="20" height="20"/> &nbsp;{{.siteName}}<font style="font-size: 12px"> {{.version}}</font></div>
+        <div class="layui-logo">&nbsp;&nbsp;&nbsp;<img src="{{.siteDir}}/static/admin/images/logo.png" width="20" height="20"/> &nbsp;{{.siteName}}<font style="font-size: 12px"> {{.version}}</font></div>
         <!-- 头部区域（可配合layui已有的水平导航） -->
         <ul class="layui-nav layui-layout-left">
 
@@ -21,11 +21,11 @@
             <li class="layui-nav-item"><a href="http://www.haodaquan.com/topics/1###" target="_blank">文档</a></li>
             <li class="layui-nav-item pp-nav-item" >
                 <a href="javascript:;">
-                    <img src="/static/admin/images/header.jpg" class="layui-nav-img"> {{.loginUserName}}
+                    <img src="{{.siteDir}}/static/admin/images/header.jpg" class="layui-nav-img"> {{.loginUserName}}
                 </a>
                 <dl class="layui-nav-child pp-nav-child">
                     {{/*<dd><a href="/user/edit">资料修改</a></dd>*/}}
-                    <dd><a href="/login_out">华丽退出</a></dd>
+                    <dd><a href="{{.siteDir}}/login_out">华丽退出</a></dd>
                 </dl>
             </li>
 
@@ -38,7 +38,7 @@
             <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
             <ul class="layui-nav layui-nav-tree"  lay-filter="nav-side">
                 <li class="layui-nav-item layui-nav-itemed layui-this">
-                    <a data-url="/home/start" data-icon="fa-home" data-title="系统首页" data-id="0" class="pointer">
+                    <a data-url="{{.siteDir}}/home/start" data-icon="fa-home" data-title="系统首页" data-id="0" class="pointer">
                         <i class="fa fa-home back_space1"></i><span>系统首页</span>
                     </a>
                 </li>
@@ -75,7 +75,7 @@
             </ul>
             <div class="layui-tab-content" style="padding: 0px; ">
                 <div class="layui-tab-item layui-show" style="margin: 0px;overflow:hidden;">
-                    <iframe src="/home/start" frameborder="0" scrolling="yes"></iframe>
+                    <iframe src="{{.siteDir}}/home/start" frameborder="0" scrolling="yes"></iframe>
                 </div>
 
             </div>
@@ -87,7 +87,7 @@
         © Power by <a href="http://www.haodaquan.com/" target="_blank">PPGo_Job {{.version}}</a>
     </div>
 </div>
-<script src="/static/layui/layui.js"></script>
+<script src="{{.siteDir}}/static/layui/layui.js"></script>
 <script>
     //JavaScript代码区域
     var $;

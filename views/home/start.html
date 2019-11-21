@@ -311,8 +311,8 @@
         </div>
     </div>
 </div>
-<script src="/static/echarts/echarts.min.js"></script>
-<script src="/static/layui/layui.js"></script>
+<script src="{{.siteDir}}/static/echarts/echarts.min.js"></script>
+<script src="{{.siteDir}}/static/layui/layui.js"></script>
 <script>
     var $;
     //注意：选项卡 依赖 element 模块，否则无法进行功能性操作
@@ -336,7 +336,7 @@
     });
 
     function  logDetail(id){
-        window.parent.openTab("/tasklog/detail?id="+id,id+' 日志详情',"admin_log_detail-"+id,'');
+        window.parent.openTab("{{.siteDir}}/tasklog/detail?id="+id,id+' 日志详情',"admin_log_detail-"+id,'');
     }
 
 

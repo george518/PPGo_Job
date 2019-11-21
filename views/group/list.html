@@ -42,7 +42,7 @@
         //方法级渲染
         table.render({
             elem: '#table_list'
-            ,url: '/group/table'
+            ,url: '{{.siteDir}}/group/table'
             ,cols: [[
                 // {checkbox: true, fixed: true},
                 {field:'id', title: 'ID', align:'center',sort: true, width:150}
@@ -73,7 +73,7 @@
                 title:'添加分组',
                 type: 2,
                 area: ['560px', '300px'],
-                content: ["/group/add",'no'],
+                content: ["{{.siteDir}}/group/add",'no'],
             });
         })
 
@@ -86,7 +86,7 @@
                     title:'编辑分组',
                     type: 2,
                     area: ['560px', '300px'],
-                    content: ["/group/edit?id="+data.id,'no'],
+                    content: ["{{.siteDir}}/group/edit?id="+data.id,'no'],
                 });
             } else if(obj.event === 'del'){
 
