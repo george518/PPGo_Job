@@ -67,7 +67,8 @@ func (self *BaseController) Auth() {
 		if userId > 0 {
 			user, err := models.AdminGetById(userId)
 
-			if err == nil && password == libs.Md5([]byte(self.getClientIp()+"|"+user.Password+user.Salt)) {
+			//if err == nil && password == libs.Md5([]byte(self.getClientIp()+"|"+user.Password+user.Salt)) {
+			if err == nil && password == libs.Md5([]byte(user.Password+user.Salt)){
 				self.userId = user.Id
 				self.loginName = user.LoginName
 				self.userName = user.RealName

@@ -50,7 +50,7 @@ func (self *LoginController) LoginIn() {
 				user.LastIp = self.getClientIp()
 				user.LastLogin = time.Now().Unix()
 				user.Update()
-				authkey := libs.Md5([]byte(self.getClientIp() + "|" + user.Password + user.Salt))
+				authkey := libs.Md5([]byte(user.Password + user.Salt))
 				self.Ctx.SetCookie("auth", strconv.Itoa(user.Id)+"|"+authkey, 7*86400)
 
 				self.ajaxMsg("登录成功", MSG_OK)
