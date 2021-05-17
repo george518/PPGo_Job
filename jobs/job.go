@@ -280,10 +280,12 @@ func RemoteCommandJob(id int, serverId int, name string, command string, servers
 			jobresult.ErrMsg = c.String()
 			jobresult.OutMsg = b.String()
 			jobresult.IsOk = false
+			return
 		}
 		jobresult.OutMsg = b.String()
 		jobresult.ErrMsg = c.String()
 		jobresult.IsOk = true
+
 		return
 	}
 	return job
