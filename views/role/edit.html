@@ -26,13 +26,14 @@
                 <div class="layui-form-item">
                     <label class="layui-form-label">资源分组</label>
                     <div class="layui-input-inline mw400 ">
-                        <input type="checkbox" name="server_group_id" lay-filter="server_group_id" title="本地服务器组" value="0" lay-skin="primary" checked>
+                        <input type="checkbox" name="server_group_id" lay-filter="server_group_id" title="本地服务器组" value="0" lay-skin="primary" {{range $ks,$vs:=$.server_group_ids}}  {{if eq  $vs 0}}checked {{end}}{{end}}>
                     {{range $k, $v := .serverGroup}}
-                        <input type="checkbox" name="server_group_id" lay-filter="server_group_id" title="{{$v.GroupName}}" value="{{$v.GroupId}}" {{range $ks,$vs:=$.server_group_ids}} {{if eq $v.GroupId $vs}}checked{{end}}{{end}} lay-skin="primary">
+                        <input type="checkbox" name="server_group_id" lay-filter="server_group_id" title="{{$v.GroupName}}" value="{{$v.GroupId}}" {{range $ks,$vs:=$.server_group_ids}}  {{if eq  $vs $v.GroupId}}checked {{end}}{{end}} lay-skin="primary">
                     {{end}}
                         <input type="hidden" name="server_group_ids" id="server_group_ids" value="{{.role.server_group_ids}}">
                     </div>
                     <div class="layui-form-mid layui-word-aux"></div>
+
                 </div>
 
 

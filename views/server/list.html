@@ -1,7 +1,7 @@
 <div class="layui-layout layui-layout-admin" style="padding-left: 20px;">
     <div class="layui-row" style="margin-top: 20px;">
         <div class="layui-col-xs6">
-            <button class="layui-btn" data-type="tabAdd" id="add">新增</button>
+            <button class="layui-btn layui-btn-sm" data-type="tabAdd" id="add">新增</button>
         </div>
         <div class="layui-col-xs6 search_text">
             <form class="layui-form" action="" onsubmit="javascript:return false;">
@@ -17,7 +17,7 @@
                         {{end}}
                         </select>
                     </div>
-                    <button class="layui-btn" data-type="reload">查询</button>
+                    <button class="layui-btn layui-btn-sm" data-type="reload">查询</button>
                 </div>
             </form>
             
@@ -51,6 +51,7 @@
         table.render({
             elem: '#table_list'
             ,url: '/server/table'
+            ,size: 'sm' //小尺寸的表格
             ,cols: [[
                 // {checkbox: true, fixed: true},
                 {field:'id', title: 'ID', align:'center',sort: true, width:80}

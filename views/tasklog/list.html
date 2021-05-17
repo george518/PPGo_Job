@@ -1,7 +1,7 @@
 <div class="layui-layout layui-layout-admin" style="padding-left: 20px;">
     <div class="layui-row" style="margin-top: 20px;">
         <div class="layui-col-xs6">
-            <button class="layui-btn layui-btn-danger" data-type="tabDel" id="tabDel">批量删除</button>
+            <button class="layui-btn layui-btn-sm layui-btn-danger" data-type="tabDel" id="tabDel">批量删除</button>
         </div>
         <div class="layui-col-xs6 search_text">
             <form class="layui-form" action="" onsubmit="javascript:return false;">
@@ -44,6 +44,7 @@
         table.render({
             elem: '#table_list'
             ,url: "/tasklog/table?task_id={{.task_id}}"
+            ,size: 'sm' //小尺寸的表格
             ,cols: [[
                 {checkbox: true, fixed: true}
                 // ,{field:'id', title: 'ID', align:'center',sort: true, width:150}

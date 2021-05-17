@@ -222,16 +222,19 @@ func RemoteCommandJob(id int, serverId int, name string, command string, servers
 		jobresult.OutMsg = ""
 		jobresult.ErrMsg = ""
 		jobresult.IsTimeout = false
+		jobresult.IsOk = true
 
 		key, err := ioutil.ReadFile(servers.PrivateKeySrc)
 		if err != nil {
 			jobresult.IsOk = false
+			jobresult.ErrMsg = fmt.Sprintf("读取私钥失败，%v", err.Error())
 			return
 		}
 		// Create the Signer for this private key.
 		signer, err := ssh.ParsePrivateKey(key)
 		if err != nil {
 			jobresult.IsOk = false
+			jobresult.ErrMsg = fmt.Sprintf("创建签名失败，%v", err.Error())
 			return
 		}
 		addr := fmt.Sprintf("%s:%d", servers.ServerIp, servers.Port)
@@ -250,6 +253,7 @@ func RemoteCommandJob(id int, serverId int, name string, command string, servers
 		client, err := ssh.Dial("tcp", addr, config)
 		if err != nil {
 			jobresult.IsOk = false
+			jobresult.ErrMsg = fmt.Sprintf("服务器连接失败，%v", err.Error())
 			return
 		}
 
@@ -258,6 +262,7 @@ func RemoteCommandJob(id int, serverId int, name string, command string, servers
 		session, err := client.NewSession()
 		if err != nil {
 			jobresult.IsOk = false
+			jobresult.ErrMsg = fmt.Sprintf("服务器连接失败，%v", err.Error())
 			return
 		}
 		defer session.Close()
@@ -269,16 +274,16 @@ func RemoteCommandJob(id int, serverId int, name string, command string, servers
 		var c bytes.Buffer
 		session.Stdout = &b
 		session.Stderr = &c
-
+		jobresult.IsTimeout = false
 		//session.Output(command)
 		if err := session.Run(command); err != nil {
+			jobresult.ErrMsg = c.String()
+			jobresult.OutMsg = b.String()
 			jobresult.IsOk = false
-			return
 		}
 		jobresult.OutMsg = b.String()
 		jobresult.ErrMsg = c.String()
 		jobresult.IsOk = true
-		jobresult.IsTimeout = false
 		return
 	}
 	return job
@@ -306,6 +311,7 @@ func RemoteCommandJobByPassword(id int, serverId int, name string, command strin
 		jobresult.OutMsg = ""
 		jobresult.ErrMsg = ""
 		jobresult.IsTimeout = false
+		jobresult.IsOk = true
 
 		// get auth method
 		auth = make([]ssh.AuthMethod, 0)
@@ -325,6 +331,7 @@ func RemoteCommandJobByPassword(id int, serverId int, name string, command strin
 
 		if client, err = ssh.Dial("tcp", addr, clientConfig); err != nil {
 			jobresult.IsOk = false
+			jobresult.ErrMsg = fmt.Sprintf("连接服务器失败，%v", err.Error())
 			return
 		}
 
@@ -333,6 +340,7 @@ func RemoteCommandJobByPassword(id int, serverId int, name string, command strin
 		// create session
 		if session, err = client.NewSession(); err != nil {
 			jobresult.IsOk = false
+			jobresult.ErrMsg = fmt.Sprintf("连接服务器失败，%v", err.Error())
 			return
 		}
 
@@ -343,12 +351,9 @@ func RemoteCommandJobByPassword(id int, serverId int, name string, command strin
 		//session.Output(command)
 		if err := session.Run(command); err != nil {
 			jobresult.IsOk = false
-			return
 		}
 		jobresult.OutMsg = b.String()
 		jobresult.ErrMsg = c.String()
-		jobresult.IsOk = true
-		jobresult.IsTimeout = false
 		return
 	}
 
@@ -369,11 +374,13 @@ func RemoteCommandJobByTelnetPassword(id int, serverId int, name string, command
 		jobresult.OutMsg = ""
 		jobresult.ErrMsg = ""
 		jobresult.IsTimeout = false
+		jobresult.IsOk = true
 
 		addr := fmt.Sprintf("%s:%d", servers.ServerIp, servers.Port)
 		conn, err := gote.DialTimeout("tcp", addr, timeout)
 		if err != nil {
 			jobresult.IsOk = false
+			jobresult.ErrMsg = fmt.Sprintf("服务器连接失败0，%v", err.Error())
 			return
 		}
 
@@ -383,26 +390,31 @@ func RemoteCommandJobByTelnetPassword(id int, serverId int, name string, command
 
 		if _, err = conn.Read(buf); err != nil {
 			jobresult.IsOk = false
+			jobresult.ErrMsg = fmt.Sprintf("服务器连接失败-1，%v", err.Error())
 			return
 		}
 
 		if _, err = conn.Write([]byte(servers.ServerAccount + "\r\n")); err != nil {
 			jobresult.IsOk = false
+			jobresult.ErrMsg = fmt.Sprintf("服务器连接失败-2，%v", err.Error())
 			return
 		}
 
 		if _, err = conn.Read(buf); err != nil {
 			jobresult.IsOk = false
+			jobresult.ErrMsg = fmt.Sprintf("服务器连接失败-3，%v", err.Error())
 			return
 		}
 
 		if _, err = conn.Write([]byte(servers.Password + "\r\n")); err != nil {
 			jobresult.IsOk = false
+			jobresult.ErrMsg = fmt.Sprintf("服务器连接失败-4，%v", err.Error())
 			return
 		}
 
 		if _, err = conn.Read(buf); err != nil {
 			jobresult.IsOk = false
+			jobresult.ErrMsg = fmt.Sprintf("服务器连接失败-5，%v", err.Error())
 			return
 		}
 
@@ -419,6 +431,7 @@ func RemoteCommandJobByTelnetPassword(id int, serverId int, name string, command
 		for _, c := range commandArr {
 			_, err = conn.Write([]byte(c + "\r\n"))
 			if err != nil {
+				jobresult.ErrMsg = fmt.Sprintf("服务器连接失败-6，%v", err.Error())
 				jobresult.IsOk = false
 				return
 			}
@@ -717,7 +730,7 @@ func (j *Job) Run() {
 				content = strings.Replace(content, "{{TaskId}}", strconv.Itoa(j.Task.Id), -1)
 				content = strings.Replace(content, "{{ServerId}}", strconv.Itoa(j.ServerId), -1)
 				content = strings.Replace(content, "{{TaskName}}", j.Task.TaskName, -1)
-				content = strings.Replace(content, "{{ExecuteCommand}}", j.Task.Command, -1)
+				content = strings.Replace(content, "{{ExecuteCommand}}", strings.Replace(j.Task.Command, "\"", "\\\"", -1), -1)
 				content = strings.Replace(content, "{{ExecuteTime}}", beego.Date(time.Unix(log.CreateTime, 0), "Y-m-d H:i:s"), -1)
 				content = strings.Replace(content, "{{ProcessTime}}", strconv.FormatFloat(float64(log.ProcessTime)/1000, 'f', 6, 64), -1)
 				content = strings.Replace(content, "{{ExecuteStatus}}", TextStatus[status], -1)

@@ -1,17 +1,18 @@
+
 <div class="layui-layout layui-layout-admin" style="padding-left: 20px;">
     <div class="layui-row" style="margin-top: 20px;">
         <div class="layui-col-xs6">
             <div class="layui-btn-group">
-                <button class="layui-btn" data-type="tabAdd" id="add">新增</button>
-                <button class="layui-btn batch" data-type="batchstart" >启动</button>
-                <button class="layui-btn layui-btn-danger batch" data-type="batchpause" >暂停</button>cron
+                <button class="layui-btn layui-btn-sm" data-type="tabAdd" id="add">新增</button>
+                <button class="layui-btn layui-btn-sm batch" data-type="batchstart" >启动</button>
+                <button class="layui-btn layui-btn-sm layui-btn-danger batch" data-type="batchpause" >暂停</button>cron
             </div>
         </div>
         <div class="layui-col-xs6 search_text" style="text-align: right;">
 
             <form class="layui-form" action="" onsubmit="javascript:return false;">
                 <div class="demoTable">
-                    <div class="layui-inline" style="width: 40%">
+                    <div class="layui-inline" style="width: 40%;">
                         <input class="layui-input" name="task_name" id="task_name" autocomplete="off"  placeholder="任务名称" >
                     </div>
                     <div class="layui-inline pp-search" style="width: 20%;text-align: left;">
@@ -22,7 +23,7 @@
                             {{end}}
                         </select>
                     </div>
-                    <button class="layui-btn" data-type="reload" id="search"><i class="fa fa-search"></i>查询</button>
+                    <button class="layui-btn layui-btn-sm" data-type="reload" id="search"><i class="fa fa-search"></i>查询</button>
                 </div>
             </form>
         </div>
@@ -56,6 +57,7 @@
         table.render({
             elem: '#table_list'
             ,url: '/task/table'
+            ,size: 'sm' //小尺寸的表格
             ,cols: [[
                 {checkbox: true, fixed: true},
                 {field:'id', title: 'ID', align:'center', width:80,sort: true}
