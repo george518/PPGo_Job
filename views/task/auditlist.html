@@ -15,7 +15,7 @@
 
                         <input class="layui-input" name="taskName" id="taskName" autocomplete="off" placeholder="任务名称" >
                     </div>
-                    <button class="layui-btn layui-btn-sm" data-type="reload" id="reload">查询</button>
+                    <button class="layui-btn layui-btn-sm" data-type="reload" id="search">查询</button>
                 </div>
             </form>
 
@@ -138,7 +138,7 @@
                 $.post('/task/ajax'+action, {"ids":ids}, function (out) {
                     if (out.status == 0) {
                         layer.msg(msgok,{icon: 1,shade:0.3,time:1000},function () {
-                            $('#reload').click();
+                            $('#search').click();
                         })
                     } else {
                         layer.msg(out.message)
