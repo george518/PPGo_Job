@@ -8,11 +8,11 @@
 package controllers
 
 import (
+	"encoding/json"
+	"github.com/astaxie/beego"
 	"github.com/george518/PPGo_Job/models"
 	"strings"
 	"time"
-	"github.com/astaxie/beego"
-	"encoding/json"
 )
 
 type NotifyTplController struct {
@@ -85,16 +85,16 @@ func (self *NotifyTplController) AjaxSave() {
 	notifyTpl.Content = strings.TrimSpace(self.GetString("content"))
 	notifyTpl.Status, _ = self.GetInt("status")
 
+	if notifyTpl.Type == models.NotifyTplTypeSystem {
+		self.ajaxMsg("系统模板禁止更新", MSG_ERR)
+	}
+
 	if notifyTpl.TplType == 1 || notifyTpl.TplType == 2 || notifyTpl.TplType == 3 {
 		m := make(map[string]string)
 		err := json.Unmarshal([]byte(notifyTpl.Content), &m)
 		if err != nil {
 			self.ajaxMsg("模板内容格式错误,"+err.Error(), MSG_ERR)
 		}
-	}
-
-	if notifyTpl.Type == models.NotifyTplTypeSystem {
-		self.ajaxMsg("系统模板禁止更新", MSG_ERR)
 	}
 
 	if err := notifyTpl.Update(); err != nil {
