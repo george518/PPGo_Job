@@ -4,7 +4,6 @@
 # @Last Modified by:   haodaquan
 # @Last Modified time: 2017-06-29 17:44:45
 
-
 case $1 in 
 	start)
 		nohup ./PPGo_Job 2>&1 >> info.log 2>&1 /dev/null &
