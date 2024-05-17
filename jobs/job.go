@@ -14,10 +14,10 @@ import (
 	"github.com/astaxie/beego/logs"
 	"github.com/george518/PPGo_Job/libs"
 	"github.com/george518/PPGo_Job/models"
-	"io/ioutil"
 	"net"
 	"net/rpc"
 	"net/rpc/jsonrpc"
+	"os"
 	"os/exec"
 	"runtime/debug"
 	"sync"
@@ -224,7 +224,7 @@ func RemoteCommandJob(id int, serverId int, name string, command string, servers
 		jobresult.IsTimeout = false
 		jobresult.IsOk = true
 
-		key, err := ioutil.ReadFile(servers.PrivateKeySrc)
+		key, err := os.ReadFile(servers.PrivateKeySrc)
 		if err != nil {
 			jobresult.IsOk = false
 			jobresult.ErrMsg = fmt.Sprintf("读取私钥失败，%v", err.Error())
