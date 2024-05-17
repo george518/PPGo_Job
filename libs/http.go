@@ -10,7 +10,6 @@ package libs
 import (
 	"github.com/pkg/errors"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strings"
 )
@@ -42,7 +41,7 @@ func HttpGet(url string, param map[string]string) (string, error) {
 
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 
 	if err != nil {
 		return "", err
@@ -61,7 +60,7 @@ func HttpPost(url string, contentType string, body io.Reader) (string, error) {
 
 	defer resp.Body.Close()
 
-	resBody, err := ioutil.ReadAll(resp.Body)
+	resBody, err := io.ReadAll(resp.Body)
 
 	if err != nil {
 		return "", err

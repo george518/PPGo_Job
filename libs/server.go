@@ -14,10 +14,10 @@ import (
 	"github.com/linxiaozhi/go-telnet"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/ssh"
-	"io/ioutil"
 	"net"
 	"net/rpc"
 	"net/rpc/jsonrpc"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -96,7 +96,7 @@ func RemoteCommandByPassword(servers *models.TaskServer) error {
 }
 
 func RemoteCommandByKey(servers *models.TaskServer) error {
-	key, err := ioutil.ReadFile(servers.PrivateKeySrc)
+	key, err := os.ReadFile(servers.PrivateKeySrc)
 	if err != nil {
 		return err
 	}
