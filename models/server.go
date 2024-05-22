@@ -8,21 +8,22 @@
 package models
 
 import (
+	"errors"
 	"fmt"
+	"github.com/astaxie/beego/orm"
+	"reflect"
 	"strconv"
 	"strings"
-
-	"github.com/astaxie/beego/orm"
 )
 
 type TaskServer struct {
 	Id             int
 	GroupId        int
 	ConnectionType int
-	ServerName     string
-	ServerAccount  string
+	ServerName     string `info:"服务器名不能为空"`
+	ServerAccount  string `info:"登录账户不能为空"`
 	ServerOuterIp  string
-	ServerIp       string
+	ServerIp       string `info:"服务器IP不能为空"`
 	Port           int
 	Password       string
 	PrivateKeySrc  string
@@ -34,28 +35,43 @@ type TaskServer struct {
 	Status         int
 }
 
+func Detection(object interface{}) error {
+	objectValue := reflect.ValueOf(object)
+	if objectValue.Kind() == reflect.Ptr {
+		objectValue = objectValue.Elem()
+	}
+	for i := 0; i < objectValue.NumField(); i++ {
+		fieldValue := objectValue.Field(i)
+		fieldType := objectValue.Type().Field(i)
+		jsonTag := fieldType.Tag.Get("info")
+		if jsonTag == "" {
+			continue
+		}
+		if fieldValue.IsZero() {
+			return errors.New(jsonTag)
+		}
+	}
+	return nil
+}
+
 func (t *TaskServer) TableName() string {
 	return TableName("task_server")
 }
 
 func (t *TaskServer) Update(fields ...string) error {
-	if t.ServerName == "" {
-		return fmt.Errorf("服务器名不能为空")
+	err := Detection(t)
+	if err != nil {
+		return fmt.Errorf(err.Error())
 	}
-	if t.ServerIp == "" {
-		return fmt.Errorf("服务器IP不能为空")
-	}
-
-	if t.ServerAccount == "" {
-		return fmt.Errorf("登录账户不能为空")
-	}
-
-	if t.Type == 0 && t.Password == "" {
-		return fmt.Errorf("服务器密码不能为空")
-	}
-
-	if t.Type == 1 && t.PrivateKeySrc == "" {
-		return fmt.Errorf("私钥不能为空")
+	if t.Password == "" || t.PrivateKeySrc == "" {
+		switch t.Type {
+		case 0:
+			return errors.New("服务器密码不能为空")
+		case 1:
+			return errors.New("私钥不能为空")
+		default:
+			return errors.New("类型不在规范之内")
+		}
 	}
 
 	if _, err := orm.NewOrm().Update(t, fields...); err != nil {
@@ -65,23 +81,19 @@ func (t *TaskServer) Update(fields ...string) error {
 }
 
 func TaskServerAdd(obj *TaskServer) (int64, error) {
-	if obj.ServerName == "" {
-		return 0, fmt.Errorf("服务器名不能为空")
+	err := Detection(obj)
+	if err != nil {
+		return 0, fmt.Errorf(err.Error())
 	}
-	if obj.ServerIp == "" {
-		return 0, fmt.Errorf("服务器IP不能为空")
-	}
-
-	if obj.ServerAccount == "" {
-		return 0, fmt.Errorf("登录账户不能为空")
-	}
-
-	if obj.Type == 0 && obj.Password == "" {
-		return 0, fmt.Errorf("服务器密码不能为空")
-	}
-
-	if obj.Type == 1 && obj.PrivateKeySrc == "" {
-		return 0, fmt.Errorf("私钥不能为空")
+	if obj.Password == "" || obj.PrivateKeySrc == "" {
+		switch obj.Type {
+		case 0:
+			return 0, errors.New("服务器密码不能为空")
+		case 1:
+			return 0, errors.New("私钥不能为空")
+		default:
+			return 0, errors.New("类型不在规范之内")
+		}
 	}
 	return orm.NewOrm().Insert(obj)
 }
@@ -111,7 +123,6 @@ func TaskServerForActuator(serverIp string, port int) int {
 	return 0
 }
 
-//
 func TaskServerGetByIds(ids string) ([]*TaskServer, int64) {
 
 	serverFilters := make([]interface{}, 0)
